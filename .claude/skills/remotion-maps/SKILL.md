@@ -1,0 +1,48 @@
+---
+name: remotion-maps
+description: Remotion Map animation knowledge
+version: 4.0.542
+---
+
+# Remotion Maps
+
+Choose exactly one technique from the intended shot, then load only that technique's `TECHNIQUE.md`.
+Every technique directory is self-contained and may be removed without breaking the others.
+
+## [Static map](techniques/static-map/TECHNIQUE.md)
+
+- Requires you grab a satellite image and mount it in a `<Img>` tag, and animate on top
+
+## [Mapbox](techniques/mapbox/TECHNIQUE.md)
+
+- Requires a Mapbox key
+- Nicer styles by default
+- Map can display a round globe when zoomed out
+- Includes nice 3D buildings such as the Eiffel tower
+
+## [MapLibre](techniques/maplibre/TECHNIQUE.md)
+
+- Requires no API key, fully free
+- Does not include 3D building
+
+## [MapTiler](techniques/maptiler/TECHNIQUE.md)
+
+- Uses MapTiler
+- Annotations can be drawn on top of geographic features: borders, rivers, labels
+
+## [CesiumJS](techniques/cesium/TECHNIQUE.md)
+
+- Flythroughs through terrain and mountains
+- "Flight simulator" perspective
+
+## Пути проекта (обязательно для этого репозитория)
+
+Ищи и сохраняй файлы только в этих папках в корне репозитория:
+
+- `stsenarii/` — тексты роликов (сценарии). Читай сценарий отсюда.
+- `golos/` — файлы озвучки (voiceover). Бери озвучку отсюда, новую сохраняй сюда.
+- `muzyka/` — фоновая музыка с правом на использование. Используй только треки из этой папки.
+- `render/` — код сцены и рендера (проекты Remotion и HyperFrames).
+- `gotovo/` — готовые видео и обложки. Итоговый рендер и обложку сохраняй сюда.
+
+Из `render/` эти папки доступны как `../stsenarii`, `../golos`, `../muzyka`, `../gotovo`.
