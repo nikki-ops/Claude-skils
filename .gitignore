@@ -1,2 +1,4 @@
 render/_istochniki/
 node_modules/
+render/remotion/out/
+__pycache__/

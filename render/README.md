@@ -1,10 +1,16 @@
 # render — код сцены и рендера
 
-Здесь лежат проекты Remotion и HyperFrames. Навыки для них подключены в `.claude/skills/`:
+```
+render/
+  paths.mjs                    общие пути проекта
+  stil/                        библия стиля, персонажи, промпты (ai-art-prompter)
+  assets/<id>/                 оригиналы картинок ролика; assets/obshchie/ — общие
+  remotion/                    проект Remotion (remotion-create)
+    public/<id>/kadry|audio/   сжатые ассеты (asset-compressor)
+    src/data/<id>.timing.json  тайминги кадров (audio-sync-master)
+  _istochniki/                 материалы разбора чужих роликов (video-analyst, не в git)
+```
 
-- Remotion: `remotion-best-practices` (начинать с него), `remotion-create`, `remotion-markup`, `remotion-render`, `remotion-studio`, `remotion-captions` и др. — источник: github.com/remotion-dev/skills
-- HyperFrames: `hyperframes` (начинать с него), `hyperframes-cli`, `media-use`, `hyperframes-registry` и др. — источник: github.com/heygen-com/hyperframes (Apache-2.0)
+`<id>` — имя ролика (`01-nazvanie`), общее для `stsenarii/`, `golos/`, `gotovo/`.
 
-Материалы брать из `../stsenarii`, `../golos`, `../muzyka`; результат рендера сохранять в `../gotovo`.
-
-Remotion для компаний может требовать платную лицензию — см. навык `remotion-license`.
+Навыки: Remotion (`remotion-best-practices` — начинать с него), HyperFrames (`hyperframes`), `ai-art-prompter`, `audio-sync-master`, `asset-compressor`, `one-click-director` (сборка в `gotovo/` одной командой). Remotion для компаний может требовать платную лицензию — см. `remotion-license`.
