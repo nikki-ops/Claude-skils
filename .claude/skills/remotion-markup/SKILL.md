@@ -344,3 +344,5 @@ You can also use Rendering to inspect one or several frames as images.
 - `gotovo/` — готовые видео и обложки. Итоговый рендер и обложку сохраняй сюда.
 
 Из `render/` эти папки доступны как `../stsenarii`, `../golos`, `../muzyka`, `../gotovo`.
+
+Пути также заданы в коде: `render/paths.mjs` (`PATHS.stsenarii`, `PATHS.golos`, `PATHS.muzyka`, `PATHS.gotovo`, `outputFile(name)`). Готовый рендер выводи в `gotovo/`, например `npx remotion render <Comp> ../../gotovo/<name>.mp4` или `npx hyperframes render --output ../../gotovo/<name>.mp4` из проекта в `render/<project>/`. Аудио из `golos/` и `muzyka/` копируй в папку ассетов проекта (`public/` у Remotion) перед рендером, не меняя оригиналы.
