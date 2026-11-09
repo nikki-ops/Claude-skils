@@ -20,7 +20,7 @@
 - Все навыки — в `.claude/skills/`: 13 навыков Remotion, HyperFrames (+ cli, registry, media-use и др.), find-skills (vercel-labs), webapp-testing, frontend-design, algorithmic-art, canvas-design, skill-creator (anthropics/skills, плагин example-skills).
 - Маркетплейсы `claude-plugins-official` и `anthropic-agent-skills` прописаны в `.claude/settings.json`.
 - Пути для кода рендера: `render/paths.mjs`.
-- Разбор чужих роликов: навык `video-analyst` — рой из 10 агентов (`.claude/agents/va-01…va-10`) с перекрёстным аудитом; главная сессия — дирижёр. Быстрый одиночный режим — агент `video-analyst`. Разбор и сценарий сохраняются в `stsenarii/`, рабочие файлы — в `render/_istochniki/` (не коммитятся).
+- Разбор чужих роликов: навык `video-analyst` — рой из 10 ролей в 8 агентах (`.claude/agents/va-*`, модель sonnet) с протоколом экономии: ≤12 запусков на ролик, аудит один раз, выжимка вместо транскрипта, кэш сети в `kesh/`. Главная сессия — дирижёр. Быстрый режим — агент `video-analyst`. Разбор и сценарий — в `stsenarii/`, рабочие файлы — в `render/_istochniki/` (не коммитятся).
 
 ## Конвейер мультика
 
