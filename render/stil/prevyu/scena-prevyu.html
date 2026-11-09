@@ -23,6 +23,7 @@ import {RenderPass} from 'three/addons/postprocessing/RenderPass.js';
 import {UnrealBloomPass} from 'three/addons/postprocessing/UnrealBloomPass.js';
 import {BokehPass} from 'three/addons/postprocessing/BokehPass.js';
 import {OutputPass} from 'three/addons/postprocessing/OutputPass.js';
+import {domModern,oranzhereya,angar} from './zdaniya.js';
 import {RoomEnvironment} from 'three/addons/environments/RoomEnvironment.js';
 
 await document.fonts.load('900 40px M','ЭКИПАЖ 1?');await document.fonts.load('800 40px M','А1');
@@ -170,16 +171,16 @@ if(FRAME==='1'){
 if(FRAME==='2'){
   // ТВОЙ ДОМ: метеорит зрителя, дом с ником, голограмма оранжереи, метеорит героя на фоне
   const a=asteroid(2.0,0.18,{lava:true});scene.add(a);
-  const h=house(1.15);h.position.set(-0.3,0.72,0.1);h.rotation.y=0.35;scene.add(h);
+  const h=domModern(0xff7a59);h.scale.setScalar(0.95);h.position.set(-0.3,0.66,0.1);h.rotation.y=0.35;scene.add(h);
   const gh=greenhouse();gh.position.set(1.15,0.95,-0.4);gh.rotation.y=0.4;scene.add(gh);
   const hero=asteroid(1.4,0.16,{lava:true});hero.position.set(-5.5,1.5,-7);scene.add(hero);
-  const hh=house(0.8);hh.position.set(-5.6,2.0,-7);scene.add(hh);
+  const hh=domModern(0x45c8ff);hh.scale.setScalar(0.7);hh.position.set(-5.6,1.95,-7);scene.add(hh);
   for(let i=0;i<7;i++){const e=asteroid(0.6+rnd()*0.7,0.14,{lava:rnd()>0.6});e.position.set((rnd()-.5)*26,(rnd()-.5)*8+1,-12-rnd()*18);scene.add(e);}
   const gg=gasGiant();gg.position.set(140,40,-380);scene.add(gg);
   scene.add(particles(500,new THREE.Vector3(12,10,10),new THREE.Vector3(0,1,-2),0xcfe8ff,0.03,.6));
   cam.position.set(1.4,3.0,8.0);cam.lookAt(-0.3,0.9,0);focus=7.9;bloomStrength=0.6;
   renderer.render(scene,cam);
-  const [bx,by]=project(new THREE.Vector3(-0.3,2.35,0.1));
+  const [bx,by]=project(new THREE.Vector3(-0.2,2.75,0.1));
   ui.innerHTML=`<div class="plashka">КАК ПОЛУЧИТЬ МЕТЕОРИТ</div><div class="badge" style="left:${bx}px;top:${by}px">@твой_ник</div><div class="sub">ВЫРАСТЕТ <span class="g">ДОМ</span></div>`;
 }
 if(FRAME==='3'){
@@ -204,6 +205,21 @@ if(FRAME==='3'){
   ui.innerHTML=`<div class="sub" style="top:1250px">БУДЕТ ЦЕЛАЯ <span class="y">СТАНЦИЯ</span></div>`;
 }
 
+if(FRAME==='4'){
+  // ВИТРИНА: прокачанный метеорит зрителя — дом + оранжерея + ангар (3/3)
+  const a=asteroid(2.4,0.18,{lava:true});scene.add(a);
+  const top=2.4*0.35+0.02;
+  const h=domModern(0xff7a59);h.position.set(-0.55,top,0.2);h.rotation.y=0.25;scene.add(h);
+  const o=oranzhereya();o.position.set(1.25,top,0.75);o.rotation.y=-0.5;scene.add(o);
+  const an=angar(0x45c8ff);an.position.set(0.9,top,-1.2);an.rotation.y=-0.6;scene.add(an);
+  for(let i=0;i<6;i++){const e=asteroid(0.6+rnd()*0.7,0.14,{lava:rnd()>0.6});e.position.set((rnd()-.5)*24,(rnd()-.5)*8+1,-12-rnd()*16);scene.add(e);}
+  const gg=gasGiant();gg.position.set(-150,30,-400);scene.add(gg);
+  scene.add(particles(400,new THREE.Vector3(10,8,10),new THREE.Vector3(0,1,-1),0xcfe8ff,0.03,.5));
+  cam.position.set(3.4,4.3,8.6);cam.lookAt(0.3,1.2,0);focus=9.2;bloomStrength=0.55;aperture=0.0004;
+  renderer.render(scene,cam);
+  const [bx,by]=project(new THREE.Vector3(-0.3,top+2.05,0.35));
+  ui.innerHTML=`<div class="plashka">ПОСТРОЕК: 3 / 3</div><div class="badge" style="left:${bx}px;top:${by}px">@твой_ник</div><div class="sub" style="top:1380px">ПОТОМ <span class="g">ОРАНЖЕРЕЯ</span></div>`;
+}
 const comp=new EffectComposer(renderer);
 comp.addPass(new RenderPass(scene,cam));
 comp.addPass(new BokehPass(scene,cam,{focus,aperture,maxblur:0.008}));
