@@ -1508,8 +1508,8 @@ const sys=document.getElementById('sys'),W=document.getElementById('sysw'),cv=do
 function stars(){cv.width=innerWidth*devicePixelRatio;cv.height=innerHeight*devicePixelRatio;cx.fillStyle='#fff';for(let i=0;i<260;i++){cx.globalAlpha=Math.random()*.8+.2;const r=Math.random()<.1?2:1;cx.fillRect(Math.random()*cv.width,Math.random()*cv.height,r*devicePixelRatio,r*devicePixelRatio)}cx.globalAlpha=1}stars();
 const vm=Math.min(innerWidth,innerHeight)/100;
 const P=[{id:'earth',r:34,size:7,col:'radial-gradient(circle at 35% 35%,#8fd0ff,#2f6fd0 60%,#1a3a7a)',name:'🌍 Земля',sub:'Город подписчиков · скоро',lock:1,sp:.03,a:3.93},
-{id:'mars',r:34,size:10,col:'radial-gradient(circle at 35% 35%,#ffb07a,#d9502a 55%,#7a2a14)',name:'🔴 MARS CITY',sub:'420 жителей · войти',sp:.03,a:.79},
-{id:'j14',r:34,size:5,col:'radial-gradient(circle at 35% 35%,#d8d0c0,#8a8478 60%,#4a4640)',name:'🪐 J1407b',sub:'Коалиция · мэр SlavuhinS',sp:.03,a:2.36,rings:1},
+{id:'mars',r:34,size:10,col:'radial-gradient(circle at 35% 35%,#ffb07a,#d9502a 55%,#7a2a14)',name:'🔴 MARS CITY',sub:(typeof MLIST!=='undefined'?MLIST.filter(h=>!h.site&&!h.bld&&h.n).length:420).toLocaleString('ru')+' жителей · войти',sp:.03,a:.79},
+{id:'j14',r:34,size:5,col:'radial-gradient(circle at 35% 35%,#d8d0c0,#8a8478 60%,#4a4640)',name:'🪐 J1407b',sub:'7 жителей · мэр SlavuhinS',sp:.03,a:2.36,rings:1},
 {id:'sat',r:34,size:6,col:'radial-gradient(circle at 35% 35%,#f4e0a0,#c8a050 60%,#6a5020)',name:'🔒 Сатурн',sub:'откроется на 1000',lock:1,sp:.03,a:5.5}];
 P.forEach(p=>{const o=document.createElement('div');o.className='orb';o.style.width=o.style.height=(p.r*2*vm)+'px';W.appendChild(o);
  const e=document.createElement('div');e.className='pl'+(p.lock?' lock':'');let ring='';if(p.rings){for(let k=0;k<6;k++)ring+=`<div class="rg" style="width:${(p.size*(2.2+k*.9))*vm}px;height:${(p.size*(2.2+k*.9))*vm}px;border:${.35*vm}px solid rgba(${200-k*15},${190-k*15},${170-k*15},${.7-k*.08})"></div>`}
