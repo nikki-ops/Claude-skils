@@ -89,6 +89,8 @@ export function gosha({mood = 'calm', pose = 'stand', flag = false} = {}) {
   if (pose === 'dream') {
     for (let i = 0; i < 6; i++) { const p = new THREE.Mesh(new THREE.SphereGeometry(.03 + i * .008, 10, 8), new THREE.MeshStandardMaterial({color: 0xffffff, transparent: true, opacity: .5 - i * .06})); p.position.set((Math.random() - .5) * .08, .35 - i * .08, -.21); g.add(p); }
   }
-  g.userData = {head, arms, ant};
+  let cur = mood;
+  const setMood = (m) => { if (m === cur) return; cur = m; drawEyes(visorC.getContext('2d'), m); vt.needsUpdate = true; ant.material.color.setHex(ANT[m] || ANT.calm); ant.material.emissive.setHex(ANT[m] || ANT.calm); };
+  g.userData = {head, arms, ant, setMood};
   return g;
 }

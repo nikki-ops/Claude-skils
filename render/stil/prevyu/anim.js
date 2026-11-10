@@ -8,6 +8,6 @@ const {chromium}=require('playwright');const fs=require('fs');
   fs.mkdirSync(__dirname+'/'+(process.env.OUT||'frames'),{recursive:true});
   const t0=Date.now();
   for(let i=from;i<to;i+=(step||1)){await p.evaluate(t=>window.renderAt(t),i/30);
-    await p.screenshot({path:__dirname+`/${process.env.OUT||'frames'}/f_${String(i).padStart(4,'0')}.jpg`,type:'jpeg',quality:92,timeout:180000});}
+    await p.screenshot({path:__dirname+`/${process.env.OUT||'frames'}/f_${String(i).padStart(4,'0')}.jpg`,type:'jpeg',quality:92,timeout:0});}
   console.log('done',(Date.now()-t0)/1000,'s');await b.close();
 })();
