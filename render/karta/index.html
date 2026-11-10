@@ -781,13 +781,13 @@ const gt=new THREE.Group();[-6,6].forEach(x=>box(gt,1,8,1,0x3a3f48,x,4,0));box(g
 const slots=[];for(let r=0;r<10;r++)for(const x of[258,270,276,288,294,306,312,324,330,342].filter((v,i)=>i%2===0||true))slots.push([x,PZZ-58+r*12]);
 const S2=[];for(let r=0;r<10;r++)[258,270,288,306,324,342].forEach(x=>{if(Math.abs(x-264)<4||Math.abs(x-282)<4)return;S2.push([x+(x<264?0:0),PZZ-58+r*12])});
 const SL=[];for(let r=0;r<26;r++)[258,265,272,279,286,293,307,314,321,328,335,342].forEach(x=>SL.push([x,PZZ-94+r*7.5]));
-for(let r=0;r<9;r++)for(let x=262;x<=346;x+=7)SL.push([x,-412+r*7.5]);
-{const g2=new THREE.Mesh(new THREE.PlaneGeometry(94,72),new THREE.MeshLambertMaterial({color:0x8a8f98,polygonOffset:true,polygonOffsetFactor:-1,polygonOffsetUnits:-2}));g2.rotation.x=-1.5708;g2.position.set(304,.03,-382);sc.add(g2);for(let i=0;i<=40;i++){box(sc,.3,2.4,.3,0xf2c230,257+i*94/40,1.2,-418);box(sc,.3,2.4,.3,0xf2c230,257+i*94/40,1.2,-346)}const gt2=new THREE.Group();[-6,6].forEach(x=>box(gt2,1,8,1,0x3a3f48,x,4,0));box(gt2,13,2.8,.6,0x1d2a44,0,8.4,0);lab(gt2,'ПРОМЗОНА-2',12,1.3,'#1d2a44','#f7c24a',0,8.9,.32);lab(gt2,'ТВОЙ ДОМ УЖЕ СТРОИТСЯ',12,.9,'#f7c24a','#1a1410',0,7.6,.32);gt2.position.set(304,0,-344);sc.add(gt2)}
 let k=0;const put=(g,h)=>{const sl=SL[k++];if(!sl){g.visible=false;return}g.scale.setScalar(.62);g.position.set(sl[0],0,sl[1]);g.rotation.y=sl[0]%18<9?-Math.PI/2:Math.PI/2;g.visible=true;if(h){h.x=sl[0];h.z=sl[1];h.top=4;h.district=sl[1]<-300?'Промзона-2':'Промзона'}};
 MLIST.filter(h=>h.site).forEach(h=>{put(h.g,h);h.kind='стройка — ждёт комментарий (TikTok)'});
-const YT_SUBS=722,YT_HOMES=430;// обновлять: подписчики YouTube и жители YouTube с домами
-for(let i=0;i<YT_SUBS-YT_HOMES;i++){const g=mk('site');sc.add(g);const h={n:'',anon:1,site:1,g,top:6,kind:'стройка — ждёт комментарий (YouTube)',day:10,district:'Промзона'};put(g,h);MLIST.push(h)}
-for(let i=0;i<49;i++){const g=mk('site');sc.add(g);const h={n:'',anon:1,site:1,g,top:6,kind:'стройка — ждёт комментарий (TikTok)',day:4,district:'Промзона'};put(g,h);MLIST.push(h)}}
+const PZ_TOTAL=127,NEW_HOMES=128;// промзона всего 127 строек; 128 готовых домов подписчиков без ника → всего 722 дома на карте
+const PZ_YT=PZ_TOTAL-MLIST.filter(h=>h.site).length-49;
+for(let i=0;i<PZ_YT;i++){const g=mk('site');sc.add(g);const h={n:'',anon:1,site:1,g,top:6,kind:'стройка — ждёт комментарий (YouTube)',day:10,district:'Промзона'};put(g,h);MLIST.push(h)}
+for(let i=0;i<49;i++){const g=mk('site');sc.add(g);const h={n:'',anon:1,site:1,g,top:6,kind:'стройка — ждёт комментарий (TikTok)',day:4,district:'Промзона'};put(g,h);MLIST.push(h)}
+const HT=['izba','brick','dacha','two','dome','cottage','kupol','banya'];for(let i=0;i<NEW_HOMES;i++){const g=mk(HT[i%HT.length]);sc.add(g);const h={n:'',anon:1,g,top:6,kind:'дом подписчика — ник появится после комментария',day:10,district:'Новостройки'};put(g,h);h.district='Новостройки';h.top=4.5;MLIST.push(h)}}
 
 NEW3.forEach(h=>{if(h.fx)h.fx.forEach(f=>f.visible=false);h.rg.visible=false;if(h.deco)h.deco.visible=true});FWP.visible=false;SNOW.visible=false;DAN.fm.visible=false;PZ.visible=false;RK.visible=false;HERO.fm.visible=false;GD.forEach(d=>d.visible=false);
 sun.target.position.set(110,0,-160);sun.position.set(80,140,-110);{const c=sun.shadow.camera;c.left=-240;c.right=240;c.top=240;c.bottom=-240;c.far=500;c.updateProjectionMatrix()}
