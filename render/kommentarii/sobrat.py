@@ -58,6 +58,7 @@ def main():
     ap.add_argument("kanal", nargs="?", default="@gorodpodpiscikov")
     ap.add_argument("--posle", help="ГГГГ-ММ-ДД — только комментарии после даты")
     ap.add_argument("--tolko-novye", action="store_true")
+    ap.add_argument("--video", action="append", help="только эти ID роликов (можно несколько)")
     a = ap.parse_args()
     since = datetime.fromisoformat(a.posle).replace(tzinfo=timezone.utc).timestamp() if a.posle else 0
     seen_f = ROOT / "vidennye.json"
@@ -66,13 +67,15 @@ def main():
     base_f = ROOT / "vse.json"
     base = {c["id"]: c for c in json.loads(base_f.read_text())} if base_f.exists() else {}
     vids = ids(a.kanal)
+    if a.video:
+        vids = [v for v in vids if v[0] in a.video]
     if not vids:
         sys.exit("Ролики не найдены (проверьте доступ к www.youtube.com)")
     rows = []
     for vid, title in vids:
         info, cs = comments(vid)
         print(f"{title[:60]:60} — {len(cs)}")
-        time.sleep(5)
+        time.sleep(20)
         for c in cs:
             if c.get("timestamp", 0) < since or (a.tolko_novye and c["id"] in seen):
                 continue
