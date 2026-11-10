@@ -1063,14 +1063,14 @@ W10.forEach((q,i)=>{const s=sl10[i];if(!s)return;let g;try{g=b10(q[0],q[1],q[2],
  g.position.set(s[0],0,s[1]);g.rotation.y=s[1]<0&&s[1]>-300?((Math.round((s[1]+214)/11)%2)?0:Math.PI):Math.PI;sc.add(g);
  MLIST.push({n:q[0],g,x:s[0],z:s[1],top:(g.userData.top||6)*g.scale.y,kind:q[2]||'дом',day:10,district:'Квартал 10 ноября'})})
 }catch(e){console.warn("yt10",e)}
-try{// ===== УЮТ: газон, дорожка, фонарь, кусты и заборчик у каждого жилого дома =====
-const LG=[0x6aa84a,0x5f9e44,0x74b052],LAMP=new THREE.MeshBasicMaterial({color:0xffd27a});
+try{// ===== УЮТ: марсианский участок — плитка, дорожка, фонарь, камни и заборчик у каждого жилого дома =====
+const LG=[0xd9b48a,0xcfa87c,0xe0bf98],LAMP=new THREE.MeshBasicMaterial({color:0xffd27a});
 MLIST.forEach((h,i)=>{if(!h.g||h.site||h.bld||h.anon||!h.g.parent||h.g.userData.decor)return;const g=h.g;g.userData.decor=1;const d=new THREE.Group();
  const lw=box(d,9,.12,8.6,LG[i%3],0,.06,.4);lw.receiveShadow=false;
  for(let k=0;k<4;k++)box(d,1.1,.14,.9,0xd8cdb8,0,.08,3.2+k*1.2>4.6?4.4:3.2+k*.4);
  box(d,1.2,.14,3.6,0xd8cdb8,0,.09,3.1);
  box(d,.22,3.2,.22,0x2a2d34,3.8,1.6,4.2);const l=new THREE.Mesh(new THREE.BoxGeometry(.6,.6,.6),LAMP);l.position.set(3.8,3.3,4.2);d.add(l);
- [[-3.6,4.1],[ -3.6,-3.4],[3.7,-3.4]].forEach(a=>{const b=msh(d,new THREE.SphereGeometry(.75,8,6),0x3f8f45,a[0],.6,a[1]);b.scale.y=.8});
+ [[-3.6,4.1],[ -3.6,-3.4],[3.7,-3.4]].forEach((a,j)=>{const b=msh(d,new THREE.DodecahedronGeometry(.7,0),[0x8a4a2e,0x7a3a24,0x9a5a3a][(i+j)%3],a[0],.45,a[1]);b.scale.set(1,.7,1);b.rotation.y=i+j});
  for(let x=-4.2;x<=4.2;x+=1.05){if(Math.abs(x)<1)continue;box(d,.12,.7,.12,0xf4efe6,x,.35,4.6)}box(d,3.4,.1,.1,0xf4efe6,-2.6,.6,4.6);box(d,3.4,.1,.1,0xf4efe6,2.6,.6,4.6);
  g.add(d)})}catch(e){console.warn("decor",e)}
 try{// ===== ОПТИМИЗАЦИЯ: склеиваем мелкие детали (десятки тысяч → сотни объектов) =====
