@@ -346,8 +346,8 @@ const SH=[ // [начало, конец, функция(локальное t, д
  [10.31,11.80,(l,u)=>{const a=0.25+u*0.17;return {pos:V3(GWX()+Math.sin(a)*3.1,TOP(HR)+1.0,GWZ()+Math.cos(a)*3.1),look:V3(GWX()-0.2,TOP(HR)+0.65,GWZ())};}],
  [11.80,14.18,(l,u)=>({pos:V3(2.6,3.4,6.6).lerp(V3(2.3,3.6,6.0),u),look:V3(-0.5,0.4,-9),fov:l>0.75?40/1.4:40})],
  [14.18,17.87,(l,u)=>({pos:V3(-3.0,4.0,12.5).lerp(V3(-3.2,3.7,11.5),easeInOut(u)),look:V3(-3.4,1.1,1.4)})],
- [17.87,21.99,(l,u)=>({pos:VP.clone().add(V3(0.4,3.6,8.6)),look:VP.clone().add(V3(0,0.9,0.2))})],
- [21.99,24.31,(l,u)=>({pos:VP.clone().add(V3(0.4,3.6,8.6)),look:VP.clone().add(V3(-0.3,1.0,0.2))})],
+ [17.87,21.99,(l,u)=>({pos:VP.clone().add(V3(0.8,3.6,8.6)),look:VP.clone().add(V3(0.4,0.9,0.3))})],
+ [21.99,24.31,(l,u)=>({pos:VP.clone().add(V3(0.6,3.6,8.8)),look:VP.clone().add(V3(0.1,1.0,0.3))})],
  [24.31,25.91,(l,u)=>({pos:VP.clone().add(V3(5.0-u*.2,2.4,2.0)),look:VP.clone().add(V3(1.45,0.6,-0.25)),whip:1})],
  [25.91,26.75,(l,u)=>({pos:VP.clone().add(V3(1.9,2.4,-5.2)),look:VP.clone().add(V3(0.3,0.7,-1.5)),whip:1})],
  [26.75,28.47,(l,u)=>({pos:VP.clone().add(V3(-5.6+u*.2,2.7,-4.6)),look:VP.clone().add(V3(-1.45,1.25,-1.05)),whip:1})],
@@ -404,7 +404,7 @@ const FR=[[0.35,1.43,"это мой |метеорит"],[1.97,2.57,"экипаж
  [14.23,15.18,"один метеорит"],[15.46,16.32,"один житель"],[16.59,17.58,"вместе |с тобой"],[17.92,19.69,"подпишись |и напиши |комментарий"],
  [19.98,21.72,"этот метеорит |станет твоим"],[22.04,24.09,"сначала |вырастет дом |с твоим ником"],[24.36,25.68,"потом |оранжерея"],[25.96,26.52,"ангар"],
  [26.80,28.23,"или |телескоп-караоке"],[28.52,29.77,"напиши, |что построить"],[30.07,31.29,"а однажды |здесь…"],[31.56,33.21,"будет целая |станция"],
- [33.53,34.79,"позови друга |в соседи"],[35.05,36.84,"подпишись |и напиши |комментарий"],[37.08,39.73,"в следующей серии |твой метеорит |с ником!"]];
+ [33.53,34.79,"позови друга |в соседи"],[35.05,36.84,"подпишись |и напиши |комментарий"],[37.08,39.73,"в следующей |серии |твой метеорит |с ником!"]];
 const COL={'метеорит':'y','пиццы':'y','город':'y','с тобой':'g','подпишись':'r','комментарий':'r','станет твоим':'g','вырастет дом':'g','с твоим ником':'g','телескоп-караоке':'y','напиши,':'r','станция':'y','позови друга':'r','твой метеорит':'g','с ником!':'g'};
 const vow=s=>(s.match(/[аеёиоуыэюя]/gi)||[]).length+0.5;
 const CH=[];FR.forEach(([a,b,txt])=>{const parts=txt.split('|').map(s=>s.trim());const tot=parts.reduce((s,p)=>s+vow(p),0);let x=a;
@@ -419,7 +419,7 @@ function drawUI(t,r){
   const c=CH.find(([a,b])=>t>=a&&t<b);let sub='';
   if(c){sub=c[2];const k=Object.keys(COL).find(w=>sub===w||sub.endsWith(w)||sub.startsWith(w));if(k)sub=sub.replace(k,`<span class="${COL[k]}">${k}</span>`);}
   let h='';const p=plaque(t);if(p)h+=`<div class="plashka">${p}</div>`;
-  if(c)h+=`<div class="sub">${sub}</div>`;
+  if(c)h+=`<div class="sub" style="${t>=37.03?'top:1180px;':''}white-space:nowrap">${sub}</div>`;
   if(r.scene===Wd){
     if(t>=14.18&&t<17.87){h+=badge(camW,NP.clone().add(V3(0,TOP(NR)+0.7,0)),'@???',14.6,t,'#9ffbff');h+=pill(1420,'1 МЕТЕОРИТ = 1 ЖИТЕЛЬ','#1d2a52',t,15.4);}
     if(t>=23.2&&t<30.02&&t<24.31)h+=badge(camW,VP.clone().add(V3(-0.85,VT-VP.y+2.0,0.35)),'@твой_ник',23.25,t);
@@ -448,5 +448,13 @@ window.renderAt=(t)=>{
   } else {acc.style.display='none';r=renderOnce(t);}
   drawUI(t,r);return true;
 };
+window.cover=()=>{
+  const t=15.0;updateW(t);
+  vHouse.visible=true;vHouse.scale.set(1,1,1);vGreen.visible=true;vGreen.scale.setScalar(1);vBusy.visible=true;vFree.visible=false;
+  vHangar.visible=false;vScope.visible=false;belt.forEach(b=>{b.h.visible=true;b.h.scale.setScalar(b.r*.45);});grid.material.opacity=0;drone.visible=false;
+  flag.visible=true;flag.scale.y=1;
+  GW.position.set(1.0,TOP(HR),0.9);GW.rotation.set(0,0.35,0);pose(GW,'wave',0.4,'proud');GW.userData.ant.material.emissiveIntensity=6;
+  camW.fov=38;camW.updateProjectionMatrix();camW.position.set(2.5,1.55,4.7);camW.lookAt(0.4,2.25,-1.0);
+  compW.bok.uniforms.focus.value=camW.position.distanceTo(GW.position);compW.render();ui.innerHTML='';acc.style.display='none';};
 window.__ready=true;
 </script></body></html>
