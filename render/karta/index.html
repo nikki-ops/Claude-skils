@@ -1219,10 +1219,10 @@ for(const d in DIST){const A=DIST[d];DC[d]=[];const wide=A.filter(h=>h.f.w>9.8||
 while(rci<RC.length)SPARE.push(RC[rci++]);
 // Страна Imen: участки вокруг дворца
 const IMG=MLIST.find(h=>h.bld&&h.district==='Страна Imen');if(IMG){IMG.g.position.set(42,0,176);IMG.x=42;IMG.z=176;IMG.top=24}
-{const sl=[];[-7.5,5.5,18.5,31.5,57.5,70.5,83.5].forEach(x=>sl.push([x,140,0]));[-7.5,5.5,18.5,31.5,44.5,57.5].forEach(x=>sl.push([x,212,PI]));[163,176,189].forEach(z=>{sl.push([2,z,0]);sl.push([82,z,0])});
+{const sl=[];[-7.5,5.5,18.5,31.5,70.5,83.5].forEach(x=>sl.push([x,140,0]));[-7.5,5.5,18.5,31.5,44.5,57.5].forEach(x=>sl.push([x,212,PI]));[163,176,189].forEach(z=>{sl.push([2,z,0]);sl.push([82,z,0])});
  sl.sort((a,b)=>Math.atan2(a[1]-176,a[0]-42)-Math.atan2(b[1]-176,b[0]-42));const subj=IMEN.filter(h=>!/o13sova|Imen_Brawl/i.test(h.n));
  subj.forEach((h,k)=>{const s=sl[Math.floor(k*sl.length/subj.length)];place(h,s[0],s[1],s[2],'Страна Imen')});
- IMEN.forEach(h=>{if(/o13sova/i.test(h.n))place(h,80,232,PI,'Страна Imen');if(/Imen_Brawl/i.test(h.n))place(h,44.5,140,0,'Страна Imen')})}
+ IMEN.forEach(h=>{if(/o13sova/i.test(h.n))place(h,80,232,PI,'Страна Imen');if(/Imen_Brawl/i.test(h.n))place(h,57.5,140,0,'Страна Imen')})}
 // Сопротивление
 place(RESI[0],116,219,0,'Сопротивление');place(RESI[2],116,240,PI,'Сопротивление');place(RESI[1],148,240,PI,'Сопротивление');
 // ждут рейса — у аэропорта рядом с космодромом
@@ -1290,8 +1290,9 @@ const LMS=[EARTH,...LM].map(g=>({g,f:fp(g)}));const SPS=[];
 SPARE.forEach(([i,j])=>{if(j===14){SPS.push(shelf(cx0(i)+1,cx0(i)+CW-1,cz0(j)+13,0,24));return}SPS.push(shelf(cx0(i)+1,cx0(i)+CW-1,cz0(j)+10,PI,19.5),shelf(cx0(i)+1,cx0(i)+CW-1,cz0(j)+30,0,19.5))});
 const SKV=[];LMS.sort((a,b)=>b.f.d-a.f.d).forEach(it=>{let r=pack(ALS,it,3)||pack(SPS,it,3);if(r){putG(it.g,it.f,r[0],r[1],r[2]);LOG.lm++}else{it.g.parent&&it.g.parent.remove(it.g)}});
 // марсианские скверы: свободные клетки и пустые участки
-function skver(x,z,w,d){pl(w,d,PM(0xc9a27a,3),x,z,.08);const n=Math.max(2,Math.round(w*d/90));for(let i=0;i<n;i++){const a=i*2.39996,r=Math.sqrt((i+.5)/n),px=x+Math.cos(a)*r*w*.4,pz=z+Math.sin(a)*r*d*.4;
- if(i%4===0){const c=msh(sc,new THREE.OctahedronGeometry(.8+(i%3)*.3),new THREE.MeshLambertMaterial({color:[0x9a6aff,0x5fd0ff,0xff7ab8][i%3],emissive:0x2a1a4a}),px,1.2,pz);c.scale.y=1.7}
+const SKM=PM(0x8a5a44,3);
+function skver(x,z,w,d){pl(w,d,SKM,x,z,.08);pl(w-3,1.4,TIL[0],x,z,.09);pl(1.4,d-3,TIL[0],x,z,.09);[[-1,-1],[1,-1],[-1,1],[1,1]].forEach(s=>{if(w>10&&d>10){box(sc,2.4,.5,.8,0x6a4a3a,x+s[0]*(w/2-2.5),.25,z+s[1]*2);lamp(x+s[0]*(w/2-1.2),z+s[1]*(d/2-1.2),0,-s[0])}});const n=Math.max(3,Math.round(w*d/40));for(let i=0;i<n;i++){const a=i*2.39996,r=Math.sqrt((i+.5)/n),px=x+Math.cos(a)*r*w*.4,pz=z+Math.sin(a)*r*d*.4;
+ if(i%3===0){const c=msh(sc,new THREE.OctahedronGeometry(.8+(i%3)*.3),new THREE.MeshLambertMaterial({color:[0x9a6aff,0x5fd0ff,0xff7ab8][i%3],emissive:0x2a1a4a}),px,1.2,pz);c.scale.y=1.7}
  else{const s=.6+((i*7)%5)*.25,b=msh(sc,new THREE.DodecahedronGeometry(s,0),[0x8a4a2e,0x7a3a24,0x9a5a3a][i%3],px,s*.5,pz);b.rotation.y=i}}}
 SPS.forEach(s=>{const free=s.x1-s.cur;if(free>8){const x=(s.cur+s.x1)/2;if(free>22)greenhouse(x,s.zc,Math.min(7,free/4));skver(x,s.zc,free-2,15)}});
 PARK.forEach((p,i)=>{if(i%3===0)greenhouse(p.x,p.z,3.6);else skver(p.x,p.z,p.pw-1.5,p.pd-1.5)});
@@ -1305,12 +1306,12 @@ pl(112,136,PM(0x5f636c,3),282,-348,.07);for(let x=226;x<=338;x+=4){box(sc,.3,2.4
  for(let x=140;x<=156;x+=1.2){box(g,.12,.9,.12,0xf4efe6,x,.45,233);box(g,.12,.9,.12,0xf4efe6,x,.45,247)}for(let z=233;z<=247;z+=1.2){box(g,.12,.9,.12,0xf4efe6,140,.45,z);box(g,.12,.9,.12,0xf4efe6,156,.45,z)}sc.add(g)}
 pl(112,88,PM(0x9a6a50,3),162,156,.05);
 // Страна Imen: земля, стена с башнями, флаги, ворота
-{const g=new THREE.Group(),W=0xb88a5a;pl(116,140,PM(0xa8704a,3),42,180,.06);for(let z=112;z<158;z+=4)for(let x=0;x<3;x++)pl(2.6,4,TIL[(x+z/4)%2|0],39.4+x*2.6,z+2,.08);for(let z=116;z<156;z+=8)[35,49].forEach(x=>flag(g,x,z,6,tri('#2fae4a','#f4f4f4','#ff8a2a'),2));const seg=(x1,z1,x2,z2)=>{const L=Math.hypot(x2-x1,z2-z1),m=box(g,L,3.4,1.2,W,(x1+x2)/2,1.7,(z1+z2)/2);m.rotation.y=-Math.atan2(z2-z1,x2-x1);for(let t=0;t<L;t+=2.2){const k=box(g,1,.8,1.3,0xa87a4a,x1+(x2-x1)*t/L,3.8,z1+(z2-z1)*t/L);k.rotation.y=m.rotation.y}};
+{const g=new THREE.Group(),W=0xb88a5a;pl(116,140,PM(0x9a6040,3),42,180,.06);for(let z=112;z<158;z+=4)for(let x=0;x<3;x++)pl(2.6,4,TIL[(x+z/4)%2|0],39.4+x*2.6,z+2,.08);for(let z=116;z<156;z+=8)[35,49].forEach(x=>flag(g,x,z,6,tri('#2fae4a','#f4f4f4','#ff8a2a'),2));const seg=(x1,z1,x2,z2)=>{const L=Math.hypot(x2-x1,z2-z1),m=box(g,L,3.4,1.2,W,(x1+x2)/2,1.7,(z1+z2)/2);m.rotation.y=-Math.atan2(z2-z1,x2-x1);for(let t=0;t<L;t+=2.2){const k=box(g,1,.8,1.3,0xa87a4a,x1+(x2-x1)*t/L,3.8,z1+(z2-z1)*t/L);k.rotation.y=m.rotation.y}};
  seg(-16,110,36,110);seg(48,110,100,110);seg(100,110,100,250);seg(100,250,-16,250);seg(-16,250,-16,110);
  [[-16,110],[100,110],[100,250],[-16,250],[36,110],[48,110],[100,180],[-16,180]].forEach((a,i)=>{msh(g,new THREE.CylinderGeometry(2,2.2,7,10),W,a[0],3.5,a[1]);msh(g,new THREE.ConeGeometry(2.4,2.2,10),0x2fae4a,a[0],8.1,a[1]);flag(g,a[0],a[1],12,tri('#2fae4a','#f4f4f4','#ff8a2a'),3)});
  box(g,14,2.4,1.4,0x1d2a44,42,8,110);lab(g,'СТРАНА IMEN · ИМПЕРИЯ',13,2,'#1d2a44','#f7c24a',42,8,109.2).rotation.y=PI;lab(g,'СТРАНА IMEN · ИМПЕРИЯ',13,2,'#1d2a44','#f7c24a',42,8,110.8);sc.add(g)}
 // Аэропорт «Дон х9щ · Бананчик» у космодрома
-{const g=new THREE.Group();pl(112,26,PM(0x8a8d92,3),282,269,.06);box(g,84,.1,7,0x2a2c32,286,.05,276);for(let x=248;x<326;x+=6)box(g,3,.04,.4,0xffffff,x,.12,276);
+{const g=new THREE.Group();pl(112,26,PM(0x5f636c,3),282,269,.06);box(g,84,.1,7,0x2a2c32,286,.05,276);for(let x=248;x<326;x+=6)box(g,3,.04,.4,0xffffff,x,.12,276);
  box(g,16,5,8,0xe8eef6,320,2.5,263);box(g,16.4,.4,8.4,0x3a3f48,320,5.2,263);for(let i=0;i<6;i++)box(g,1.8,2,.1,0x8fd2ff,313+i*2.6,2.8,267.05);lab(g,'АЭРОПОРТ «ДОН Х9Щ · БАНАНЧИК»',14,1.2,'#1d2a44','#f7c24a',320,4.4,267.1);
  box(g,2,10,2,0xd8dce4,331,5,271);box(g,3.6,2.4,3.6,0x7fc8ff,331,11,271);const p=new THREE.Group();box(p,10,1.4,1.6,0xf4f4f4,0,1.6,0);box(p,2.4,.3,11,0xf4f4f4,0,1.7,0);box(p,1.4,2.4,.3,0xd94a3a,-4.4,2.8,0);const n=msh(p,new THREE.ConeGeometry(.8,2,10),0xf4f4f4,5.8,1.6,0);n.rotation.z=-PI/2;p.position.set(272,0,276);g.add(p);sc.add(g)}
 // марсоходы и жители на новых улицах
