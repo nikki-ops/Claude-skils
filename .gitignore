@@ -2,3 +2,4 @@ render/_istochniki/
 node_modules/
 render/remotion/out/
 __pycache__/
+render/kommentarii/out/
