@@ -236,7 +236,7 @@ const spMat=new THREE.PointsMaterial({color:0xfff1c2,size:0.05,transparent:true,
 A.add(particles(250,V3(6,6,6),V3(0,1,1),0xcfe8ff,0.025,.5));
 const glowA=new THREE.PointLight(0xff8a30,0,12,2);A.add(glowA);
 const camA=new THREE.PerspectiveCamera(40,W/H,0.1,2000);
-const START=V3(2.5,14,-10),STOP=0.8;
+const START=V3(0.5,2.6,-4.0),STOP=0.8;
 function updateA(t){
   const ring=t>=35;
   const k=ring?1:easeOut(t/STOP,5);const pos=START.clone().lerp(V3(0,0,0),k);heroRoot.position.copy(pos);
@@ -399,7 +399,7 @@ function updateW(t){
 [cSign,fSign].forEach(s=>s.userData.draw(0,1));
 
 // ======================= 2D: плашки, субтитры, бейджи =======================
-const FR=[[0.35,1.43,"это мой |метеорит"],[1.97,2.57,"экипаж:"],[2.81,3.20,"один"],[3.56,4.25,"это я"],[4.63,5.20,"вокруг"],[5.43,6.38,"пустой пояс"],
+const FR=[[0.0,1.43,"это мой |метеорит"],[1.97,2.57,"экипаж:"],[2.81,3.20,"один"],[3.56,4.25,"это я"],[4.63,5.20,"вокруг"],[5.43,6.38,"пустой пояс"],
  [6.68,8.50,"ни соседей, |ни кафе…"],[8.87,9.98,"ни доставки |пиццы"],[10.36,11.58,"зато есть |план"],[11.85,13.88,"построить |город |на метеоритах"],
  [14.23,15.18,"один метеорит"],[15.46,16.32,"один житель"],[16.59,17.58,"вместе |с тобой"],[17.92,19.69,"подпишись |и напиши |комментарий"],
  [19.98,21.72,"этот метеорит |станет твоим"],[22.04,24.09,"сначала |вырастет дом |с твоим ником"],[24.36,25.68,"потом |оранжерея"],[25.96,26.52,"ангар"],
@@ -419,7 +419,7 @@ function drawUI(t,r){
   const c=CH.find(([a,b])=>t>=a&&t<b);let sub='';
   if(c){sub=c[2];const k=Object.keys(COL).find(w=>sub===w||sub.endsWith(w)||sub.startsWith(w));if(k)sub=sub.replace(k,`<span class="${COL[k]}">${k}</span>`);}
   let h='';const p=plaque(t);if(p)h+=`<div class="plashka">${p}</div>`;
-  if(c)h+=`<div class="sub" style="${t>=37.03?'top:1180px;':''}white-space:nowrap">${sub}</div>`;
+  if(c)h+=`<div class="sub" style="${t>=37.03?'top:1170px;font-size:100px;':''}white-space:nowrap">${sub}</div>`;
   if(r.scene===Wd){
     if(t>=14.18&&t<17.87){h+=badge(camW,NP.clone().add(V3(0,TOP(NR)+0.7,0)),'@???',14.6,t,'#9ffbff');h+=pill(1420,'1 МЕТЕОРИТ = 1 ЖИТЕЛЬ','#1d2a52',t,15.4);}
     if(t>=23.2&&t<30.02&&t<24.31)h+=badge(camW,VP.clone().add(V3(-0.85,VT-VP.y+2.0,0.35)),'@твой_ник',23.25,t);
@@ -427,8 +427,8 @@ function drawUI(t,r){
     if(t>=28.47&&t<30.02){h+=badge(camW,VP.clone().add(V3(-0.85,VT-VP.y+2.0,0.35)),'@твой_ник',28.47,t);h+=pill(1420,'НАПИШИ В КОММЕНТАРИЯХ, ЧТО ПОСТРОИТЬ ↓','#ff3b4f',t,28.6);}
     if(t>=33.48&&t<35){h+=badge(camW,NP.clone().add(V3(0,TOP(NR)+0.7,0)),'@друг?',33.6,t,'#ffd23f');h+=pill(1420,'ОТПРАВЬ ДРУГУ ➜','#ff3b4f',t,33.9);}
   } else if(t>=37.03){
-    h+=pill(1420,'ПОДПИШИСЬ + КОММЕНТАРИЙ = ТВОЙ МЕТЕОРИТ','#ff3b4f',t,37.2);
-    h+=`<div class="cta" style="top:1540px;background:#1d2a52;font-size:30px;transform:translateX(-50%) scale(${pop(t,37.6)})">СЕРИЯ 2: ТВОЙ ДОМ С НИКОМ</div>`;
+    h+=pill(1320,'ПОДПИШИСЬ + КОММЕНТАРИЙ = ТВОЙ МЕТЕОРИТ','#ff3b4f',t,37.2);
+    h+=`<div class="cta" style="top:1420px;background:#1d2a52;font-size:30px;transform:translateX(-50%) scale(${pop(t,37.6)})">СЕРИЯ 2: ТВОЙ ДОМ С НИКОМ</div>`;
   }
   ui.innerHTML=h;
 }
