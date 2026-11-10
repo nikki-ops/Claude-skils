@@ -32,3 +32,5 @@
 6. `one-click-director` — проверка, рендер, обложка → `gotovo/<id>.mp4`, `gotovo/<id>-oblozhka.png`.
 
 `<id>` = `NN-nazvanie`, одинаковый во всех папках.
+
+
