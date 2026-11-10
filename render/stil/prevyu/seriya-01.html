@@ -195,7 +195,7 @@ function stake(){const g=new THREE.Group();
 // ======================= ОБЩЕЕ =======================
 const base=scene.children.slice();
 const V3=(x,y,z)=>new THREE.Vector3(x,y,z);
-const holoMat=new THREE.MeshBasicMaterial({color:0x9ffbff,transparent:true,opacity:.22,depthWrite:false});
+const holoMat=new THREE.MeshBasicMaterial({color:0x7ff4ff,transparent:true,opacity:.38,depthWrite:false});
 const holoEdge=new THREE.LineBasicMaterial({color:0xcffdff,transparent:true,opacity:.75});
 function makeHolo(obj){const g=obj.clone(true);const extra=[];
   g.traverse(o=>{if(o.isLight){o.visible=false;}if(o.isMesh){o.material=holoMat;o.castShadow=false;extra.push(o);}});
@@ -274,45 +274,45 @@ const Wd=new THREE.Scene();Wd.background=scene.background;Wd.environment=scene.e
 base.forEach(o=>{if(o.isLight||o.isPoints)Wd.add(o.clone());});
 const TOP=(R)=>R*0.35+0.02;
 // метеорит Гоши
-const HERO=V3(0,0,0);const hRock=asteroid(1.8,0.18);Wd.add(hRock);
-const hHouse=domModern(0x45c8ff);hHouse.scale.setScalar(.85);hHouse.position.set(-0.45,TOP(1.8),-0.3);hHouse.rotation.y=0.3;Wd.add(hHouse);
+const HR=2.4,VR=2.6,NR=1.6;const HERO=V3(0,0,0);const hRock=asteroid(HR,0.2);Wd.add(hRock);
+const hHouse=domModern(0x45c8ff);hHouse.scale.setScalar(1.0);hHouse.position.set(-0.8,TOP(HR),-0.5);hHouse.rotation.y=0.3;Wd.add(hHouse);
 const GW=gosha({mood:'joy'});GW.scale.setScalar(0.95);Wd.add(GW);
 const puffW=particles(60,V3(.15,.5,.15),V3(0,.2,-.25),0xffffff,0.06,0);GW.add(puffW);
 const flag=new THREE.Group();{const pole=new THREE.Mesh(new THREE.CylinderGeometry(.012,.012,.6),new THREE.MeshStandardMaterial({color:0x2a3040,metalness:.7,roughness:.35}));pole.position.y=.3;flag.add(pole);
   const cloth=new THREE.Mesh(new THREE.BoxGeometry(.26,.16,.012),new THREE.MeshStandardMaterial({color:0xffd23f,emissive:0xffb000,emissiveIntensity:.35}));cloth.position.set(.13,.5,0);flag.add(cloth);}
-flag.position.set(0.95,TOP(1.8),0.35);Wd.add(flag);
+flag.position.set(1.5,TOP(HR),0.2);Wd.add(flag);
 // участок зрителя
-const VP=V3(5,0.2,-1.5);const vRock=asteroid(1.6,0.18,{lava:true});vRock.position.copy(VP);Wd.add(vRock);const vLava=lavaMats(vRock);
-const VT=VP.y+TOP(1.6);
-for(let k=0;k<4;k++){const st=stake();const a=k/4*Math.PI*2+0.78;st.position.set(VP.x+Math.cos(a)*1.0,VT+0.17,VP.z+Math.sin(a)*1.0);Wd.add(st);}
-const vFree=signAnim('free');vFree.scale.setScalar(.55);vFree.position.set(VP.x+0.55,VT+0.85,VP.z+0.65);vFree.rotation.y=-0.25;Wd.add(vFree);
-const vBusy=signAnim('busy');vBusy.scale.setScalar(.55);vBusy.position.copy(vFree.position);vBusy.rotation.y=-0.25;Wd.add(vBusy);
-const vHouse=domModern(0xff7a59);vHouse.position.set(VP.x-0.3,VT,VP.z+0.05);vHouse.rotation.y=0.25;Wd.add(vHouse);
-const vGreen=oranzhereya();vGreen.position.set(VP.x+0.95,VT,VP.z-0.55);vGreen.rotation.y=-0.6;Wd.add(vGreen);
+const VP=V3(7.2,0.2,-2.2);const vRock=asteroid(VR,0.2,{lava:true});vRock.position.copy(VP);Wd.add(vRock);const vLava=lavaMats(vRock);
+const VT=VP.y+TOP(VR);
+for(let k=0;k<4;k++){const st=stake();const a=k/4*Math.PI*2+0.78;st.position.set(VP.x+Math.cos(a)*VR*.78,VT+0.17,VP.z+Math.sin(a)*VR*.78);Wd.add(st);}
+const vFree=signAnim('free');vFree.scale.setScalar(.55);vFree.position.set(VP.x+1.35,VT+0.85,VP.z+1.45);vFree.rotation.y=-0.35;Wd.add(vFree);
+const vBusy=signAnim('busy');vBusy.scale.setScalar(.55);vBusy.position.copy(vFree.position);vBusy.rotation.y=-0.35;Wd.add(vBusy);
+const vHouse=domModern(0xff7a59);vHouse.position.set(VP.x-0.85,VT,VP.z+0.35);vHouse.rotation.y=0.25;Wd.add(vHouse);
+const vGreen=oranzhereya();vGreen.position.set(VP.x+1.45,VT,VP.z-0.25);vGreen.rotation.y=-0.9;Wd.add(vGreen);
 const vGreenH=makeHolo(vGreen);Wd.add(vGreenH);
-const vHangar=makeHolo(angar(0x45c8ff));vHangar.position.set(VP.x+0.15,VT,VP.z-1.15);vHangar.rotation.y=-0.2;Wd.add(vHangar);
-function telescope(){const g=new THREE.Group();const m=new THREE.MeshStandardMaterial({color:0xffffff});
+const vHangar=angar(0x45c8ff);vHangar.scale.setScalar(1.25);vHangar.position.set(VP.x+0.3,VT,VP.z-1.5);vHangar.rotation.y=-0.5;Wd.add(vHangar);
+function telescope(){const g=new THREE.Group();const m=new THREE.MeshPhysicalMaterial({color:0xf3efe7,roughness:.4,clearcoat:.6});
   for(let i=0;i<3;i++){const l=new THREE.Mesh(new THREE.CylinderGeometry(.015,.015,.6),m);const a=i/3*Math.PI*2;l.position.set(Math.cos(a)*.12,.28,Math.sin(a)*.12);l.rotation.set(Math.sin(a)*.35,0,-Math.cos(a)*.35);g.add(l);}
-  const tube=new THREE.Mesh(new THREE.CylinderGeometry(.07,.1,.7,16),m);tube.position.set(0,.65,0);tube.rotation.z=-.8;g.add(tube);
-  const ball=new THREE.Mesh(new THREE.IcosahedronGeometry(.13,1),m);ball.position.set(.32,.98,0);g.add(ball);return g;}
-const vScope=makeHolo(telescope());vScope.position.set(VP.x-1.05,VT,VP.z-0.75);Wd.add(vScope);
-const notes=particles(40,V3(.6,.6,.6),V3(VP.x-0.75,VT+1.2,VP.z-0.75),0xff7ad9,0.07,0);Wd.add(notes);
+  const tube=new THREE.Mesh(new THREE.CylinderGeometry(.07,.1,.7,16),new THREE.MeshPhysicalMaterial({color:0xffd23f,roughness:.3,clearcoat:.8}));tube.position.set(0,.65,0);tube.rotation.z=-.8;g.add(tube);
+  const ball=new THREE.Mesh(new THREE.IcosahedronGeometry(.13,1),new THREE.MeshStandardMaterial({color:0xffffff,metalness:1,roughness:.12,flatShading:true,emissive:0xff7ad9,emissiveIntensity:.35}));ball.position.set(.32,.98,0);g.add(ball);return g;}
+const vScope=telescope();vScope.scale.setScalar(1.4);vScope.position.set(VP.x-1.45,VT,VP.z-1.05);vScope.rotation.y=-2.2;Wd.add(vScope);
+const notes=particles(40,V3(.6,.6,.6),V3(VP.x-1.2,VT+1.3,VP.z-1.05),0xff7ad9,0.07,0);Wd.add(notes);
 // кафе и свободный участок для перечисления
 const CP=V3(-7,0.5,-5);const cRock=asteroid(1.3,0.16,{lava:false});cRock.position.copy(CP);Wd.add(cRock);
 const cSign=signAnim('cafe');cSign.scale.setScalar(.55);cSign.position.set(CP.x,CP.y+TOP(1.3)+0.85,CP.z+0.3);cSign.rotation.set(0,0.3,0.12);Wd.add(cSign);
-const FP=V3(9,0.3,-6);const fRock=asteroid(1.4,0.16,{lava:true});fRock.position.copy(FP);Wd.add(fRock);
+const FP=V3(2,0.5,-11);const fRock=asteroid(1.4,0.16,{lava:true});fRock.position.copy(FP);Wd.add(fRock);
 for(let k=0;k<4;k++){const st=stake();const a=k/4*Math.PI*2+0.78;st.position.set(FP.x+Math.cos(a)*.85,FP.y+TOP(1.4)+0.17,FP.z+Math.sin(a)*.85);Wd.add(st);}
 const fSign=signAnim('free');fSign.scale.setScalar(.6);fSign.position.set(FP.x,FP.y+TOP(1.4)+0.85,FP.z+0.4);fSign.rotation.y=-0.3;Wd.add(fSign);
 // сосед
-const NP=V3(-3.4,0.35,1.2);const nRock=asteroid(1.1,0.15,{lava:false});nRock.position.copy(NP);Wd.add(nRock);
-for(let k=0;k<4;k++){const st=stake();const a=k/4*Math.PI*2+0.78;st.position.set(NP.x+Math.cos(a)*.65,NP.y+TOP(1.1)+0.17,NP.z+Math.sin(a)*.65);Wd.add(st);}
+const NP=V3(-5.2,0.35,1.6);const nRock=asteroid(NR,0.18,{lava:false});nRock.position.copy(NP);Wd.add(nRock);
+for(let k=0;k<4;k++){const st=stake();const a=k/4*Math.PI*2+0.78;st.position.set(NP.x+Math.cos(a)*NR*.6,NP.y+TOP(NR)+0.17,NP.z+Math.sin(a)*NR*.6);Wd.add(st);}
 // пояс
 const belt=[];
-for(let i=0;i<20;i++){const r=0.6+rnd()*0.8;const e=asteroid(r,0.14,{lava:rnd()>0.7});let px,pz;
-  do{px=(rnd()-.5)*30;pz=-4-rnd()*30;}while(Math.hypot(px-VP.x,pz-VP.z)<3||Math.hypot(px-CP.x,pz-CP.z)<3||Math.hypot(px-FP.x,pz-FP.z)<3);
+for(let i=0;i<20;i++){const r=1.0+rnd()*1.0;const e=asteroid(r,0.16,{lava:rnd()>0.7});let px,pz;
+  do{px=(rnd()-.5)*30;pz=-4-rnd()*30;}while(Math.hypot(px-VP.x,pz-VP.z)<5.5||Math.hypot(px,pz)<4.5||Math.hypot(px-CP.x,pz-CP.z)<3.5||Math.hypot(px-FP.x,pz-FP.z)<3.5);
   e.position.set(px,(rnd()-.5)*3-0.6,pz);e.rotation.y=rnd()*3;Wd.add(e);
   for(let k=0;k<4;k++){const st=stake();const a=k/4*Math.PI*2+0.4;st.position.set(px+Math.cos(a)*r*.55,e.position.y+TOP(r)+0.17,pz+Math.sin(a)*r*.55);Wd.add(st);}
-  const h=makeHolo(domModern(0xffffff,{light:false}));h.scale.setScalar(r*.55);h.position.set(px,e.position.y+TOP(r),pz);h.rotation.y=rnd()*3;Wd.add(h);
+  const h=makeHolo(domModern(0xffffff,{light:false}));h.scale.setScalar(r*.45);h.position.set(px,e.position.y+TOP(r),pz);h.rotation.y=rnd()*3;Wd.add(h);
   belt.push({e,h,delay:rnd()*1.2,r});}
 // голографическая разметка над поясом
 const gridPts=[];belt.forEach((b,i)=>{const n=belt[(i+3)%belt.length];gridPts.push(b.e.position.x,b.e.position.y+1.2,b.e.position.z,n.e.position.x,n.e.position.y+1.2,n.e.position.z);});
@@ -342,21 +342,21 @@ const SH=[ // [начало, конец, функция(локальное t, д
  [4.58,6.63,(l,u)=>({pos:V3(-1,6,9).lerp(V3(-2,8.5,13),easeInOut(u)),look:V3(0.8,-1,-8)})],
  [6.63,7.62,(l,u)=>({pos:FP.clone().add(V3(-2.4+u*.3,1.8,3.8)),look:FP.clone().add(V3(0,.8,0)),whip:1})],
  [7.62,8.82,(l,u)=>({pos:CP.clone().add(V3(2.6-u*.3,1.6,3.8)),look:CP.clone().add(V3(0,.8,0)),whip:1})],
- [8.82,10.31,(l,u)=>({pos:V3(3.0,2.2,5.4),look:V3(-0.6,1.6,-1.2),whip:1})],
- [10.31,11.80,(l,u)=>{const a=0.25+u*0.17;return {pos:V3(GWX()+Math.sin(a)*3.1,TOP(1.8)+1.0,GWZ()+Math.cos(a)*3.1),look:V3(GWX()-0.2,TOP(1.8)+0.65,GWZ())};}],
- [11.80,14.18,(l,u)=>({pos:V3(2.3,3.0,6.0).lerp(V3(2.0,3.2,5.4),u),look:V3(-0.5,0.4,-9),fov:l>0.75?40/1.4:40})],
- [14.18,17.87,(l,u)=>({pos:V3(-1.2,2.8,8.4).lerp(V3(-1.4,2.6,7.6),easeInOut(u)),look:V3(-1.8,0.8,0.9)})],
- [17.87,21.99,(l,u)=>({pos:VP.clone().add(V3(0.2,2.7,6.4)),look:VP.clone().add(V3(0,0.8,0))})],
- [21.99,24.31,(l,u)=>({pos:VP.clone().add(V3(0.2,2.7,6.4)),look:VP.clone().add(V3(0,0.9,0))})],
- [24.31,25.91,(l,u)=>({pos:VP.clone().add(V3(3.4-u*.2,2.0,2.2)),look:VP.clone().add(V3(0.95,0.55,-0.55)),whip:1})],
- [25.91,26.75,(l,u)=>({pos:VP.clone().add(V3(2.6,2.0,-3.6)),look:VP.clone().add(V3(0.15,0.45,-1.15)),whip:1})],
- [26.75,28.47,(l,u)=>({pos:VP.clone().add(V3(-3.2+u*.2,2.3,-3.0)),look:VP.clone().add(V3(-1.05,0.7,-0.75)),whip:1})],
- [28.47,30.02,(l,u)=>{const a=0.2+u*0.45;return {pos:VP.clone().add(V3(Math.sin(a)*6.2,3.0,Math.cos(a)*6.2)),look:VP.clone().add(V3(0,0.6,-0.3))};}],
- [30.02,31.51,(l,u)=>({pos:V3(0.8,1.9,4.2).lerp(V3(0.7,4.5,5.5),easeInOut(u)),look:V3(0,1.6,-20).lerp(V3(0,3,-30),u)})],
+ [8.82,10.31,(l,u)=>({pos:V3(3.8,2.9,6.8),look:V3(-0.6,1.9,-1.2),whip:1})],
+ [10.31,11.80,(l,u)=>{const a=0.25+u*0.17;return {pos:V3(GWX()+Math.sin(a)*3.1,TOP(HR)+1.0,GWZ()+Math.cos(a)*3.1),look:V3(GWX()-0.2,TOP(HR)+0.65,GWZ())};}],
+ [11.80,14.18,(l,u)=>({pos:V3(2.6,3.4,6.6).lerp(V3(2.3,3.6,6.0),u),look:V3(-0.5,0.4,-9),fov:l>0.75?40/1.4:40})],
+ [14.18,17.87,(l,u)=>({pos:V3(-3.0,4.0,12.5).lerp(V3(-3.2,3.7,11.5),easeInOut(u)),look:V3(-3.4,1.1,1.4)})],
+ [17.87,21.99,(l,u)=>({pos:VP.clone().add(V3(0.4,3.6,8.6)),look:VP.clone().add(V3(0,0.9,0.2))})],
+ [21.99,24.31,(l,u)=>({pos:VP.clone().add(V3(0.4,3.6,8.6)),look:VP.clone().add(V3(-0.3,1.0,0.2))})],
+ [24.31,25.91,(l,u)=>({pos:VP.clone().add(V3(5.0-u*.2,2.4,2.0)),look:VP.clone().add(V3(1.45,0.6,-0.25)),whip:1})],
+ [25.91,26.75,(l,u)=>({pos:VP.clone().add(V3(1.9,2.4,-5.2)),look:VP.clone().add(V3(0.3,0.7,-1.5)),whip:1})],
+ [26.75,28.47,(l,u)=>({pos:VP.clone().add(V3(-5.6+u*.2,2.7,-4.6)),look:VP.clone().add(V3(-1.45,1.25,-1.05)),whip:1})],
+ [28.47,30.02,(l,u)=>{const a=0.2+u*0.45;return {pos:VP.clone().add(V3(Math.sin(a)*8.2,3.8,Math.cos(a)*8.2)),look:VP.clone().add(V3(0,0.6,-0.3))};}],
+ [30.02,31.51,(l,u)=>({pos:V3(1.0,2.2,4.6).lerp(V3(0.7,4.5,5.5),easeInOut(u)),look:V3(0,1.6,-20).lerp(V3(0,3,-30),u)})],
  [31.51,33.48,(l,u)=>({pos:V3(0.7,4.5,5.5).lerp(V3(0.7,7,8),easeInOut(u)),look:V3(0,3,-30).lerp(V3(25,95,-340),easeInOut(u))})],
- [33.48,35.00,(l,u)=>({pos:V3(-1.2,2.8,8.4).lerp(V3(-1.4,2.6,7.8),u),look:V3(-1.8,0.8,0.9)})],
+ [33.48,35.00,(l,u)=>({pos:V3(-3.0,4.0,12.5).lerp(V3(-3.2,3.7,11.8),u),look:V3(-3.4,1.1,1.4)})],
 ];
-let GWpos=V3(0.75,TOP(1.8),0.6);const GWX=()=>GWpos.x,GWZ=()=>GWpos.z;
+let GWpos=V3(1.0,TOP(HR),0.9);const GWX=()=>GWpos.x,GWZ=()=>GWpos.z;
 function shotAt(t){for(let i=0;i<SH.length;i++)if(t>=SH[i][0]&&t<SH[i][1])return i;return SH.length-1;}
 function camFor(i,t){const [a,b,f]=SH[i];return f(t-a,(t-a)/(b-a));}
 function updateW(t){
@@ -366,15 +366,15 @@ function updateW(t){
     c={pos:p.pos.clone().lerp(c.pos,u),look:p.look.clone().lerp(c.look,u),fov:c.fov};}
   camW.position.copy(c.pos);camW.lookAt(c.look);camW.fov=c.fov||40;camW.updateProjectionMatrix();
   // Гоша: куда и как
-  let gp=V3(0.75,TOP(1.8),0.6),gr=0.2,ps='stand',mood='joy',lift=0;
-  if(t>=8.82&&t<10.31){gp=V3(1.25,TOP(1.8),0.9);gr=0.6;ps=t>9.1?'facepalm':'stand';mood=t>9.1?'sad':'calm';}
+  let gp=V3(1.0,TOP(HR),0.9),gr=0.2,ps='stand',mood='joy',lift=0;
+  if(t>=8.82&&t<10.31){gp=V3(1.7,TOP(HR),1.2);gr=0.6;ps=t>9.1?'facepalm':'stand';mood=t>9.1?'sad':'calm';}
   else if(t>=10.31&&t<11.80){ps=t<10.9?'wave':'flag';mood=t<10.9?'joy':'proud';}
   else if(t>=11.80&&t<14.18){gr=lerp(0.2,Math.PI,easeInOut((t-11.8)/0.6));mood='proud';}
-  else if(t>=14.18&&t<17.87){gp=V3(-0.9,TOP(1.8),0.9);gr=-0.9;ps=t>16.6?'point':'stand';mood='joy';}
-  else if(t>=17.87&&t<28.47){gp=V3(VP.x-0.85,VT,VP.z+1.05);gr=0.5;ps=(t>22.6&&t<23.1)?'snap':'marshal';mood=t>20.5?'love':'joy';}
-  else if(t>=28.47&&t<30.02){gp=V3(VP.x-0.85,VT,VP.z+1.05);gr=0.5;ps='wave';}
+  else if(t>=14.18&&t<17.87){gp=V3(-1.5,TOP(HR),1.3);gr=-0.9;ps=t>16.6?'point':'stand';mood='joy';}
+  else if(t>=17.87&&t<28.47){gp=V3(VP.x+0.2,VT,VP.z+1.6);gr=0.3;ps=(t>22.6&&t<23.1)?'snap':'marshal';mood=t>20.5?'love':'joy';}
+  else if(t>=28.47&&t<30.02){gp=V3(VP.x+0.2,VT,VP.z+1.6);gr=0.3;ps='wave';}
   else if(t>=30.02&&t<33.48){gr=Math.PI;ps='dream';mood='dream';lift=0.25;}
-  else if(t>=33.48){gp=V3(-0.6,TOP(1.8),0.9);gr=-0.7;ps='point';mood='joy';}
+  else if(t>=33.48){gp=V3(-1.5,TOP(HR),1.3);gr=-0.7;ps='point';mood='joy';}
   GWpos=gp;GW.position.set(gp.x,gp.y+lift,gp.z);GW.rotation.set(0,gr,0);pose(GW,ps,t,mood);
   puffW.material.opacity=lift?0.4:0;
   // флажок
@@ -391,7 +391,7 @@ function updateW(t){
   vHangar.visible=t>=25.91;vScope.visible=t>=26.75;notes.material.opacity=t>=26.9&&t<30.02?.8:0;
   notes.position.y=((t*0.4)%0.3);
   // голограммы на поясе
-  belt.forEach(b=>{const u=easeOut((t-30.1-b.delay)/0.4,3);b.h.visible=t>=30.1+b.delay;b.h.scale.setScalar(b.r*.55*Math.max(.001,u));});
+  belt.forEach(b=>{const u=easeOut((t-30.1-b.delay)/0.4,3);b.h.visible=t>=30.1+b.delay;b.h.scale.setScalar(b.r*.45*Math.max(.001,u));});
   // таблички
   vFree.userData.draw(0,1);vBusy.userData.draw(0,1);
   return {scene:Wd,cam:camW,focus:camW.position.distanceTo(c.look)*0.6};
@@ -421,11 +421,11 @@ function drawUI(t,r){
   let h='';const p=plaque(t);if(p)h+=`<div class="plashka">${p}</div>`;
   if(c)h+=`<div class="sub">${sub}</div>`;
   if(r.scene===Wd){
-    if(t>=14.18&&t<17.87){h+=badge(camW,NP.clone().add(V3(0,TOP(1.1)+0.6,0)),'@???',14.6,t,'#9ffbff');h+=pill(1420,'1 МЕТЕОРИТ = 1 ЖИТЕЛЬ','#1d2a52',t,15.4);}
-    if(t>=23.2&&t<30.02&&t<24.31)h+=badge(camW,VP.clone().add(V3(-0.3,VT-VP.y+1.95,0.05)),'@твой_ник',23.25,t);
+    if(t>=14.18&&t<17.87){h+=badge(camW,NP.clone().add(V3(0,TOP(NR)+0.7,0)),'@???',14.6,t,'#9ffbff');h+=pill(1420,'1 МЕТЕОРИТ = 1 ЖИТЕЛЬ','#1d2a52',t,15.4);}
+    if(t>=23.2&&t<30.02&&t<24.31)h+=badge(camW,VP.clone().add(V3(-0.85,VT-VP.y+2.0,0.35)),'@твой_ник',23.25,t);
     if(t>=24.31&&t<28.47)h+=pill(220,t<25.91?'ПОСТРОЕК: 2 / 3':'ПОСТРОЕК: 3 / 3','#1d2a52',t,t<25.91?24.4:25.95);
-    if(t>=28.47&&t<30.02){h+=badge(camW,VP.clone().add(V3(-0.3,VT-VP.y+1.95,0.05)),'@твой_ник',28.47,t);h+=pill(1420,'НАПИШИ В КОММЕНТАРИЯХ, ЧТО ПОСТРОИТЬ ↓','#ff3b4f',t,28.6);}
-    if(t>=33.48&&t<35){h+=badge(camW,NP.clone().add(V3(0,TOP(1.1)+0.6,0)),'@друг?',33.6,t,'#ffd23f');h+=pill(1420,'ОТПРАВЬ ДРУГУ ➜','#ff3b4f',t,33.9);}
+    if(t>=28.47&&t<30.02){h+=badge(camW,VP.clone().add(V3(-0.85,VT-VP.y+2.0,0.35)),'@твой_ник',28.47,t);h+=pill(1420,'НАПИШИ В КОММЕНТАРИЯХ, ЧТО ПОСТРОИТЬ ↓','#ff3b4f',t,28.6);}
+    if(t>=33.48&&t<35){h+=badge(camW,NP.clone().add(V3(0,TOP(NR)+0.7,0)),'@друг?',33.6,t,'#ffd23f');h+=pill(1420,'ОТПРАВЬ ДРУГУ ➜','#ff3b4f',t,33.9);}
   } else if(t>=37.03){
     h+=pill(1420,'ПОДПИШИСЬ + КОММЕНТАРИЙ = ТВОЙ МЕТЕОРИТ','#ff3b4f',t,37.2);
     h+=`<div class="cta" style="top:1540px;background:#1d2a52;font-size:30px;transform:translateX(-50%) scale(${pop(t,37.6)})">СЕРИЯ 2: ТВОЙ ДОМ С НИКОМ</div>`;
