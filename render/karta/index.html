@@ -1073,6 +1073,261 @@ MLIST.forEach((h,i)=>{if(!h.g||h.site||h.bld||h.anon||!h.g.parent||h.g.userData.
  [[-3.6,4.1],[ -3.6,-3.4],[3.7,-3.4]].forEach((a,j)=>{const b=msh(d,new THREE.DodecahedronGeometry(.7,0),[0x8a4a2e,0x7a3a24,0x9a5a3a][(i+j)%3],a[0],.45,a[1]);b.scale.set(1,.7,1);b.rotation.y=i+j});
  for(let x=-4.2;x<=4.2;x+=1.05){if(Math.abs(x)<1)continue;box(d,.12,.7,.12,0xf4efe6,x,.35,4.6)}box(d,3.4,.1,.1,0xf4efe6,-2.6,.6,4.6);box(d,3.4,.1,.1,0xf4efe6,2.6,.6,4.6);
  g.add(d)})}catch(e){console.warn("decor",e)}
+var ZC={yt:[42,-60,260],tt:[102,-348,240],n10:[162,-228,240],c:[162,-84,170],city:[282,-108,170],al:[222,60,200],pz:[282,-348,200],fun:[162,156,170],cos:[282,182,210],im:[42,180,150],res:[132,228,80]};
+try{// ===== ПЕРЕПЛАНИРОВКА: спланированный город — сетка улиц, Центр с площадью, Сити, Аллея желаний, жилые районы 4×3, Промзона, Страна Imen, Сопротивление =====
+(function(){
+const PI=Math.PI,LOG={upg:0,upgReq:0,move:0,near:0,add:0,imp:0,impFound:0,res:0,resFound:0,alley:0,lm:0};
+const nz=s=>String(s||'').toLowerCase().replace(/@/g,'').trim().replace(/-[0-9a-zа-яё]{2,6}$/,'');
+const F=n=>MLIST.find(h=>h.n&&nz(h.n)===nz(n));
+const isYard=c=>c&&c.isGroup&&c.children[0]&&c.children[0].geometry&&c.children[0].geometry.parameters&&c.children[0].geometry.parameters.width===9&&c.children[0].geometry.parameters.depth===8.6;
+const LIT=new THREE.MeshBasicMaterial({color:0xffd27a}),LIT2=new THREE.MeshBasicMaterial({color:0x8fdcff}),LIT3=new THREE.MeshBasicMaterial({color:0xff3b2f});
+function cvTex(w,h,draw){const c=document.createElement('canvas');c.width=w;c.height=h;draw(c.getContext('2d'),w,h);return new THREE.CanvasTexture(c)}
+function flag(g,x,z,hgt,tex,w){w=w||3.6;box(g,.22,hgt,.22,0xd8dce4,x,hgt/2,z);const m=new THREE.Mesh(new THREE.PlaneGeometry(w,w*.62),new THREE.MeshBasicMaterial({map:tex,side:THREE.DoubleSide}));m.position.set(x+w/2+.12,hgt-w*.33,z);g.add(m);return m}
+const tri=(a,b,c,txt)=>cvTex(256,160,(x,w,h)=>{[a,b,c].forEach((col,i)=>{x.fillStyle=col;x.fillRect(0,i*h/3,w,h/3+1)});if(txt){x.fillStyle='#1d2a44';x.font='900 34px Arial Black,sans-serif';x.textAlign='center';x.textBaseline='middle';x.fillText(txt,w/2,h/2)}});
+function yard(g,i){const d=new THREE.Group();box(d,9,.12,8.6,[0xd9b48a,0xcfa87c,0xe0bf98][i%3],0,.06,.4);box(d,1.2,.14,3.6,0xd8cdb8,0,.09,3.1);box(d,.22,3.2,.22,0x2a2d34,3.8,1.6,4.2);const l=new THREE.Mesh(new THREE.BoxGeometry(.6,.6,.6),LIT);l.position.set(3.8,3.3,4.2);d.add(l);
+ [[-3.6,4.1],[-3.6,-3.4],[3.7,-3.4]].forEach((a,j)=>{const b=msh(d,new THREE.DodecahedronGeometry(.7,0),[0x8a4a2e,0x7a3a24,0x9a5a3a][(i+j)%3],a[0],.45,a[1]);b.scale.set(1,.7,1);b.rotation.y=i+j});
+ for(let x=-4.2;x<=4.2;x+=1.05){if(Math.abs(x)<1)continue;box(d,.12,.7,.12,0xf4efe6,x,.35,4.6)}box(d,3.4,.1,.1,0xf4efe6,-2.6,.6,4.6);box(d,3.4,.1,.1,0xf4efe6,2.6,.6,4.6);g.add(d);g.userData.decor=1;return d}
+function figure(g,c,x,z,s){const f=new THREE.Group();box(f,.5,.8,.4,0x3a3f48,0,.4,0);box(f,.6,.8,.45,c,0,1.2,0);box(f,.5,.5,.5,0xe9c7a3,0,1.85,0);f.position.set(x,0,z);f.scale.setScalar(s||1);g.add(f);return f}
+// ---------- 1. ПОЖЕЛАНИЯ ЖИТЕЛЕЙ (render/kommentarii/out/zaprosy-vse.json, imperiya.json) ----------
+const FRESH=[];function newHome(n,g,kind,district){g.position.set(-900,0,-900);sc.add(g);const h={n,g,x:0,z:0,top:g.userData.top||6,kind,day:10,district:district||'Район YouTube',fresh:1};MLIST.push(h);FRESH.push(h);LOG.add++;return h}
+function swap(h,g){const o=h.g;g.position.copy(o.position);g.rotation.y=o.rotation.y;g.visible=o.visible;sc.add(g);const y=o.children.find(isYard);if(y){o.remove(y);g.add(y);g.userData.decor=1}o.parent&&o.parent.remove(o);h.g=g;h.top=g.userData.top||h.top}
+const up=(n,fn,req)=>{const h=F(n);if(!h){console.warn('wish: нет',n);return null}fn(h);LOG.upg++;LOG.upgReq+=req||1;return h};
+const topOf=h=>{const b=new THREE.Box3().setFromObject(h.g);return Math.max(2,b.max.y)};
+up('RUT_ROBLOX',h=>{const g=h.g,b=new THREE.Group();box(b,2.2,.5,2.2,0x3f4f3a,0,.25,0);const w=msh(b,new THREE.TorusGeometry(.6,.1,6,16),0x9aa3ad,0,.6,0);w.rotation.x=PI/2;[-1.6,1.6].forEach(x=>{msh(b,new THREE.CylinderGeometry(.18,.18,1.4,8),0x5a6068,x,.7,-.6)});lab(b,'БУНКЕР ×2 · 50 МЕСТ',3.6,.6,'#1d2a44','#f7c24a',0,1.5,1.12);b.position.set(-3,0,-3.3);g.add(b);h.kind+=' · 2-этажный бункер на 50 человек под чёрным небоскрёбом'});
+up('777osandroid',h=>{const g=new THREE.Group(),C=0xcfc2a8;box(g,7.4,1.6,6.4,0x2b2b2e,0,.8,0);for(let i=0;i<6;i++)box(g,1.2,1.2,.1,[0x3a3a3e,0x1a1a1e][i%2],-2.9+i*1.16,.8,3.22);
+ box(g,7,14*1.45,6,C,0,1.6+14*.725,0);for(let f=0;f<14;f++)for(let k=0;k<4;k++){const y=2.3+f*1.45,m=(f*7+k*3)%5<2?LIT:0x5a6a7a;box(g,1,.8,.08,m,-2.5+k*1.66,y,3.03);box(g,.08,.8,1,m,3.53,y,-2+k*1.33)}
+ box(g,7.3,.5,6.3,0x8a8d92,0,1.6+14*1.45+.25,0);lab(g,'ХРУЩЁВКА · 14 ЭТАЖЕЙ',5.6,.8,'#1d2a44','#f7c24a',0,1.25,3.25);door(g,0,3.2);g.userData.top=1.6+14*1.45+1.5;swap(h,g);h.kind='14-этажная хрущёвка на бедроковом цоколе (+ вилла во дворе — по 3 просьбам)';
+ const v=villa(0x2f9a9a);v.scale.setScalar(.55);v.position.set(-1.6,0,5.6);g.add(v)},3);
+up('SSSRinRussia228-s6g',h=>{const g=new THREE.Group(),G=0x4f545e,D=0x2e3138,Au=0xc9a24a;[-5,0,5].forEach(x=>box(g,1,2.2,1,D,x,1.1,0));box(g,17,3,5,G,0,3.6,0);box(g,12,2.4,4,D,-1,6.3,0);
+ const pr=msh(g,new THREE.ConeGeometry(2.6,5,4),G,10.8,3.6,0);pr.rotation.z=-PI/2;pr.rotation.x=PI/4;[[-5,9.5],[-2,11],[1,9.2],[3.6,8.2]].forEach(a=>{box(g,1.2,a[1]-7,1.2,D,a[0],(a[1]+7.5)/2,0);msh(g,new THREE.ConeGeometry(.9,2.4,4),Au,a[0],a[1]+1,0)});
+ for(let i=0;i<8;i++){box(g,.7,.4,.06,LIT3,-7+i*2,3.9,2.53);box(g,1,.6,1,0x3a3d44,-7+i*2,5.4,2.4)}box(g,17.2,.3,5.2,Au,0,5.05,0);[-1,1].forEach(s=>msh(g,new THREE.SphereGeometry(.7,10,8),new THREE.MeshBasicMaterial({color:0x7fe3ff}),-8.6,3.6,s*1.4));
+ lab(g,'«АПОКАЛИПСИС»',6,.9,'#2e3138','#ffd27a',0,3.4,2.56);g.userData.top=13;swap(h,g);h.kind='крейсер класса «Апокалипсис» (Warhammer 40 000) — бывшая «Сталинка»';h.wish=1});
+up('kreilek',h=>{const g=new THREE.Group(),Y=0xe8c86a;[0,1,2].forEach(f=>{box(g,5.2,2.4,4.4,[0xe8d8a8,0xdcc898,0xe8d8a8][f],0,1.2+f*2.4,0);box(g,5.3,.18,4.5,0xb5a68c,0,2.4+f*2.4,0);win(g,-1.4,1.4+f*2.4,2.2);win(g,1.4,1.4+f*2.4,2.2)});door(g,0,2.2);box(g,5.6,.3,4.8,0x8a3b22,0,7.35,0);
+ const b=msh(g,new THREE.TorusGeometry(1.8,.55,8,16,PI*.85),Y,0,8,0);b.rotation.z=PI*.08;msh(g,new THREE.SphereGeometry(.3,6,6),0x6a4a1a,1.8,8.2,0);
+ const t=new THREE.Group();msh(t,new THREE.CylinderGeometry(.9,1.1,.8,10),0x4a5a3a,0,.4,0);const br=box(t,.35,.35,3,0x3a4a2a,0,.8,1.4);br.rotation.x=-.3;t.position.set(-1.6,7.5,-1);g.add(t);lab(g,'ОРУЖИЕ ПРОТИВ ПОГЛОЩЕНИЯ',4.6,.5,'#1d2a44','#f7c24a',0,6.6,2.25);g.userData.top=10.5;swap(h,g);
+ h.kind='3-этажный дом с бананом на крыше + оружие против поглощения (крэй_или_илья)'},2);
+up('Сева-т6ы',h=>{const T=topOf(h),c=new THREE.Group();[[.9,0xf7a8c8],[.75,0xfff4e8],[.6,0x8a4a2a],[.45,0xf7a8c8]].forEach((a,i)=>msh(c,new THREE.CylinderGeometry(a[0],a[0],.6,14),a[1],0,.3+i*.6,0));box(c,.1,.5,.1,0xffffff,0,2.7,0);msh(c,new THREE.SphereGeometry(.12,6,6),new THREE.MeshBasicMaterial({color:0xffa040}),0,3,0);smoke(c,0,3.4,0);c.position.set(1.3,T-.6,-.9);h.g.add(c);h.kind+=' · дымоход из тортиков'},2);
+up('BETA_deta',h=>{const g=new THREE.Group();box(g,7,.3,7,0xffffff,0,.15,0);[[4.4,0],[3.6,3],[2.8,5.8],[2,8.4],[1.2,10.8]].forEach(a=>msh(g,new THREE.ConeGeometry(a[0],3.6,10),0x1f6a3a,0,2.4+a[1],0));box(g,.9,1.4,.9,0x6a4326,0,.7,0);
+ for(let i=0;i<22;i++){const y=1.6+i*.55,r=Math.max(.6,4-i*.17);msh(g,new THREE.SphereGeometry(.28,6,6),new THREE.MeshBasicMaterial({color:[0xff3a3a,0xffe05a,0x5fd0ff,0xff7ab8][i%4]}),Math.cos(i*1.9)*r,y,Math.sin(i*1.9)*r)}
+ msh(g,new THREE.OctahedronGeometry(.9),new THREE.MeshBasicMaterial({color:0xffd23a}),0,15.8,0);g.userData.top=17;swap(h,g);h.kind='новогодняя ёлка вместо дома + второй дом «Планета Земля» (на Аллее желаний)';h.wish=1},2);
+up('бананфортн',h=>{const s=store3('МАГНИТ','#d6203a',6);s.position.set(7.4,0,0);h.g.add(s);h.kind+=' + второй дом: магазин «Магнит»'});
+up('o13sova',h=>{const T=topOf(h),f=new THREE.Group();box(f,5,2.2,4,0xee7a1a,0,1.1,0);[-1.4,1.4].forEach(x=>{box(f,.7,.5,.06,LIT,x,1.3,2.03)});box(f,1.6,.3,.06,LIT,0,.6,2.03);msh(f,new THREE.ConeGeometry(3.6,2.4,4),0x2a1a3a,0,3.4,0).rotation.y=PI/4;msh(f,new THREE.SphereGeometry(.7,10,8),0xff8a1a,1.6,4.4,1.1);f.position.set(0,T,-.6);h.g.add(f);h.kind+=' · +этаж Хэллоуинского домика (200+ жителей)'});
+up('Pasha-hn3lv',h=>{const g=two(),tx=cvTex(256,160,(x,w,hh)=>{x.fillStyle='#1f8a3a';x.fillRect(0,0,w,hh);x.fillStyle='#d42a2a';x.beginPath();x.ellipse(w/2,hh/2,w*.36,hh*.3,0,0,6.283);x.fill();x.fillStyle='#ffffff';[-1,0,1].forEach(k=>{const cx=w/2+k*54,cy=hh/2;x.beginPath();x.arc(cx,cy,19,0,6.283);x.fill();x.fillStyle='#d42a2a';x.beginPath();x.arc(cx+7,cy,16,0,6.283);x.fill();x.fillStyle='#ffffff'})});
+ flag(g,-3,-1.5,8,tx,4.2);g.userData.top=8.5;swap(h,g);h.kind='дом с флагом: зелёная основа, красный овал и три полумесяца (исправлено)'});
+up('villian1644',h=>{h.kind=h.kind.replace(/^/,'')+' · украшает дома новых жителей (в Центре)';h.biz=1});
+up('Дон-х9щ',h=>{h.kind+=' · свой аэропорт «Дон х9щ» у космодрома'});
+up('standoff2co2-h6p',h=>{h.kind+=' · аэропорт «Бананчик» у космодрома'});
+up('MAGA-g5t6q',h=>{h.kind+=' · ТЦ «MAGA» на площади Центра'});
+// рядом: Коко228 — козлик (Serzho228_Official), каменный дом Коти-м5г, сосед kreker_16
+const KOKO=F('коко228');if(KOKO){const a=new THREE.Group();box(a,1.3,.7,.6,0xf4f0e6,0,.8,0);box(a,.5,.5,.45,0xf4f0e6,.8,1.25,0);[[-.45,-.2],[-.45,.2],[.45,-.2],[.45,.2]].forEach(p=>box(a,.15,.5,.15,0xd8d0c0,p[0],.25,p[1]));[-.12,.12].forEach(z=>box(a,.08,.35,.08,0x6a5a4a,.85,1.6,z));box(a,.1,.25,.1,0xd8d0c0,1.05,.95,0);a.position.set(-3.6,0,2.8);a.rotation.y=.6;KOKO.g.add(a);KOKO.kind+=' · козлик у дома (Serzho228_Official)';LOG.near++}
+const KOTI=newHome('Коти-м5г',brick(0x8f8c88),'каменный дом рядом с Коко228');LOG.near++;
+const KREK=F('kreker_16');if(KREK){KREK.kind+=' · сосед Коко228';LOG.near++}
+if(F('ItsSuperMasha'))LOG.near++;// двухэтажный дом с собачкой уже стоит
+// новые жители из net_doma, которых не было на карте
+function tornado(){const g=new THREE.Group();for(let i=0;i<8;i++){const r=1.2+i*.45,m=msh(g,new THREE.CylinderGeometry(r+.3,r,1.1,10,1,true),[0x8a8f98,0x9aa3ad,0x7a8088][i%3],Math.sin(i*.8)*.5,.6+i*1.1,Math.cos(i*.8)*.5);m.material.side=THREE.DoubleSide}const s=izba(0xc9a272,0x4a6a8a);s.scale.setScalar(.5);s.position.y=4;s.rotation.z=.3;g.add(s);g.userData.top=10;return g}
+function cubeHut(){const g=new THREE.Group();box(g,4.6,4.6,4.6,0xe8a35a,0,2.3,0);const r=msh(g,new THREE.ConeGeometry(3.8,2.8,5),0x7a3ad8,0,6,0);r.rotation.y=.3;door(g,0,2.3);win(g,-1.3,3,2.3);win(g,1.3,3,2.3);g.userData.top=7.6;return g}
+newHome('кто-то-не-пойми-кто',bunker3(),'бункер под землёй из стали 60 см — переживёт почти всё');
+newHome('hary-999',tornado(),'дом в стиле торнадо (ник hary99911)');
+newHome('user-ku9zl6ng7v',mk('cottage'),'дом');
+newHome('ts-me-1',cubeHut(),'дом-кубик с пятигранной крышей');
+// переезд на другую планету — ждут рейса у космодрома
+const WAIT=[];{const e=F('ЕленаГончарова-э4е');if(e){e.kind+=' · переезжает на J1407b (ник РУЛЕТ) — ждёт рейса у космодрома';WAIT.push(e);LOG.move++}
+ const gl=newHome('GLEB444.RF4',mk('capsule'),'капсула · переезд на новую планету — ждёт рейса у космодрома');WAIT.push(gl);LOG.move++}
+// сюжет: kiilek9p — Кремль-шар и страна Марсен
+function kreml(){const g=new THREE.Group(),Rd=0xb03a2a;box(g,17,.2,15,0xd8a070,0,.1,0);for(let i=0;i<=16;i++){[-7,7].forEach(z=>box(g,.3,1.2,.3,[0xd42a2a,0xff8a2a,0xf4f4f4][i%3],-8+i,.6,z))}for(let i=0;i<=14;i++)[-8,8].forEach(x=>box(g,.3,1.2,.3,[0xd42a2a,0xff8a2a,0xf4f4f4][i%3],x,.6,-7+i));
+ [[-4,-4],[4,-4],[-4,4],[4,4]].forEach(a=>{box(g,1.6,4,1.6,Rd,a[0],2,a[1]);msh(g,new THREE.ConeGeometry(1.2,2,4),0x2f7a4a,a[0],5,a[1]).rotation.y=PI/4;msh(g,new THREE.OctahedronGeometry(.35),LIT3,a[0],6.3,a[1])});[[0,-4,8,.6],[0,4,8,.6],[-4,0,.6,8],[4,0,.6,8]].forEach(a=>box(g,a[2],2.2,a[3],Rd,a[0],1.1,a[1]));
+ msh(g,new THREE.SphereGeometry(3,20,14),0xd94a3a,0,4.2,0);msh(g,new THREE.TorusGeometry(3.02,.15,8,30),0xf7c24a,0,4.2,0).rotation.x=PI/2;box(g,.2,1.6,.2,0xf7c24a,0,7.9,0);msh(g,new THREE.OctahedronGeometry(.7),LIT3,0,9,0);
+ flag(g,6,6,6,tri('#d42a2a','#ff8a2a','#f4f4f4','МАРСЕН'),3.6);lab(g,'СТРАНА МАРСЕН',5,.8,'#1d2a44','#f7c24a',0,1.2,7.2);g.userData.top=10;return g}
+const KII=newHome('kiilek9p',kreml(),'Кремль-шар · страна Марсен: оборона и противоядие от захвата (сюжет)','Аллея Желаний');KII.wish=1;
+// Империя / Страна Imen
+const IMP=JSON.parse('["MayaAvetisyan-p7s","симп-и4п","Белый-3","Юля-л4х1н","РАМАДАН-й9у","Itzz_PoZZIzA","ВиталийВтюрин-т3ю","Миша-х2ч5в","Appl1k_Hidi","Максим-н2м3т","levon_here","луар2.0-ы9ч"]');
+const IMEN=[];IMP.forEach(n=>{let h=F(n);if(h)LOG.impFound++;else h=newHome(n,two(),'дом');h.kind+=' · подданный Империи';IMEN.push(h);LOG.imp++});
+{const v=F('ВиталийВтюрин-т3ю');if(v){const c=new THREE.Group();for(let i=0;i<6;i++)box(c,1,1,1,[0x8a5a30,0x6a7a4a][i%2],(i%3)*1.1,.5+Math.floor(i/3),0);lab(c,'РЕСУРСЫ',2.4,.5,'#1d2a44','#f7c24a',1.1,2.4,.55);c.position.set(-4.3,0,2.4);v.g.add(c);v.kind+=' · ангар-склад: поставляет ресурсы для противостояния'}
+ const y=F('Юля-л4х1н');if(y){flag(y.g,3.4,-3.4,9,cvTex(256,160,(x,w,hh)=>{['#2fae4a','#f4f4f4','#ff8a2a'].forEach((c,i)=>{x.fillStyle=c;x.fillRect(0,i*hh/3,w/2,hh/3+1)});x.fillStyle='#5fb8ff';x.fillRect(w/2,0,w/2,hh);x.fillStyle='#fff';x.font='900 36px Arial Black';x.textAlign='center';x.textBaseline='middle';x.fillText('СОЮЗ',w*.75,hh/2)}),3.6);y.kind+=' · «новая империя над землёй» в союзе с IMEN'}}
+['Imen_Brawl-Stars','o13sova'].forEach(n=>{const h=F(n);if(h)IMEN.push(h)});
+const RESN=['НурдоолотНоманова','Sarvar-c4f6q','Ярик-й4щ8ф'],RESI=RESN.map(n=>{let h=F(n);if(h)LOG.resFound++;else h=newHome(n,two(),'дом');LOG.res++;return h});
+RESI[0].kind+=' · страна Проксима (флаг и щит), готовится к войне против Империи';RESI[1].kind+=' · отделён от остальных, рядом казарма армии';RESI[2].kind+=' · против Империи';
+{const g=RESI[0].g;flag(g,-3.6,-3,7,cvTex(256,160,(x,w,hh)=>{x.fillStyle='#1d2a6a';x.fillRect(0,0,w,hh);x.fillStyle='#ffffff';x.beginPath();for(let i=0;i<10;i++){const r=i%2?14:36,a=-PI/2+i*PI/5;x.lineTo(w/2+Math.cos(a)*r,hh/2+Math.sin(a)*r)}x.fill();x.font='900 22px Arial Black';x.textAlign='center';x.fillText('ПРОКСИМА',w/2,hh-14)}),3.6);
+ const sh=msh(g,new THREE.CylinderGeometry(1.1,1.1,.2,16),0x2a4a9a,3.2,1.6,3.6);sh.rotation.x=PI/2;msh(g,new THREE.CylinderGeometry(.4,.4,.25,10),0xf7c24a,3.2,1.6,3.62).rotation.x=PI/2}
+// ---------- 2. СТАРЫЕ ОБЪЕКТЫ: что прикрепить к домам, что перенести, что убрать ----------
+const CITY=[-24,-424,354,294],HSET=new Set(MLIST.map(h=>h.g));
+MLIST.forEach(h=>{if(h.g&&!h.bld){h.g.scale.set(1,1,1)}});sc.updateMatrixWorld(true);
+const HOUSES=MLIST.filter(h=>h.g&&!h.bld&&!h.site&&!h.fresh),B3=new THREE.Box3(),FUN=[],LM=[],DEL=[];
+const FUNR=[-16,63,87,158],FUNC=[35,110];
+sc.children.slice().forEach(o=>{if(HSET.has(o)||o.isLight||o.isCamera||o.isPoints||!o.visible)return;B3.setFromObject(o);if(B3.isEmpty())return;const b=B3;
+ if(b.max.y<-100||b.max.x-b.min.x>500||b.max.z-b.min.z>500)return;const cx=(b.min.x+b.max.x)/2,cz=(b.min.z+b.max.z)/2;if(cx<CITY[0]||cx>CITY[2]||cz<CITY[1]||cz>CITY[3])return;
+ if(o.userData.dyn){o.visible=false;return}
+ if(b.min.x>=FUNR[0]&&b.max.x<=FUNR[2]&&b.min.z>=FUNR[1]&&b.max.z<=FUNR[3]){FUN.push(o);return}
+ if(Math.abs(cx)<3&&Math.abs(cz)<3){DEL.push(o);return}
+ const sz=Math.max(b.max.x-b.min.x,b.max.z-b.min.z);let n=0;o.traverse(q=>{if(q.isMesh)n++});
+ if(o.isGroup){let best=null,bd=1e9;HOUSES.forEach(h=>{const d=Math.hypot(h.g.position.x-cx,h.g.position.z-cz);if(d<bd){bd=d;best=h}});
+  const pd=best?Math.hypot(best.g.position.x-o.position.x,best.g.position.z-o.position.z):1e9;
+  if(best&&((bd<=8&&sz<=20)||(bd<=11&&n>=5&&sz<=20)||(pd<1&&sz<40))){best.g.attach(o);return}
+  if(n>=8&&sz>=6){LM.push(o);return}}
+ DEL.push(o)});
+DEL.forEach(o=>sc.remove(o));
+// ---------- 3. ГАБАРИТЫ ----------
+function fp(g,yd){const p=g.position.clone(),ry=g.rotation.y;g.position.set(0,0,0);g.rotation.y=0;g.updateMatrixWorld(true);const B=new THREE.Box3(),b=new THREE.Box3();
+ g.children.forEach(c=>{if(isYard(c))return;c.traverseVisible(q=>{if(q.isMesh&&q.geometry){if(!q.geometry.boundingBox)q.geometry.computeBoundingBox();b.copy(q.geometry.boundingBox).applyMatrix4(q.matrixWorld);B.union(b)}})});
+ if(B.isEmpty())B.set(new THREE.Vector3(-3,0,-3),new THREE.Vector3(3,1,3));if(yd){B.min.x=Math.min(B.min.x,-4.6);B.max.x=Math.max(B.max.x,4.6);B.min.z=Math.min(B.min.z,-4.2);B.max.z=Math.max(B.max.z,4.8)}
+ g.position.copy(p);g.rotation.y=ry;return{w:B.max.x-B.min.x,d:B.max.z-B.min.z,ox:(B.max.x+B.min.x)/2,oz:(B.max.z+B.min.z)/2}}
+function putG(g,f,px,pz,ry){const s=ry?-1:1;g.position.set(px-s*f.ox,0,pz-s*f.oz);g.rotation.y=ry||0}
+function place(h,px,pz,ry,dist){putG(h.g,h.f,px,pz,ry);h.x=px;h.z=pz;if(dist)h.district=dist}
+let yi=0;MLIST.forEach(h=>{if(!h.g||h.site||h.bld)return;if(!h.g.children.some(isYard))yard(h.g,yi++);h.f=fp(h.g,1);const y=h.g.children.find(isYard);if(y)y.position.y=.1});
+// ---------- 4. СЕТКА ----------
+const X0=-14,Z0=-416,PX=60,PZ=48,CW=52,cx0=i=>X0+PX*i,cz0=j=>Z0+PZ*j,cd=j=>j===14?26:40;
+const ZN={},setZ=(c0,c1,r0,r1,n)=>{for(let i=c0;i<=c1;i++)for(let j=r0;j<=r1;j++)ZN[i+','+j]=n};
+setZ(4,5,0,2,'pz');setZ(2,3,6,7,'plaza');setZ(2,3,5,5,'cb');setZ(2,3,8,8,'cb');setZ(4,5,6,6,'city');setZ(2,5,9,10,'al');setZ(2,3,11,12,'fun');setZ(4,5,11,13,'cos');setZ(0,1,11,13,'im');setZ(2,2,13,13,'res');setZ(4,5,14,14,'air');
+const MERGED=['pz','plaza','al','fun','cos','im','air'],merged=(a,b)=>{const x=ZN[a],y=ZN[b];return x&&x===y&&MERGED.includes(x)};
+function plots(i,j,dense){const cols=dense?5:4,rows=j===14?2:3,pw=CW/cols,pd=cd(j)/rows,o=[];for(let r=0;r<rows;r++)for(let c=0;c<cols;c++)o.push({x:cx0(i)+pw*(c+.5),z:cz0(j)+pd*(r+.5),ry:r===0?PI:0,pw,pd});return o}
+const fitP=(h,p)=>h.f.w<=p.pw-.5&&h.f.d<=p.pd-.5;
+// ---------- 5. РАСПРЕДЕЛЕНИЕ ----------
+const tallRe=/небоскр|многоэтаж|высотк|башн|этажей|1000 этаж|[0-9]{2}\s*-?\s*этаж|хрущ|5-этаж|пентхаус/i,
+ bizRe=/магазин|«|лавка|больниц|АЭС|ресторан|ТЦ|торгов|шаурм|вокзал|офис|метро|АТБ|ларёк|библиотек|Эрмитаж|кафе|пекарн|бургер|отель|мотель|заправк|банк|школ|музей|студи|Вкусно/i,
+ funRe=/замок|унитаз|ракет|самолёт|корабл|чёрн|планет|ананас|банан|кит|танк|летающ|левитир|перевёрн|Сквидвард|бедрок|Nokia|свинь|гус|сердц|кекс|морков|шестер|молот|коллайдер|ускорит|статуя|Майнкрафт|торнадо|шар|Земл|обезьян|крейсер|гриб/i;
+const KOT=MLIST[0],used=new Set([KOT,...IMEN,...RESI,...WAIT]);
+const REG=MLIST.filter(h=>h.g&&!h.site&&!h.bld&&!used.has(h));
+const fitsReg=h=>h.f.w<=12.5&&h.f.d<=12.8;
+// полки (ряды участков переменной ширины)
+function shelf(x0,x1,zc,ry,dmax){return{x0,x1,zc,ry,dmax,cur:x0}}
+function pack(S,it,gap){for(const s of S){if(it.f.d>s.dmax)continue;if(s.cur+it.f.w<=s.x1){const px=s.cur+it.f.w/2;s.cur+=it.f.w+(gap||2.4);return[px,s.zc,s.ry]}}return null}
+const PLZ=[shelf(108,216,-119,0,17.5),shelf(108,216,-49,PI,17.5)],ALS=[shelf(116,336,46,0,19.5),shelf(116,336,74,PI,19.5),shelf(108,336,26,PI,19.5),shelf(108,336,94,0,19.5)];
+// Центр: бизнес
+const CB=[...plots(2,5),...plots(3,5),...plots(2,8),...plots(3,8)];let cbk=0;const ALLEY=[];
+REG.filter(h=>bizRe.test(h.kind)&&!h.wish).forEach(h=>{used.add(h);if(fitsReg(h)&&cbk<CB.length){const p=CB[cbk++];place(h,p.x,p.z,p.ry,'Центр')}else{const r=pack(PLZ,h);if(r)place(h,r[0],r[1],r[2],'Центр');else ALLEY.push(h)}});
+// Сити: высотки
+const CT=[...plots(4,6),...plots(5,6)];let ctk=0;
+REG.filter(h=>!used.has(h)&&tallRe.test(h.kind)).forEach(h=>{used.add(h);if(fitsReg(h)&&ctk<CT.length){const p=CT[ctk++];place(h,p.x,p.z,p.ry,'Сити')}else ALLEY.push(h)});
+// Аллея желаний: всё крупное + особые просьбы
+REG.forEach(h=>{if(used.has(h))return;if(!fitsReg(h)||h.wish){used.add(h);ALLEY.push(h)}});
+ALLEY.sort((a,b)=>b.f.d-a.f.d);const OVER=[];
+ALLEY.forEach(h=>{const r=pack(ALS,h);if(r){place(h,r[0],r[1],r[2],'Аллея Желаний');LOG.alley++}else OVER.push(h)});
+REG.forEach(h=>{if(used.has(h)||h.anon||!funRe.test(h.kind))return;const r=pack(ALS,h);if(r){used.add(h);place(h,r[0],r[1],r[2],'Аллея Желаний');LOG.alley++}});
+// жилые районы
+const RC=[];for(let j=0;j<=14;j++)for(let i=0;i<6;i++){if(j>10&&j<13)continue;if(!ZN[i+','+j])RC.push([i,j])}
+const DIST={'Район TikTok':[],'Квартал 10 ноября':[],'Район YouTube':[]},NOVO=[];
+REG.forEach(h=>{if(used.has(h))return;if(h.district==='Новостройки'){NOVO.push(h);return}if(h===KOTI||h===KREK)return;(DIST[h.district]||DIST['Район YouTube']).push(h)});
+OVER.forEach(h=>DIST['Район YouTube'].push(h));
+{const tot=Object.values(DIST).reduce((s,a)=>s+a.length,0);let k=0;const keys=Object.keys(DIST);keys.forEach((d,di)=>{const n=di===keys.length-1?NOVO.length-k:Math.round(NOVO.length*DIST[d].length/tot);const A=DIST[d],B=NOVO.slice(k,k+n);k+=n;
+ const out=[],step=(A.length+B.length)/Math.max(1,B.length);let bi=0;A.forEach((h,ii)=>{out.push(h);while(bi<B.length&&(out.length+1)>=step*(bi+1)){out.push(B[bi++])}});while(bi<B.length)out.push(B[bi++]);DIST[d]=out})}
+if(KOKO){for(const d in DIST){const a=DIST[d],i=a.indexOf(KOKO);if(i>=0){a.splice(i+1,0,...[KOTI,KREK].filter(Boolean));break}}}else DIST['Район YouTube'].push(KOTI,...(KREK?[KREK]:[]));
+const PARK=[],SPARE=[],DC={};let rci=0;
+for(const d in DIST){const A=DIST[d];DC[d]=[];const wide=A.filter(h=>h.f.w>9.8||h.f.d>12.8),small=A.filter(h=>!(h.f.w>9.8||h.f.d>12.8));let q=[...wide],s=[...small];
+ while((q.length||s.length)&&rci<RC.length){const [i,j]=RC[rci++],dense=!q.length&&j!==14;const P=plots(i,j,dense);DC[d].push([i,j]);
+  P.forEach(p=>{let h=null;if(q.length&&fitP(q[0],p))h=q.shift();else if(s.length)h=s.shift();if(h){place(h,p.x,p.z,p.ry,d)}else PARK.push(p)})}
+ if(q.length||s.length)console.warn('replan: не хватило места',d,q.length+s.length)}
+while(rci<RC.length)SPARE.push(RC[rci++]);
+// Страна Imen: участки вокруг дворца
+const IMG=MLIST.find(h=>h.bld&&h.district==='Страна Imen');if(IMG){IMG.g.position.set(42,0,176);IMG.x=42;IMG.z=176;IMG.top=24}
+{const sl=[];[-7.5,5.5,18.5,31.5,57.5,70.5,83.5].forEach(x=>sl.push([x,140,0]));[-7.5,5.5,18.5,31.5,44.5,57.5].forEach(x=>sl.push([x,212,PI]));[163,176,189].forEach(z=>{sl.push([2,z,0]);sl.push([82,z,0])});
+ sl.sort((a,b)=>Math.atan2(a[1]-176,a[0]-42)-Math.atan2(b[1]-176,b[0]-42));const subj=IMEN.filter(h=>!/o13sova|Imen_Brawl/i.test(h.n));
+ subj.forEach((h,k)=>{const s=sl[Math.floor(k*sl.length/subj.length)];place(h,s[0],s[1],s[2],'Страна Imen')});
+ IMEN.forEach(h=>{if(/o13sova/i.test(h.n))place(h,80,232,PI,'Страна Imen');if(/Imen_Brawl/i.test(h.n))place(h,44.5,140,0,'Страна Imen')})}
+// Сопротивление
+place(RESI[0],116,219,0,'Сопротивление');place(RESI[2],116,240,PI,'Сопротивление');place(RESI[1],148,240,PI,'Сопротивление');
+// ждут рейса — у аэропорта рядом с космодромом
+WAIT.forEach((h,i)=>place(h,236+i*13,262,0,'Космодром · ждут рейса'));
+// основатель — в центре площади
+place(KOT,162,-84,0,'Центр');
+// промзона: ровно 127 строек
+{const S=MLIST.filter(h=>h.site);let k=0;for(let r=0;r<11;r++)for(let c=0;c<12;c++){const h=S[k++];if(!h)continue;const x=230.7+c*9.33,z=-409.8+r*12.36;h.g.position.set(x,0,z);h.g.rotation.y=0;h.x=x;h.z=z;h.top=4;h.district='Промзона'}
+ if(S.length!==127)console.warn('replan: строек',S.length);if(typeof CR!=='undefined')CR.forEach(c=>{c.j.rotation.y=-PI/2})}
+// космодром
+{const c=MLIST.find(h=>h.bld&&h.district==='Космодром');if(c){c.g.position.set(282,0,182);c.x=282;c.z=142}}
+// перенос зоны развлечений
+FUN.forEach(o=>{o.position.x+=162-FUNC[0];o.position.z+=156-FUNC[1]});
+// ---------- 6. ИНФРАСТРУКТУРА ----------
+const RD=[];const pl=(w,d,c,x,z,y,off)=>{const m=new THREE.Mesh(new THREE.PlaneGeometry(w,d),c);m.rotation.x=-PI/2;m.position.set(x,y,z);sc.add(m);return m};
+const PM=(c,o)=>new THREE.MeshLambertMaterial({color:c,polygonOffset:true,polygonOffsetFactor:-o,polygonOffsetUnits:-2*o});
+const ASP=PM(0x34363d,2),SW={yt:PM(0x9a6450,3),tt:PM(0x86686a,3),n10:PM(0xa06a46,3),cb:PM(0xa88262,3),city:PM(0x5a5f6a,3),res:PM(0x7a4a3e,3)},MARK=PM(0xf2efe6,4),GOLD=PM(0xf7c24a,4),TIL=[PM(0xe6cfa6,3),PM(0xa8785a,3)];
+pl(362,712,ASP,162,-64,.03);
+const swOf={};for(const d in DC)DC[d].forEach(c=>swOf[c]=d==='Район TikTok'?SW.tt:d==='Квартал 10 ноября'?SW.n10:SW.yt);
+for(let j=0;j<=14;j++)for(let i=0;i<6;i++){const z=ZN[i+','+j];if(z&&MERGED.includes(z))continue;const m=z==='cb'?SW.cb:z==='city'?SW.city:z==='res'?SW.res:(swOf[i+','+j]||SW.yt);pl(CW+3,cd(j)+3,m,cx0(i)+CW/2,cz0(j)+cd(j)/2,.06)}
+function lamp(x,z,ax,s){const g=new THREE.Group();box(g,.24,5.2,.24,0x2a2d34,0,2.6,0);const a=box(g,1.6,.14,.14,0x2a2d34,.7*s,5.1,0);box(g,.8,.25,.5,LIT,1.4*s,4.98,0);g.position.set(x,0,z);g.rotation.y=ax?PI/2:0;sc.add(g)}
+const GD=new Set();
+for(let k=1;k<6;k++){const xg=cx0(k)-4;for(let j=0;j<=14;j++){if(merged((k-1)+','+j,k+','+j))continue;const z0=cz0(j),d=cd(j);RD.push([xg-2.5,z0,xg+2.5,z0+d]);
+ for(let z=z0+2;z<z0+d-1;z+=5)pl(.25,2.2,MARK,xg,z+1.1,.09);for(let s=0;s<5;s++){pl(.7,2.2,MARK,xg-2+s*1,z0+1.4,.09);pl(.7,2.2,MARK,xg-2+s*1,z0+d-1.4,.09)}
+ for(let z=z0+6;z<z0+d;z+=16){lamp(xg-3.4,z,0,1);lamp(xg+3.4,z+8,0,-1)}}}
+for(let k=1;k<=14;k++){const zg=cz0(k)-4;for(let i=0;i<6;i++){if(merged(i+','+(k-1),i+','+k))continue;const x0=cx0(i);RD.push([x0,zg-2.5,x0+CW,zg+2.5]);
+ for(let x=x0+2;x<x0+CW-1;x+=5)pl(2.2,.25,MARK,x+1.1,zg,.09);for(let s=0;s<5;s++){pl(2.2,.7,MARK,x0+1.4,zg-2+s,.09);pl(2.2,.7,MARK,x0+CW-1.4,zg-2+s,.09)}
+ for(let x=x0+6;x<x0+CW;x+=16){lamp(x,zg-3.4,1,-1);lamp(x+8,zg+3.4,1,1)}}}
+// главный проспект z=12 — золотая разделительная
+for(let x=-12;x<340;x+=9)pl(4,.5,GOLD,x,12,.1);
+// арки районов
+function arch(x,z,rot,t,col){const g=new THREE.Group();[-3.6,3.6].forEach(s=>{box(g,1,10,1,0x1d2a44,s,5,0);box(g,1.4,.6,1.4,0xf7c24a,s,10.2,0)});box(g,9,2.2,.7,0x1d2a44,0,9.4,0);box(g,9.2,.25,.9,0xf7c24a,0,8.2,0);box(g,9.2,.25,.9,0xf7c24a,0,10.6,0);
+ lab(g,t,8.4,1.5,'#1d2a44',col||'#f7c24a',0,9.4,.37);lab(g,t,8.4,1.5,'#1d2a44',col||'#f7c24a',0,9.4,-.37).rotation.y=PI;g.position.set(x,0,z);g.rotation.y=rot||0;sc.add(g)}
+arch(102,-300,0,'РАЙОН TIKTOK','#5fe0ff');arch(102,-204,0,'КВАРТАЛ 10 НОЯБРЯ','#ffb347');arch(42,-108,0,'РАЙОН YOUTUBE','#ff5a5a');arch(162,-156,0,'ЦЕНТР','#f7c24a');arch(222,-108,0,'СИТИ','#9fd4ff');arch(222,-348,0,'ПРОМЗОНА','#f7c24a');arch(110,60,PI/2,'АЛЛЕЯ ЖЕЛАНИЙ','#f7c24a');arch(222,156,0,'КОСМОДРОМ','#ffffff');
+// стеклянная башня с горящими окнами
+let ts=0;function gtower(w,h){const k=ts++,g=new THREE.Group(),body=[0x22344f,0x1f3a4a,0x2a2f4a,0x1a2a3a][k%4],DK=0x2a3a58;box(g,w+2,.6,w+2,0x5a6068,0,.3,0);box(g,w,h,w,body,0,.6+h/2,0);
+ for(let y=2;y<h-.4;y+=1.6)for(let c=0;c<3;c++){const off=-w/2+w*(c+.5)/3,r=(k*31+Math.round(y*7)+c*13)%7,m=r<3?LIT:r<5?LIT2:DK,ww=w/3-.5;box(g,ww,.9,.08,m,off,.6+y,w/2+.04);box(g,ww,.9,.08,r%2?m:LIT,off,.6+y,-w/2-.04);box(g,.08,.9,ww,r%3?m:LIT2,w/2+.04,.6+y,off);box(g,.08,.9,ww,m,-w/2-.04,.6+y,off)}
+ box(g,w+.5,.5,w+.5,0xf7c24a,0,h+.85,0);box(g,w*.6,2,w*.6,body,0,h+2.1,0);box(g,w*.62,.3,w*.62,0xf7c24a,0,h+3.2,0);box(g,.25,5,.25,0x9aa3ad,0,h+5.6,0);msh(g,new THREE.SphereGeometry(.4,8,6),LIT3,0,h+8.2,0);g.userData.top=h+8;sc.add(g);return g}
+// Центр: площадь Основателя
+for(let x=0;x<28;x++)for(let z=0;z<22;z++)pl(4,4,TIL[(x+z)%2],108+x*4,-126+z*4,.07);
+msh(sc,new THREE.CylinderGeometry(12,12.4,.35,40),0xe8d8bc,162,.17,-84);const gr=msh(sc,new THREE.TorusGeometry(12.2,.35,8,48),0xf7c24a,162,.4,-84);gr.rotation.x=PI/2;
+lab(sc,'ПЛОЩАДЬ ОСНОВАТЕЛЯ · KAPAOKE_KOT',12,1.3,'#1d2a44','#f7c24a',162,.5,-70.5).rotation.x=-PI/2;
+[[148,-98],[176,-98],[148,-70],[176,-70]].forEach(a=>{box(sc,1.6,.6,1.6,0x3a3f48,a[0],.3,a[1]);const c=msh(sc,new THREE.OctahedronGeometry(1.3),new THREE.MeshLambertMaterial({color:0xf7c24a,emissive:0x6a4a10}),a[0],2.4,a[1]);c.scale.y=1.8});
+for(let k=0;k<16;k++){const a=k/16*6.283;lamp(162+Math.cos(a)*16,-84+Math.sin(a)*16,0,1)}
+[[116,-96,9,52],[116,-72,9,40],[208,-96,9,46],[208,-72,9,58]].forEach(a=>gtower(a[2],a[3]).position.set(a[0],0,a[1]));
+function greenhouse(x,z,r){const g=new THREE.Group();msh(g,new THREE.CylinderGeometry(r+.3,r+.3,.5,24),0xd8dce4,0,.25,0);for(let i=0;i<9;i++){const a=i*.7;msh(g,new THREE.ConeGeometry(.5,1.6+(i%3)*.6,6),[0xd9653a,0xe8a33a,0xb04a2a][i%3],Math.cos(a)*r*.55,1,Math.sin(a)*r*.55)}
+ msh(g,new THREE.SphereGeometry(r,20,10,0,6.283,0,PI/2),new THREE.MeshLambertMaterial({color:0xbfefff,transparent:true,opacity:.35,depthWrite:false}),0,.5,0);msh(g,new THREE.TorusGeometry(r,.12,6,30),0xf7c24a,0,.55,0).rotation.x=PI/2;g.position.set(x,0,z);sc.add(g);return g}
+greenhouse(137,-84,4.5);greenhouse(187,-84,4.5);
+// ТЦ «MAGA» и прочие ориентиры на площади
+function mall(){const g=new THREE.Group();box(g,20,.4,11,0xb9bdc4,0,.2,0);box(g,19,7,10,0xd9dde4,0,3.9,0);box(g,18,1.4,.1,0x6fb6e6,0,2.4,5.06);box(g,18,1.2,.1,0x6fb6e6,0,5,5.06);box(g,3,2.6,.15,0x2a3a48,0,1.5,5.1);box(g,19.4,.5,10.4,0x8a8d92,0,7.6,0);lab(g,'ТЦ «MAGA»',10,1.6,'#c43a32','#ffffff',0,6.3,5.12);msh(g,new THREE.SphereGeometry(2.6,16,8,0,6.283,0,PI/2),new THREE.MeshLambertMaterial({color:0x9fd4ff}),4,7.8,0);g.userData.top=10;return g}
+{const m=mall();sc.add(m);const it={f:fp(m)};const r=pack(PLZ,it);if(r)putG(m,it.f,r[0],r[1],r[2]);else{m.position.set(162,0,-108)}}
+// Сити: стеклянные башни на свободных участках
+for(let k=ctk;k<CT.length;k++){const p=CT[k];gtower(8,26+((k*17)%5)*7).position.set(p.x,0,p.z)}
+for(let j=6;j<=6;j++)for(let i=4;i<=5;i++){}
+// Аллея желаний: бульвар
+for(let x=108;x<338;x+=4)pl(4,8,TIL[(x/4|0)%2],x+2,60,.07);pl(232,36,PM(0x9a6a50,3),222,24,.06);pl(232,36,PM(0x9a6a50,3),222,96,.06);
+for(let x=118;x<336;x+=14){const c=msh(sc,new THREE.OctahedronGeometry(.9),new THREE.MeshLambertMaterial({color:[0x9a6aff,0x5fd0ff,0xff7ab8][(x/14|0)%3],emissive:0x2a1a4a}),x,1.4,60);c.scale.y=1.8;box(sc,1.2,.3,1.2,0x3a3f48,x,.15,60);lamp(x+7,57,0,1);lamp(x+7,63,0,-1)}
+// Земля BETA_deta — второй дом
+function earth(){const g=new THREE.Group();box(g,14,.6,14,0xb9bdc4,0,.3,0);msh(g,new THREE.CylinderGeometry(1.4,2,3,10),0x8a8d92,0,1.8,0);msh(g,new THREE.SphereGeometry(6.5,24,18),0x2f6fd0,0,9.5,0);
+ for(let i=0;i<16;i++){const a=i*2.4,b=Math.sin(i*1.7)*1.1,m=msh(g,new THREE.SphereGeometry(1.6+(i%3)*.5,8,6),i%4?0x3f9a4a:0xc9a86a,Math.cos(a)*Math.cos(b)*5.6,9.5+Math.sin(b)*5.6,Math.sin(a)*Math.cos(b)*5.6);m.scale.set(1,.5,1);m.lookAt(0,9.5,0)}
+ lab(g,'ПЛАНЕТА ЗЕМЛЯ · BETA_deta',8,1,'#1d2a44','#f7c24a',0,1.1,7.05);g.userData.top=16;return g}
+const EARTH=earth();sc.add(EARTH);
+// ориентиры: старые постройки (рынок, вокзальная улица…) + Земля — на свободные участки
+const LMS=[EARTH,...LM].map(g=>({g,f:fp(g)}));const SPS=[];
+SPARE.forEach(([i,j])=>{if(j===14){SPS.push(shelf(cx0(i)+1,cx0(i)+CW-1,cz0(j)+13,0,24));return}SPS.push(shelf(cx0(i)+1,cx0(i)+CW-1,cz0(j)+10,PI,19.5),shelf(cx0(i)+1,cx0(i)+CW-1,cz0(j)+30,0,19.5))});
+const SKV=[];LMS.sort((a,b)=>b.f.d-a.f.d).forEach(it=>{let r=pack(ALS,it,3)||pack(SPS,it,3);if(r){putG(it.g,it.f,r[0],r[1],r[2]);LOG.lm++}else{it.g.parent&&it.g.parent.remove(it.g)}});
+// марсианские скверы: свободные клетки и пустые участки
+function skver(x,z,w,d){pl(w,d,PM(0xc9a27a,3),x,z,.08);const n=Math.max(2,Math.round(w*d/90));for(let i=0;i<n;i++){const a=i*2.39996,r=Math.sqrt((i+.5)/n),px=x+Math.cos(a)*r*w*.4,pz=z+Math.sin(a)*r*d*.4;
+ if(i%4===0){const c=msh(sc,new THREE.OctahedronGeometry(.8+(i%3)*.3),new THREE.MeshLambertMaterial({color:[0x9a6aff,0x5fd0ff,0xff7ab8][i%3],emissive:0x2a1a4a}),px,1.2,pz);c.scale.y=1.7}
+ else{const s=.6+((i*7)%5)*.25,b=msh(sc,new THREE.DodecahedronGeometry(s,0),[0x8a4a2e,0x7a3a24,0x9a5a3a][i%3],px,s*.5,pz);b.rotation.y=i}}}
+SPS.forEach(s=>{const free=s.x1-s.cur;if(free>8){const x=(s.cur+s.x1)/2;if(free>22)greenhouse(x,s.zc,Math.min(7,free/4));skver(x,s.zc,free-2,15)}});
+PARK.forEach((p,i)=>{if(i%3===0)greenhouse(p.x,p.z,3.6);else skver(p.x,p.z,p.pw-1.5,p.pd-1.5)});
+// Промзона: гравий, забор, краны
+pl(112,136,PM(0x5f636c,3),282,-348,.07);for(let x=226;x<=338;x+=4){box(sc,.3,2.4,.3,0xf2c230,x,1.2,-418);box(sc,.3,2.4,.3,0xf2c230,x,1.2,-279)}for(let z=-418;z<=-279;z+=4){box(sc,.3,2.4,.3,0xf2c230,338.5,1.2,z);if(z<-352||z>-344)box(sc,.3,2.4,.3,0xf2c230,225.5,1.2,z)}
+// Сопротивление: баррикада, казарма, армия
+{const g=new THREE.Group();for(let z=209;z<248;z+=1.6){box(g,1.4,.7,1.4,0xc9b48a,108.5,.35,z);box(g,1.4,.7,1.4,0xb8a478,108.5,1.05,z+.8)}for(let z=212;z<248;z+=6){[-1,1].forEach(s=>{const b=box(g,.3,.3,3,0x2a2a2e,111.5,1,z);b.rotation.x=s*.8;b.rotation.y=s*.8})}
+ lab(g,'СОПРОТИВЛЕНИЕ · ПРОТИВ ИМПЕРИИ',8,1.2,'#5a1a1a','#ffffff',132,1.4,207.2);box(g,.3,2,.3,0x2a2a2e,128,1,207);box(g,.3,2,.3,0x2a2a2e,136,1,207);
+ const k=new THREE.Group();box(k,12,3.4,6,0x6a7a4a,0,1.7,0);box(k,12.4,.4,6.4,0x4a5a3a,0,3.6,0);door(k,0,3);lab(k,'КАЗАРМА',4,.8,'#3a4a2a','#ffffff',0,2.7,3.05);k.position.set(147,0,220);g.add(k);
+ for(let i=0;i<6;i++)figure(g,0x5a6a3a,141+i*2.2,225.5,1.1);const t=new THREE.Group();box(t,3.4,.8,2,0x4a6a3a,0,.6,0);box(t,1.8,.7,1.4,0x5a7a4a,0,1.3,0);box(t,2.2,.2,.2,0x3a4a2a,1.6,1.4,0);t.position.set(154,0,213);g.add(t);
+ for(let x=140;x<=156;x+=1.2){box(g,.12,.9,.12,0xf4efe6,x,.45,233);box(g,.12,.9,.12,0xf4efe6,x,.45,247)}for(let z=233;z<=247;z+=1.2){box(g,.12,.9,.12,0xf4efe6,140,.45,z);box(g,.12,.9,.12,0xf4efe6,156,.45,z)}sc.add(g)}
+pl(112,88,PM(0x9a6a50,3),162,156,.05);
+// Страна Imen: земля, стена с башнями, флаги, ворота
+{const g=new THREE.Group(),W=0xb88a5a;pl(116,140,PM(0xa8704a,3),42,180,.06);for(let z=112;z<158;z+=4)for(let x=0;x<3;x++)pl(2.6,4,TIL[(x+z/4)%2|0],39.4+x*2.6,z+2,.08);for(let z=116;z<156;z+=8)[35,49].forEach(x=>flag(g,x,z,6,tri('#2fae4a','#f4f4f4','#ff8a2a'),2));const seg=(x1,z1,x2,z2)=>{const L=Math.hypot(x2-x1,z2-z1),m=box(g,L,3.4,1.2,W,(x1+x2)/2,1.7,(z1+z2)/2);m.rotation.y=-Math.atan2(z2-z1,x2-x1);for(let t=0;t<L;t+=2.2){const k=box(g,1,.8,1.3,0xa87a4a,x1+(x2-x1)*t/L,3.8,z1+(z2-z1)*t/L);k.rotation.y=m.rotation.y}};
+ seg(-16,110,36,110);seg(48,110,100,110);seg(100,110,100,250);seg(100,250,-16,250);seg(-16,250,-16,110);
+ [[-16,110],[100,110],[100,250],[-16,250],[36,110],[48,110],[100,180],[-16,180]].forEach((a,i)=>{msh(g,new THREE.CylinderGeometry(2,2.2,7,10),W,a[0],3.5,a[1]);msh(g,new THREE.ConeGeometry(2.4,2.2,10),0x2fae4a,a[0],8.1,a[1]);flag(g,a[0],a[1],12,tri('#2fae4a','#f4f4f4','#ff8a2a'),3)});
+ box(g,14,2.4,1.4,0x1d2a44,42,8,110);lab(g,'СТРАНА IMEN · ИМПЕРИЯ',13,2,'#1d2a44','#f7c24a',42,8,109.2).rotation.y=PI;lab(g,'СТРАНА IMEN · ИМПЕРИЯ',13,2,'#1d2a44','#f7c24a',42,8,110.8);sc.add(g)}
+// Аэропорт «Дон х9щ · Бананчик» у космодрома
+{const g=new THREE.Group();pl(112,26,PM(0x8a8d92,3),282,269,.06);box(g,84,.1,7,0x2a2c32,286,.05,276);for(let x=248;x<326;x+=6)box(g,3,.04,.4,0xffffff,x,.12,276);
+ box(g,16,5,8,0xe8eef6,320,2.5,263);box(g,16.4,.4,8.4,0x3a3f48,320,5.2,263);for(let i=0;i<6;i++)box(g,1.8,2,.1,0x8fd2ff,313+i*2.6,2.8,267.05);lab(g,'АЭРОПОРТ «ДОН Х9Щ · БАНАНЧИК»',14,1.2,'#1d2a44','#f7c24a',320,4.4,267.1);
+ box(g,2,10,2,0xd8dce4,331,5,271);box(g,3.6,2.4,3.6,0x7fc8ff,331,11,271);const p=new THREE.Group();box(p,10,1.4,1.6,0xf4f4f4,0,1.6,0);box(p,2.4,.3,11,0xf4f4f4,0,1.7,0);box(p,1.4,2.4,.3,0xd94a3a,-4.4,2.8,0);const n=msh(p,new THREE.ConeGeometry(.8,2,10),0xf4f4f4,5.8,1.6,0);n.rotation.z=-PI/2;p.position.set(272,0,276);g.add(p);sc.add(g)}
+// марсоходы и жители на новых улицах
+function rover(c){const g=new THREE.Group();box(g,3,1,1.8,c,0,1.1,0);box(g,1.4,.8,1.6,0x8fd2ff,.5,1.9,0);[-1.1,1.1].forEach(x=>[-1,1].forEach(z=>{const w=msh(g,new THREE.CylinderGeometry(.45,.45,.3,10),0x2a2a2e,x,.45,z);w.rotation.x=PI/2}));g.userData.dyn=1;sc.add(g);return g}
+const RT=[{ax:'x',z:12,a:-12,b:336},{ax:'x',z:-180,a:-12,b:336},{ax:'x',z:-276,a:-12,b:336},{ax:'z',x:42,a:-414,b:104},{ax:'z',x:102,a:-414,b:246},{ax:'z',x:222,a:-414,b:8},{ax:'x',z:-132,a:-12,b:100}];
+for(let i=0;i<14;i++){const R=RT[i%RT.length],v=rover([0xf4f4f4,0xd94a3a,0x2f6fd0,0xf2c230][i%4]),sp=.012+(i%3)*.005,ph=i*.41,off=i%2?1.2:-1.2;
+ MT.push(t=>{const k=(t*sp+ph)%2,d=k<1?k:2-k,fw=k<1,p=R.a+(R.b-R.a)*d;if(R.ax==='x'){v.position.set(p,0,R.z+(fw?off:-off));v.rotation.y=fw?0:PI}else{v.position.set(R.x+(fw?off:-off),0,p);v.rotation.y=fw?-PI/2:PI/2}})}
+for(let i=0;i<30;i++){const R=RT[i%RT.length],w=new THREE.Group();figure(w,[0xd94a3a,0x2f6fd0,0xf2c230,0x3fae5a,0xb07aff,0xff8a3a][i%6],0,0,1.2);w.userData.dyn=1;sc.add(w);const sp=.004+(i%4)*.0015,ph=(i*.137)%2,o=i%2?3.4:-3.4;
+ MT.push(t=>{const k=(t*sp+ph)%2,d=k<1?k:2-k,p=R.a+(R.b-R.a)*d;if(R.ax==='x'){w.position.set(p,0,R.z+o);w.rotation.y=k<1?PI/2:-PI/2}else{w.position.set(R.x+o,0,p);w.rotation.y=k<1?0:PI}})}
+// ---------- 7. ПОДПИСИ РАЙОНОВ ----------
+const cen=d=>{const a=MLIST.filter(h=>h.district===d&&!h.site);if(!a.length)return null;return[a.reduce((s,h)=>s+h.x,0)/a.length,a.reduce((s,h)=>s+h.z,0)/a.length]};
+const yt=cen('Район YouTube'),tt=cen('Район TikTok'),n10=cen('Квартал 10 ноября');if(yt)ZC.yt=[yt[0],yt[1],260];if(tt)ZC.tt=[tt[0],tt[1],240];if(n10)ZC.n10=[n10[0],n10[1],240];
+const LBL=[['ЦЕНТР','#f7c24a',162,-84],['РАЙОН YOUTUBE','#ff5a5a',ZC.yt[0],ZC.yt[1]],['РАЙОН TIKTOK','#5fe0ff',ZC.tt[0],ZC.tt[1]],['КВАРТАЛ 10 НОЯБРЯ','#ffb347',ZC.n10[0],ZC.n10[1]],['СИТИ','#9fd4ff',282,-108],['АЛЛЕЯ ЖЕЛАНИЙ','#f7c24a',222,60],['ПРОМЗОНА','#f7c24a',282,-348],['ЗОНА РАЗВЛЕЧЕНИЙ','#6fe07a',162,156],['КОСМОДРОМ','#ffffff',282,182],['СТРАНА IMEN','#6fe07a',42,180],['СОПРОТИВЛЕНИЕ','#ff6a5a',132,228],['АЭРОПОРТ','#ffffff',300,269]];
+LBL.forEach((q,i)=>{let d=DL[i];if(!d){const e=document.createElement('div');e.className='o';e.style.cssText=DL[0].e.style.cssText;st.appendChild(e);d={e,x:0,z:0};DL.push(d)}d.e.textContent=q[0];d.e.style.color=q[1];d.e.style.fontSize=q[0].length>14?'4.4em':'5.4em';d.x=q[2];d.z=q[3]});
+window.__PLAN={roads:RD,log:LOG,spare:SPARE.length,park:PARK.length,over:OVER.length};console.log('replan',JSON.stringify(window.__PLAN.log));
+})();
+}catch(e){console.warn("replan",e)}
 try{// ===== ОПТИМИЗАЦИЯ: склеиваем мелкие детали (десятки тысяч → сотни объектов) =====
 (function(){if(typeof PCAR!=='undefined')PCAR.userData.dyn=1;if(typeof FTR!=='undefined')FTR.userData.dyn=1;
 const MI=new THREE.Matrix4(),TMP=new THREE.Matrix4();
@@ -1089,8 +1344,8 @@ sc.children.slice().forEach(g=>{if(!g.isGroup||g.userData.dyn)return;const L=[];
 const L=[];sc.children.forEach(o=>{if(ok(o,o))L.push(o)});mergeInto(sc,L,sc,new THREE.Matrix4());
 })();
 }catch(e){console.warn("merge",e)}
-const MAPCFG={title:'MARS CITY',list:MLIST,center:[150,-120],radius:360,maxD:620,goal:1000,fog:0xdba383,tg:'https://t.me/',
-tabs:[{name:'▶️ YouTube',fly:[110,-10,260]},{name:'🎵 TikTok',fly:[110,-275,230]},{name:'🏗 Промзона',fly:[300,-52,220]},{name:'🎡 Отдых',fly:[37,115,150]},{name:'🚀 Космодром',fly:[300,110,190]},{name:'🏳 Страна Imen',fly:[55,240,70]}],
+const MAPCFG={title:'MARS CITY',list:MLIST,center:[162,-64],radius:380,maxD:620,goal:1000,fog:0xdba383,tg:'https://t.me/',
+tabs:[{name:'▶️ YouTube',fly:ZC.yt},{name:'🎵 TikTok',fly:ZC.tt},{name:'📅 10 ноября',fly:ZC.n10},{name:'⭐ Центр',fly:ZC.c},{name:'🏙 Сити',fly:ZC.city},{name:'✨ Аллея желаний',fly:ZC.al},{name:'🏗 Промзона',fly:ZC.pz},{name:'🎡 Отдых',fly:ZC.fun},{name:'🚀 Космодром',fly:ZC.cos},{name:'🏳 Страна Imen',fly:ZC.im},{name:'🛡 Сопротивление',fly:ZC.res}],
 days:{max:10,label:d=>d===1?'основатель · выпуск 1':'выпуск '+d},
 tour:['Космодром «Марс-1»','тгк: qwuufh','nyaaan.mp3','Дон-х9щ','ANTI_COPUSTA','DwYoP69','Bloodyking-123','Нормис-л6х','$$+BB','BETA_deta','Маргошкинс💋','Юля-л4х1н','Urbanofix🛠','NEZ_Rbx_Z','Обурмолдить-❤️','ZXC_TEFTELI','KAPAOKE_KOT','GorodKotikov'],
 tick:t=>{dlab();MT.forEach(f=>{try{f(t)}catch(_){}});if(typeof up4==='function')up4(t);SM.forEach(q=>{const k=(t*.7+q.i*.33)%1;q.m.position.y=q.y0+k*3;q.m.material.opacity=.7*(1-k);q.m.scale.setScalar(.6+k*.9)});(M3.fly||[]).forEach((p,k)=>p.position.y=5+Math.sin(t*1.6+k)*.4);(M3.dia||[]).forEach(d=>d.rotation.y=t*.8)}};
