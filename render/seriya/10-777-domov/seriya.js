@@ -8,7 +8,11 @@ const SUB=[[0,'этот'],[.45,'город'],[1.13,'строят'],[1.6,'под�
 [30.72,'рядом с другом','tq'],[32.27,'пишите вместе'],[33.41,'цель — тысяча'],[35.38,'тысячный'],[36.3,'золотой дом','gold'],[37.94,'мне страшно…','red'],[39.48,'а знаешь'],[40.32,'кто строит'],[41,'этот город?']];
 // голос golos/10-777-domov.mp3 (42 с): [время голоса, время сцены] — камера и плашки идут по сцене
 const AN=[[0,0],[1.13,1],[2.71,2.4],[5.3,5],[7.32,7.2],[8.86,8.5],[10.47,10.2],[11.56,11],[12.48,12],[14.78,14],[16.89,15.5],[17.86,17],[18.98,18.5],[20.36,20],[22.56,22],[24.57,24],[26.77,26],[28.9,28.4],[30.72,30.2],[33.41,31],[35.38,32.4],[37.94,34],[39.48,35.2],[40.32,36],[42,38]];
-const MAPT=v=>{for(let i=1;i<AN.length;i++)if(v<=AN[i][0]){const a=AN[i-1],b=AN[i];return a[1]+(b[1]-a[1])*(v-a[0])/(b[0]-a[0])}return 38};
+// плавный ремап (монотонный кубический сплайн): скорость сцены меняется без скачков в опорных точках
+const AM=(()=>{const n=AN.length,h=[],d=[],m=[];for(let i=0;i<n-1;i++){h[i]=AN[i+1][0]-AN[i][0];d[i]=(AN[i+1][1]-AN[i][1])/h[i]}
+ m[0]=d[0];m[n-1]=d[n-2];for(let i=1;i<n-1;i++)m[i]=d[i-1]*d[i]<=0?0:3*(h[i-1]+h[i])/((2*h[i]+h[i-1])/d[i-1]+(h[i]+2*h[i-1])/d[i]);return m})();
+const MAPT=v=>{for(let i=1;i<AN.length;i++)if(v<=AN[i][0]){const a=AN[i-1],b=AN[i],h=b[0]-a[0],s=(v-a[0])/h,s2=s*s,s3=s2*s;
+ return(2*s3-3*s2+1)*a[1]+(s3-2*s2+s)*h*AM[i-1]+(-2*s3+3*s2)*b[1]+(s3-s2)*h*AM[i]}return 38};
 // камера: [t0,t1, от{tx,tz,d,yaw,p}, до{...}] — внутри отрезка плавно, на границе — склейка
 const Z=(tx,tz,d,yaw,p)=>({tx,tz,d,yaw,p});
 const START=Z(118,48,48,.2,.5);
@@ -63,7 +67,10 @@ function prep(w){const L=w.MLIST||w.eval('MLIST');CAM.forEach(c=>[c[2],c[3]].for
  ready=true}
 window.seek=function(tv){const t=MAPT(tv);
  const w=$('map').contentWindow,MP=w&&w.MP;if(!MP)return false;if(!ready)prep(w);
- const c=CAM.find(a=>t>=a[0]&&t<a[1])||CAM[CAM.length-1],u=ss(cl(0,1,(t-c[0])/(c[1]-c[0])));
+ // анимации карты (дым, летающие дома, кристаллы) — по времени ролика, а не по часам компьютера
+ if(!w.__vt){w.__vt=true;w.performance.now=()=>w.__VT*1000}w.__VT=tv;
+ // внутри плана камера едет с постоянной скоростью: без торможения до нуля перед склейкой
+ const c=CAM.find(a=>t>=a[0]&&t<a[1])||CAM[CAM.length-1],u=cl(0,1,(t-c[0])/(c[1]-c[0]));
  for(const k of['tx','tz','d','yaw','p'])MP.K[k]=c[2][k]+(c[3][k]-c[2][k])*u;
  if(t>=34&&t<35)MP.K.yaw+=.02*Math.sin(t*95);
  const night=t>=8.5&&t<10.2;if(night!==lastNight){look(w,night);lastNight=night}
@@ -72,7 +79,7 @@ window.seek=function(tv){const t=MAPT(tv);
  if(!d.getElementById('vcs')){const s=d.createElement('style');s.id='vcs';s.textContent='body.nolab .mpn{display:none!important}body.mpall .mpn{font-size:1.5em!important}';d.head.appendChild(s)}
  d.body.classList.toggle('mpall',t>=26&&t<28);
  MP.draw();
- d.querySelectorAll('.mpn').forEach(e=>{if(e.style.display==='none')return;const r=e.getBoundingClientRect();e.style.visibility=(r.left<24||r.right>1056||r.top<290||r.bottom>1700)?'hidden':'visible'});
+ d.querySelectorAll('.mpn').forEach(e=>{if(e.style.display==='none')return;const r=e.getBoundingClientRect(),m=Math.min(r.left-24,1056-r.right,r.top-290,1700-r.bottom);e.style.visibility='visible';e.style.opacity=cl(0,1,m/80).toFixed(2)});
  // слой 2D
  const sb=[...SUB].reverse().find(a=>tv>=a[0]);const S=$('sub');S.textContent=sb?sb[1]:'';S.className='o '+(sb&&sb[2]||'');S.style.transform='scale('+(sb?pop(tv,sb[0]):1)+')';
  show('day',t<12||t>=35);
