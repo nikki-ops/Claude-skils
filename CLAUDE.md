@@ -17,7 +17,7 @@
 
 ## Навыки и пути в коде
 
-- Все навыки — в `.claude/skills/`: 13 навыков Remotion, HyperFrames (+ cli, registry, media-use и др.), find-skills (vercel-labs), webapp-testing, frontend-design, algorithmic-art, canvas-design, skill-creator (anthropics/skills, плагин example-skills).
+- Все навыки — в `.claude/skills/`: 13 навыков Remotion, HyperFrames (+ cli, registry, media-use и др.), find-skills (vercel-labs), webapp-testing, frontend-design, algorithmic-art, canvas-design, skill-creator, brand-guidelines, doc-coauthoring, internal-comms, mcp-builder, slack-gif-creator, theme-factory, web-artifacts-builder (anthropics/skills, плагин example-skills — все 12).
 - Маркетплейсы `claude-plugins-official` и `anthropic-agent-skills` прописаны в `.claude/settings.json`.
 - Пути для кода рендера: `render/paths.mjs`.
 - Разбор чужих роликов: навык `video-analyst` — рой из 10 ролей в 8 агентах (`.claude/agents/va-*`, модель sonnet) с протоколом экономии: ≤12 запусков на ролик, аудит один раз, выжимка вместо транскрипта, кэш сети в `kesh/`. Главная сессия — дирижёр. Быстрый режим — агент `video-analyst`. Разбор и сценарий — в `stsenarii/`, рабочие файлы — в `render/_istochniki/` (не коммитятся).
