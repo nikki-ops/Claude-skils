@@ -10,7 +10,7 @@ html,body{margin:0;width:1080px;height:1920px;overflow:hidden;background:#0b0a10
 #sub.tq{color:var(--tq)}#sub.gold{color:var(--gold)}#sub.red{color:var(--red)}#sub.grn{color:var(--grn)}
 #cnt{top:330px}#cnt span{display:inline-block;background:linear-gradient(#222845,#141829);color:#fff;font-weight:900;font-size:76px;padding:18px 50px;border-radius:26px;border:5px solid var(--gold)}#cnt b{color:var(--gold)}
 #plq{top:300px}#plq span{display:inline-block;background:#2f8f4a;color:#fff;font-weight:900;font-size:56px;padding:14px 40px;border-radius:18px;border:5px solid #fff}
-#badge{top:700px}#badge span{display:inline-block;background:#fff;color:var(--ink);font-weight:900;font-size:84px;padding:12px 46px;border-radius:70px;border:8px solid var(--grn);box-shadow:0 14px 0 rgba(0,0,0,.25)}
+#badge{top:520px}#badge span{display:inline-block;background:#fff;color:var(--ink);font-weight:900;font-size:84px;padding:12px 46px;border-radius:70px;border:8px solid var(--grn);box-shadow:0 14px 0 rgba(0,0,0,.25)}
 #phone{left:290px;width:500px;height:900px;top:330px;border-radius:70px;background:#0e1020;border:14px solid #2a2e44;box-shadow:0 30px 80px rgba(0,0,0,.5);overflow:hidden;text-align:left}
 #phone .scr{position:absolute;inset:0;background:#fff;padding:60px 34px;font-family:Rubik;font-weight:700;color:#141829}
 #phone .h{font-size:40px;font-weight:900;margin-bottom:10px}#phone .m{font-size:26px;color:#7a7f94;margin-bottom:30px}
@@ -22,13 +22,30 @@ html,body{margin:0;width:1080px;height:1920px;overflow:hidden;background:#0b0a10
 #pause{top:180px}#pause span{display:inline-block;background:rgba(20,24,41,.85);color:#fff;font-weight:900;font-size:70px;padding:14px 46px;border-radius:24px}
 #flash{position:absolute;inset:0;background:#ffe9a8;opacity:0;pointer-events:none}
 #gold{top:520px}#gold span{display:inline-block;font-size:220px;filter:drop-shadow(0 0 40px #f7c24a)}
+#sub{top:1250px;-webkit-text-stroke:18px var(--ink);text-shadow:0 12px 0 var(--ink),0 0 30px rgba(20,24,41,.6)}
+#sub.red{color:#ff6a7a}                 /* ярче на оранжевом; или заменить red на gold-white */
+#sub.gold{color:#ffd860}
+#phone{left:210px;width:660px;height:800px;top:250px}   /* низ 1050 < субтитр 1250 */
+#phone .scr{padding:70px 40px}
+#phone .h{font-size:52px}#phone .m{font-size:34px}
+#phone .btn{font-size:50px;padding:26px}
+#phone .cm{font-size:42px;min-height:170px}
+#cta{top:1400px}#cta span{background:#f7c24a;color:#1a1410;box-shadow:0 12px 0 #c99a2e;font-size:60px}
+#plq span{font-size:66px;padding:16px 44px}
+#cnt{top:300px}
+#day{top:170px}
+body .o{will-change:transform}
+.nophone #phone{background:transparent;border:0;box-shadow:none}   /* для 28-31: только плашка-комментарий */
+.nophone .scr{background:rgba(255,255,255,.96);border-radius:36px;height:auto;inset:auto;top:420px;left:0;right:0;padding:36px}
+.nophone .h,.nophone .btn,.nophone .m{display:none!important}
+#vg{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at center,rgba(20,8,4,0) 45%,rgba(20,8,4,.4) 100%)}
 </style></head><body>
 <iframe id="map" src="../../karta/index.html?video"></iframe>
-<div id="flash"></div>
+<div id="vg"></div><div id="flash"></div>
 <div class="o" id="day"><span>ДЕНЬ 10</span></div>
 <div class="o" id="cnt"><span>ЖИТЕЛЕЙ: <b>777</b></span></div>
 <div class="o" id="plq"><span>ПО ПРОСЬБЕ ЖИТЕЛЕЙ</span></div>
-<div class="o" id="pause"><span>⏸ НАЙДИ СЕБЯ</span></div>
+<div class="o" id="pause"><span>НАЙДИ СЕБЯ</span></div>
 <div class="o" id="badge"><span>@твой_ник</span></div>
 <div class="o" id="gold"><span>🏠</span></div>
 <div class="o" id="phone"><div class="scr"><div class="h">gorodpodpiscikov</div><div class="m">город на Марсе · 777 жителей</div><div class="btn" id="pbtn">Подписаться</div><div class="m" style="margin:40px 0 0">Комментарии</div><div class="cm" id="pcm"></div></div></div>
