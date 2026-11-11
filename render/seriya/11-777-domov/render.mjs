@@ -23,7 +23,7 @@ await p.waitForFunction(()=>{const w=document.getElementById('map').contentWindo
 await p.waitForTimeout(2500);
 const END=T1!=null?+T1:await p.evaluate(()=>window.END),N=Math.round((END-T0)*FPS);
 fs.mkdirSync(path.dirname(OUT),{recursive:true});
-const voice=path.join(ROOT,'golos/11-777-domov.mp3'),hasV=fs.existsSync(voice)&&T0===0;
+const voice=path.join(ROOT,'golos/11-777-domov.mp3'),hasV=fs.existsSync(voice)&&T0===0&&!process.argv.includes('--noaudio');
 const ff=spawn('ffmpeg',['-v','error','-y','-f','image2pipe','-framerate',String(FPS),'-i','-',...(hasV?['-i',voice]:[]),'-vf',`scale=${Math.round(1080*SC/2)*2}:${Math.round(1920*SC/2)*2}`,'-c:v','libx264','-pix_fmt','yuv420p','-crf','18','-preset','medium',...(hasV?['-c:a','aac','-b:a','192k','-shortest']:[]),OUT],{stdio:['pipe','inherit','inherit']});
 const t0=Date.now();
 for(let i=0;i<N;i++){const t=T0+i/FPS;await p.evaluate(t=>window.seek(t),t);await p.evaluate(()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r))));
