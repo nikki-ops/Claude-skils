@@ -178,7 +178,7 @@ sc.add(new THREE.HemisphereLight(0xffd9b0,0x6b2a1a,.75));
 const sun=new THREE.DirectionalLight(0xffe2b8,1.5);sun.position.set(-8,60,-6);sun.target.position.set(95,0,-50);sc.add(sun.target);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);{const c=sun.shadow.camera;c.left=-160;c.right=160;c.top=160;c.bottom=-160;c.far=300}sc.add(sun);
 // поверхность: город ровный, вокруг холмы
 const H=(x,z)=>{const dx=Math.max(0,-20-x,x-350),dz=Math.max(0,-420-z,z-290),r=Math.hypot(dx,dz),k=Math.min(1,r/35);return k*(Math.sin(x*.06)*Math.cos(z*.05)*5+Math.sin(x*.15+z*.11)*1.2+Math.max(0,r-60)*.08)};
-{const gg=new THREE.PlaneGeometry(700,700,140,140);gg.rotateX(-Math.PI/2);gg.translate(22,0,-34);const gp=gg.attributes.position;
+{const gg=new THREE.PlaneGeometry(1600,1600,200,200);gg.rotateX(-Math.PI/2);gg.translate(162,0,-70);const gp=gg.attributes.position;
 for(let i=0;i<gp.count;i++)gp.setY(i,H(gp.getX(i),gp.getZ(i)));gg.computeVertexNormals();
 const gm=new THREE.Mesh(gg,new THREE.MeshLambertMaterial({color:0xa65a40}));gm.receiveShadow=true;sc.add(gm);
 const rm=new THREE.MeshLambertMaterial({color:0x8a3b22});
