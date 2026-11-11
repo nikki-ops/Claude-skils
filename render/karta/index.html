@@ -1098,6 +1098,18 @@ W10.forEach((q,i)=>{const s=sl10[i];if(!s)return;let g;try{g=b10(q[0],q[1],q[2],
  const k=Math.max(4,Math.min(10,(()=>{const b=new THREE.Box3().setFromObject(g);return Math.max(b.max.x-b.min.x,b.max.z-b.min.z)})()));g.scale.multiplyScalar(Math.min(1,9.5/k));
  g.position.set(s[0],0,s[1]);g.rotation.y=s[1]<0&&s[1]>-300?((Math.round((s[1]+214)/11)%2)?0:Math.PI):Math.PI;sc.add(g);
  MLIST.push({n:q[0],g,x:s[0],z:s[1],top:(g.userData.top||6)*g.scale.y,kind:q[2]||'дом',day:10,district:'Квартал 10 ноября'})})
+// --- TikTok, скрины комментариев 11.11 ---
+const W11=[["magmanoid","izba","дом"],["svetlana ivanova","dacha","дом"],["MUMBL€ |_|_|NEBL€","izba","дом · голос за кратер"],["ВЗ ПОДПИСКА","dacha","дом · голос за кратер"],["Злая морда","izba","дом"],["i_love_xiaomi","dacha","дом · голос за кратер"],["✝️_DIKOP_✝️","osobyi:дом-ракета ПВО","дом-ракета ПВО"],["333","izba","дом"],["777","sky","панелька",9],["свинюка","osobyi:зимний дом","зимний дом с фиолетовым светом в окнах"],["зовченко","osobyi:двухэтажный с бассейном","двухэтажный дом с бассейном"],["пипидастр","dacha","дом"],["qowosoo","izba","дом"],["яр(PM)⁵¹[KSB]","osobyi:планета Марс","дом-маленькая планета Марс"],["Bee","osobyi:библиотека","библиотека"]];
+function w11(q){const o=q[2];
+ if(/зимн/.test(o)){const g=izba(0xe8e4f0,0xf4f8ff);[[-1.4,2],[1.4,2]].forEach(a=>{const w=new THREE.Mesh(new THREE.BoxGeometry(1,1,.1),new THREE.MeshBasicMaterial({color:0xb04aff}));w.position.set(a[0],a[1],2.3);g.add(w)});for(let i=0;i<5;i++)msh(g,new THREE.SphereGeometry(.7+i%2*.3,8,6),0xffffff,-3.5+i*1.7,.3,3.6);return g}
+ if(/бассейн/.test(o)){const g=mk('two');box(g,4,.3,2.4,0x3ab8e8,0,.2,4.2);box(g,4.4,.2,2.8,0xe8e4dc,0,.05,4.2);return g}
+ if(/планета марс/.test(o)){const g=new THREE.Group();msh(g,new THREE.SphereGeometry(3.4,22,16),0xd8583a,0,3.6,0);msh(g,new THREE.SphereGeometry(.9,10,8),0xa83a22,1.6,5.2,2.2);msh(g,new THREE.SphereGeometry(.6,10,8),0xa83a22,-1.8,3,2.6);box(g,1,1.4,.2,0x3a1a10,0,.8,3);g.userData.top=7.2;return g}
+ if(/библиот/.test(o))return store3('БИБЛИОТЕКА','#6a3ab8',7);
+ if(/ракет/.test(o))return P10.rocket();
+ return b10(q[0],q[1],q[2],q[3])}
+W11.forEach((q,i)=>{const x=3+i*11,z=-428;let g;try{g=w11(q)}catch(e){g=mk('izba')}
+ const k=Math.max(4,Math.min(10,(()=>{const b=new THREE.Box3().setFromObject(g);return Math.max(b.max.x-b.min.x,b.max.z-b.min.z)})()));g.scale.multiplyScalar(Math.min(1,9.5/k));
+ g.position.set(x,0,z);sc.add(g);MLIST.push({n:q[0],g,x,z,top:(g.userData.top||6)*g.scale.y,kind:q[2],day:11,district:'Район TikTok'})});
 }catch(e){console.warn("yt10",e)}
 try{// ===== УЮТ: марсианский участок — плитка, дорожка, фонарь, камни и заборчик у каждого жилого дома =====
 const LG=[0xd9b48a,0xcfa87c,0xe0bf98],LAMP=new THREE.MeshBasicMaterial({color:0xffd27a});
