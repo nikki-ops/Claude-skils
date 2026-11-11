@@ -38,9 +38,12 @@ const CAM=[
 [23,24,Z('KSB',0,44,-.6,.50),Z('KSB',0,38,-.5,.45)],
 [24,25,Z('^Bee$',0,46,3.0,.60),Z('^Bee$',0,40,3.1,.55)],
 [25,26,Z('^Bee$',0,26,3.3,.45),Z('^Bee$',0,22,3.4,.42)],
-[26,26.7,Z(129,41,75,.5,.85),Z(129,41,70,.5,.85)],
-[26.7,27.4,Z(95,-338,75,.5,.85),Z(95,-338,70,.5,.85)],
-[27.4,28,Z(282,-108,75,.5,.85),Z(282,-108,70,.5,.85)],
+// «найди свой ник»: 5 самых густонаселённых кварталов (#0…#4 — считаются в prep), сверху, ники крупно
+[26,26.35,Z('#0',0,115,.5,1.25),Z('#0',0,105,.55,1.25)],
+[26.35,26.7,Z('#1',0,115,.9,1.25),Z('#1',0,105,.95,1.25)],
+[26.7,27.05,Z('#2',0,115,.2,1.25),Z('#2',0,105,.25,1.25)],
+[27.05,27.4,Z('#3',0,115,.7,1.25),Z('#3',0,105,.75,1.25)],
+[27.4,28,Z('#4',0,120,.4,1.2),Z('#4',0,100,.5,1.25)],
 [28,29.5,Z(129,41,120,.3,.75),Z(129,41,90,.6,.65)],
 [29.5,31,Z(70,60,100,.2,.7),Z(100,20,80,.5,.6)],
 [31,32.4,Z(162,-64,300,.4,.88),Z(162,-64,200,.9,.8)],
@@ -60,7 +63,11 @@ function look(w,night){const sc=w.eval('sc'),T=w.THREE;if(!LT){LT=[];sc.traverse
  if(sc.fog){sc.fog.color.setHex(night?0x2a2050:0xe8a98a);sc.fog.near=520;sc.fog.far=1100}
  const sky=sc.children.find(o=>o.isMesh&&o.material&&o.material.side===T.BackSide);if(sky)sky.material.color.setHex(night?0x3a3068:0xffffff)}
 // цели по нику: дома могли переехать при перепланировке — берём координаты из карты
-function prep(w){const L=w.MLIST||w.eval('MLIST');CAM.forEach(c=>[c[2],c[3]].forEach(z=>{if(typeof z.tx==='string'){const re=new RegExp(z.tx),h=L.find(h=>re.test(h.n)&&h.g&&h.day<=10);if(h){z.tx=h.x;z.tz=h.z}else{console.log('нет дома',z.tx);z.tx=162;z.tz=-64}}}));
+function dense(L,n){const H=L.filter(h=>h.g&&h.day<=10&&!h.anon&&!h.site&&!h.bld),G=new Map();
+ H.forEach(h=>{const k=Math.floor(h.x/45)+','+Math.floor(h.z/45);if(!G.has(k))G.set(k,[]);G.get(k).push(h)});
+ const out=[];[...G.values()].sort((a,b)=>b.length-a.length).forEach(g=>{if(out.length>=n)return;const x=g.reduce((s,h)=>s+h.x,0)/g.length,z=g.reduce((s,h)=>s+h.z,0)/g.length;
+  if(out.every(o=>Math.hypot(o.x-x,o.z-z)>110))out.push({x,z,k:g.length})});console.log('кварталы',JSON.stringify(out));return out}
+function prep(w){const L=w.MLIST||w.eval('MLIST'),DN=dense(L,5);CAM.forEach(c=>[c[2],c[3]].forEach(z=>{if(typeof z.tx==='string'&&z.tx[0]==='#'){const q=DN[+z.tx.slice(1)]||{x:162,z:-64};z.tx=q.x;z.tz=q.z;return}if(typeof z.tx==='string'){const re=new RegExp(z.tx),h=L.find(h=>re.test(h.n)&&h.g&&h.day<=10);if(h){z.tx=h.x;z.tz=h.z}else{console.log('нет дома',z.tx);z.tx=162;z.tz=-64}}}));
  // в видео без названий платформ у районов
  try{w.eval("DL.forEach(d=>{if(d.e&&/YOUTUBE|TIKTOK/i.test(d.e.textContent))d.e.style.visibility='hidden'})")}catch(e){console.log('DL',e.message)}
  look(w,false);lastNight=false;
@@ -76,10 +83,11 @@ window.seek=function(tv){const t=MAPT(tv);
  const night=t>=8.5&&t<10.2;if(night!==lastNight){look(w,night);lastNight=night}
  MP.setAll(t>=26&&t<28);
  const d=w.document;d.body.classList.toggle('nolab',t>=5&&t<8.5||t>=2.4&&t<5||t>=28&&t<31);
- if(!d.getElementById('vcs')){const s=d.createElement('style');s.id='vcs';s.textContent='body.nolab .mpn{display:none!important}body.mpall .mpn{font-size:1.5em!important}';d.head.appendChild(s)}
- d.body.classList.toggle('mpall',t>=26&&t<28);
+ if(!d.getElementById('vcs')){const s=d.createElement('style');s.id='vcs';s.textContent='body.nolab .mpn{display:none!important}body.mpall .mpn{font-size:4.4em!important;font-weight:900!important}';d.head.appendChild(s)}
+ // размер ника меняется — сбросить закэшированные габариты, чтобы раскладка без наложений считалась заново
+ const all=t>=26&&t<28;if(all!==d.body.classList.contains('mpall')){d.body.classList.toggle('mpall',all);MP.L.forEach(h=>{h.w=0;h.h=0})}
  MP.draw();
- d.querySelectorAll('.mpn').forEach(e=>{if(e.style.display==='none')return;const r=e.getBoundingClientRect(),m=Math.min(r.left-24,1056-r.right,r.top-290,1700-r.bottom);e.style.visibility='visible';e.style.opacity=cl(0,1,m/80).toFixed(2)});
+ d.querySelectorAll('.mpn').forEach(e=>{if(e.style.display==='none')return;const r=e.getBoundingClientRect(),m=Math.min(r.left-24,1056-r.right,r.top-290,1700-r.bottom,all&&r.bottom>1190&&r.top<1400?-1:1e9);e.style.visibility='visible';e.style.opacity=cl(0,1,m/80).toFixed(2)});
  // слой 2D
  const sb=[...SUB].reverse().find(a=>tv>=a[0]);const S=$('sub');S.textContent=sb?sb[1]:'';S.className='o '+(sb&&sb[2]||'');S.style.transform='scale('+(sb?pop(tv,sb[0]):1)+')';
  show('day',t<12||t>=35);
