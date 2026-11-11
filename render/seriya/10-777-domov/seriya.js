@@ -11,7 +11,7 @@ const AN=[[0,0],[1.13,1],[2.71,2.4],[5.3,5],[7.32,7.2],[8.86,8.5],[10.47,10.2],[
 const MAPT=v=>{for(let i=1;i<AN.length;i++)if(v<=AN[i][0]){const a=AN[i-1],b=AN[i];return a[1]+(b[1]-a[1])*(v-a[0])/(b[0]-a[0])}return 38};
 // камера: [t0,t1, от{tx,tz,d,yaw,p}, до{...}] — внутри отрезка плавно, на границе — склейка
 const Z=(tx,tz,d,yaw,p)=>({tx,tz,d,yaw,p});
-const START=Z(105,70,26,.15,.40);
+const START=Z(118,48,48,.2,.5);
 const CAM=[
 [0,2.4,START,Z(150,20,135,.55,.85)],
 [2.4,5.0,Z(150,20,120,.55,.85),Z(130,40,60,.9,.6)],
@@ -83,7 +83,7 @@ window.seek=function(tv){const t=MAPT(tv);
  show('badge',t>=5.9&&t<7.1,pop(t,5.9));
  const cn=t>=12&&t<14?Math.round(177+600*ss(cl(0,1,(t-12)/1.2))):0;show('cnt',(t>=12&&t<14)||(t>=31&&t<35));
  $('cnt').firstChild.innerHTML=t<14?'ЖИТЕЛЕЙ: <b>'+cn+'</b>':'ЖИТЕЛЕЙ: <b>777</b> / 1000';
- $('flash').style.opacity=t>=13.2&&t<13.6?(1-(t-13.2)/.4)*.35:(Math.abs(t-26)<.06||Math.abs(t-10.2)<.08)?.5:0;
+ $('flash').style.opacity=t>=13.2&&t<13.6?(1-(t-13.2)/.4)*.35:Math.abs(t-26)<.06?.4:0;
  show('plq',t>=20&&t<26);show('pause',t>=26&&t<28);show('cta',t>=28.4&&t<35);
  show('gold',false);
  return true};
