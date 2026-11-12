@@ -29,7 +29,7 @@ const music=path.join(ROOT,`muzyka/${ID}.mp3`),hasM=hasV&&fs.existsSync(music)&&
 let ain=[],af='';
 if(hasV){ain=['-i',voice];const lab=[];SFX.forEach(([t,f,v],i)=>{ain.push('-i',path.join(SFXD,f+'.wav'));const ms=Math.max(0,Math.round(t*1000));af+=`[${i+2}]adelay=${ms}|${ms},volume=${(v*.6).toFixed(2)}[e${i}];`;lab.push(`[e${i}]`)});
  af=`[1]loudnorm=I=-16:TP=-2,aformat=channel_layouts=stereo,asplit=2[v][vk];`+af;
- if(hasM){ain.push('-i',music);const mi=SFX.length+2;af+=`[${mi}]volume=0.22,afade=t=out:st=${END-1.5}:d=1.5[mr];[mr][vk]sidechaincompress=threshold=0.05:ratio=6:attack=20:release=300[m];`;lab.push('[m]')}else af+='[vk]anullsink;';
+ if(hasM){ain.push('-i',music);const mi=SFX.length+2;af+=`[${mi}]volume=0.12,afade=t=out:st=${END-1.5}:d=1.5[mr];[mr][vk]sidechaincompress=threshold=0.05:ratio=6:attack=20:release=300[m];`;lab.push('[m]')}else af+='[vk]anullsink;';
  af+=`[v]${lab.join('')}amix=inputs=${lab.length+1}:normalize=0:duration=first,alimiter=limit=0.89,loudnorm=I=-14:TP=-1.5[a]`}
 const ff=spawn('ffmpeg',['-v','error','-y','-f','image2pipe','-framerate',String(FPS),'-i','-',...ain,...(hasV?['-filter_complex',af,'-map','0:v','-map','[a]']:[]),'-vf',`scale=${Math.round(1080*SC/2)*2}:${Math.round(1920*SC/2)*2}`,'-c:v','libx264','-pix_fmt','yuv420p','-crf','20','-preset','medium',...(hasV?['-c:a','aac','-b:a','192k','-t',String(END)]:[]),'-movflags','+faststart',OUT],{stdio:['pipe','inherit','inherit']});
 const t0=Date.now();
