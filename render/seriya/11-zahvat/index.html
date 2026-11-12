@@ -19,7 +19,7 @@ html,body{margin:0;width:1080px;height:1920px;overflow:hidden;background:#0b0a10
 #nick{left:0;top:0;right:auto;width:auto;transform-origin:50% 100%}#nick span{display:inline-block;white-space:nowrap;background:#fff;color:var(--ink);font-weight:900;font-size:64px;padding:10px 38px;border-radius:60px;border:7px solid var(--imen);box-shadow:0 12px 0 rgba(0,0,0,.25)}
 #nick.gold span{border-color:#f7c24a;box-shadow:0 0 40px 10px rgba(247,194,74,.85),0 12px 0 rgba(0,0,0,.25)}#nick.city span{border-color:var(--city)}
 /* телефон с картой в Telegram: экран прозрачный — сквозь него живая карта */
-#tg{left:130px;width:788px;top:250px;height:980px;border:16px solid #1b1f2e;border-radius:80px;box-shadow:0 0 0 3000px rgba(8,10,20,.62),0 30px 80px rgba(0,0,0,.5);overflow:hidden;text-align:left;right:auto}
+#tg{left:130px;width:788px;top:250px;height:1250px;border:16px solid #1b1f2e;border-radius:80px;box-shadow:0 0 0 3000px rgba(8,10,20,.62),0 30px 80px rgba(0,0,0,.5);overflow:hidden;text-align:left;right:auto}
 #tg .hd{background:var(--tg);color:#fff;padding:52px 40px 26px;font-weight:900;font-size:46px}#tg .hd small{display:block;font-weight:700;font-size:30px;opacity:.9;margin-top:4px}
 #tg .sr{margin:22px 30px;background:#fff;border-radius:40px;padding:20px 34px;font-weight:700;font-size:44px;color:#141829;box-shadow:0 6px 0 rgba(0,0,0,.18)}#tg .sr i{display:inline-block;width:4px;height:44px;background:#141829;vertical-align:middle;margin-left:4px}
 /* выбор: две кнопки выше 70 % высоты */
@@ -31,15 +31,14 @@ html,body{margin:0;width:1080px;height:1920px;overflow:hidden;background:#0b0a10
 #like .sh svg{position:absolute;inset:0}#like .pl{font-weight:900;font-size:90px;color:#fff;-webkit-text-stroke:12px var(--ink);paint-order:stroke fill;margin-top:10px}
 .hrt{position:absolute;font-size:110px;left:0;top:0}
 /* комментарий */
-#cmt{top:600px}#cmt .c{padding:40px 60px!important;gap:36px!important}#cmt .c{display:inline-flex;align-items:center;gap:28px;background:#fff;border-radius:40px;padding:30px 46px;box-shadow:0 16px 0 rgba(0,0,0,.3);text-align:left}
-#cmt .a{width:150px;height:150px;border-radius:50%;background:#f7c24a;display:flex;align-items:center;justify-content:center;font-size:84px}
-#cmt .n{font-weight:700;font-size:58px;color:#5a5f74}#cmt .t{font-weight:900;font-size:124px;color:#1f6fd6}
+#cmt{top:620px}#cmt .c{display:inline-flex;align-items:center;gap:28px;background:#fff;border-radius:40px;padding:30px 46px;box-shadow:0 16px 0 rgba(0,0,0,.3);text-align:left}
+#cmt .a{width:110px;height:110px;border-radius:50%;background:#f7c24a;display:flex;align-items:center;justify-content:center;font-size:60px}
+#cmt .n{font-weight:700;font-size:44px;color:#5a5f74}#cmt .t{font-weight:900;font-size:80px;color:#1f6fd6}
 /* плашка Telegram в финале — выше нижней зоны интерфейса */
 #tgp{top:560px}#tgp span{display:inline-block;background:var(--tg);color:#fff;font-weight:900;font-size:54px;padding:18px 40px;border-radius:24px;border:5px solid #fff;box-shadow:0 10px 0 #1a7fb3}
 </style></head><body>
 <iframe id="map" src="../../karta/index.html?video"></iframe>
 <div id="night" style="position:absolute;inset:0;pointer-events:none;background:#2b2a8a;mix-blend-mode:multiply;opacity:0"></div>
-<div id="war" style="position:absolute;inset:0;pointer-events:none;background:#c0182a;mix-blend-mode:multiply;opacity:0"></div>
 <div id="vg"></div><div id="flash"></div>
 <div class="o" id="tg"><div class="hd">🗺 Карта MARS CITY<small>найди свой дом по нику</small></div><div class="sr" id="tgs"></div></div>
 <div class="o" id="plq"><span></span></div>

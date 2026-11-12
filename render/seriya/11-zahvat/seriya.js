@@ -19,7 +19,7 @@ const SUB=[[0,'за ночь'],[.5,'imen…','imen'],[1,'захватила'],[1
 [21,'кот-мэр зовёт'],[21.7,'защитников','tq'],[22.5,'защитить','tq'],[23.1,'или вступить','imen'],[23.9,'и ник!','gold'],
 [24.5,'лайк —'],[25,'щит городу','tq'],[26,''],[26.2,'а утром…'],[27.5,''],[29,'завтра','gold']];
 // звук на смене кадров (время сцены): [t, файл, громкость] — render.mjs переводит во время голоса
-const SFXS=[[0,'wall',.3],[0,'thump',.5],[.08,'whoosh2',.3],[1.0,'siren',.18],[1,'whoosh2',.3],[1.3,'thump',.35],[2,'swish',.5],[2.3,'pop',.3],[2.55,'pop',.3],[2.8,'pop',.3],[3.05,'pop',.3],[3.5,'thump',.4],[4,'flag',.5],
+const SFXS=[[0,'wall',.3],[0,'thump',.5],[.08,'whoosh2',.3],[1.0,'siren',.08],[1,'whoosh2',.3],[1.3,'thump',.18],[2,'swish',.5],[2.3,'pop',.3],[2.55,'pop',.3],[2.8,'pop',.3],[3.05,'pop',.3],[3.5,'thump',.4],[4,'flag',.5],
 [5,'swish',.35],[5.65,'pop',.6],[5.75,'ping',.4],[6,'swish',.3],[6.6,'chime',.5],[7,'whoosh2',.3],[8,'swish',.4],[9.5,'whoosh2',.4],[9.75,'ping',.35],[10.25,'swish',.3],[11,'swish',.4],
 [12.7,'wall',.25],[13.5,'whoosh2',.5],[13.8,'pop',.3],[14.1,'pop',.3],[14.25,'swish',.3],[14.4,'pop',.3],[14.9,'thump',.35],
 [15,'ping',.3],[16.5,'pop',.5],[18.05,'pop',.4],[18.9,'chime',.45],[21,'chime',.5],[21.2,'thump',.4],
@@ -138,7 +138,7 @@ function prep(w){const T=w.THREE,sc=w.eval('sc'),L=w.MLIST||w.eval('MLIST');Obje
    bx.setFromObject(o);bx.getSize(sz);if(Math.max(sz.x,sz.z)<24&&sz.y<40){o.visible=false;nh++}});console.log('убрано у стен',nh)}
  W.aYo=Math.atan2(H.yo.z-r1.cz,H.yo.x-r1.cx);W.aG=Math.atan2(r2.cz-r1.cz,r2.cx-r1.cx);
  W.ftex=texIMEN(w);
- W.w1=mkWall(w,r1,W.aG);W.w1.start=W.aYo;
+ W.w1=mkWall(w,r1,W.aG);W.w1.start=W.aYo+Math.PI;
  {const ta=W.w1.tw.map(g=>W.w1.bl[g.userData.i].a).sort((a,b)=>a-b),mids=ta.map((a,i)=>i<ta.length-1?(a+ta[i+1])/2:(a+ta[0]+2*Math.PI)/2),dA=(a,b)=>Math.abs(((a-b)%(2*Math.PI)+3*Math.PI)%(2*Math.PI)-Math.PI);
   W.aCat=mids.filter(a=>dA(a,W.aG)>.12).sort((a,b)=>dA(a,W.aG+.3)-dA(b,W.aG+.3))[0]}W.w2=mkWall(w,r2,null);W.w2.start=Math.atan2(r1.cz-r2.cz,r1.cx-r2.cx)+Math.PI;
  // флаги на крышах: голубой — город, фиолетовый — IMEN
@@ -162,10 +162,6 @@ function prep(w){const T=w.THREE,sc=w.eval('sc'),L=w.MLIST||w.eval('MLIST');Obje
  W.ty=0;const cam=W.cam;cam.lookAt=function(x,y,z){this.position.y+=W.ty;T.Object3D.prototype.lookAt.call(this,x,y+W.ty,z)};
  // свет: запомнить исходный
  W.LT=[];sc.traverse(o=>{if(o.isLight)W.LT.push([o,o.intensity,o.color.clone(),o.groundColor?o.groundColor.clone():null])});W.sky=sc.children.find(o=>o.isMesh&&o.material&&o.material.side===T.BackSide);
- // кандидаты в «мусор переднего плана» (объекты карты; дома героев серии не трогаем)
- {const keep=new Set(Object.values(H).map(h=>h.g)),bx=new T.Box3(),sz=new T.Vector3(),c=new T.Vector3();W.occ=[];
-  MAP0.forEach(o=>{if(!o.visible||keep.has(o)||o.isLight||o.isInstancedMesh||o===W.sky)return;bx.setFromObject(o);if(bx.isEmpty())return;bx.getSize(sz);bx.getCenter(c);const r=Math.max(sz.x,sz.z)/2;
-   if(r>30||sz.y>60||(!c.x&&!c.z))return;W.occ.push({o,x:c.x,z:c.z,r})})}
  W.ready=true}
 // ночь (индиго) → рассвет (оранжевый) → день
 function look(night,dawn){const T=W.T,sc=W.sc,c=new T.Color(),c2=new T.Color();
@@ -187,19 +183,18 @@ function buildCam(){const {H,r1,r2,aYo,aG,aCat}=W,yo=H.yo;
  [1,2,Z(yo.x,yo.z,62,y0+.35,.42,3),Z(yo.x,yo.z,72,y0+.45,.5,3)],
  [2,3.5,Z(r1.cx,r1.cz,150,.3,1.0),Z(r1.cx,r1.cz,240,.42,1.3)],
  [3.5,5,Z(o1.x,o1.z,36,out(aYo+.9),.3,3),Z(o2.x,o2.z,34,out(aYo+1.7),.3,3)],
- [5,6,Z(H.goku.x,H.goku.z,34,inYaw(H.goku,r1)-.7,.36,H.goku.top+3),Z(H.goku.x,H.goku.z,29,inYaw(H.goku,r1)-.45,.32,H.goku.top+3)],
- [6,7,Z(H.goku.x,H.goku.z,17,inYaw(H.goku,r1)-1.5,.24,H.goku.top+2),Z(H.goku.x,H.goku.z,14,inYaw(H.goku,r1)-1.38,.22,H.goku.top+2)],
- [7,8,Z(H.goku.x,H.goku.z,75,inYaw(H.goku,r1)-.3,.95,1),Z(H.goku.x,H.goku.z,62,inYaw(H.goku,r1)-.15,.9,1)],
+ [5,6.5,Z(H.goku.x,H.goku.z,38,inYaw(H.goku,r1)-.75,.38,H.goku.top+3),Z(H.goku.x,H.goku.z,32,inYaw(H.goku,r1)-.6,.34,H.goku.top+3)],
+ [6.5,8,Z(H.goku.x,H.goku.z,30,inYaw(H.goku,r1)-.5,.32,H.goku.top+3),Z(H.goku.x,H.goku.z,26,inYaw(H.goku,r1)-.4,.3,H.goku.top+3)],
  [8,9.5,Z(wd.x,wd.z,40,inYaw(H.doni,r1)+.5,.4,2),Z(H.doni.x,H.doni.z,28,inYaw(H.doni,r1)+.2,.42,3)],
- [9.5,10.25,Z(H.vit.x,H.vit.z,70,.9,.55,3),Z(H.vit.x,H.vit.z,52,.95,.48,4)],[10.25,11,Z(H.vit.x,H.vit.z,30,2.2,.3,6),Z(H.vit.x,H.vit.z,26,2.35,.28,6)],
+ [9.5,11,Z(H.vit.x,H.vit.z,70,.9,.55,3),Z(H.vit.x,H.vit.z,38,1.0,.42,5)],
  [11,12,Z(cat.x,cat.z,6.2,out(aCat)+.15,.18,4.4),Z(cat.x,cat.z,5.2,out(aCat)+.25,.16,4.5)],
  [12,13.5,Z(gt.x,gt.z,95,Math.atan2(-Math.cos(aG),-Math.sin(aG)),.36,4),Z(gt.x,gt.z,82,Math.atan2(-Math.cos(aG),-Math.sin(aG)),.32,4)],
- [13.5,14.25,Z(r2.cx,r2.cz,170,.5,1.1),Z(r2.cx,r2.cz,210,.55,1.2)],[14.25,15,Z(r2.cx,r2.cz,120,1.6,.75),Z(r2.cx,r2.cz,105,1.7,.7)],
+ [13.5,15,Z(r2.cx,r2.cz,170,.5,1.1),Z(r2.cx,r2.cz,240,.6,1.3)],
  [15,16.5,Z(H.max.x,H.max.z,40,inYaw(H.max,r2),.38,H.max.top+3),Z(H.max.x,H.max.z,34,inYaw(H.max,r2)+.15,.34,H.max.top+3)],
  [16.5,18,Z(H.gg.x+40,H.gg.z+30,170,.3,1.2),Z(H.gg.x,H.gg.z,100,.32,1.25)],
  [18,19.5,Z(H.gg.x,H.gg.z,62,.35,1.15),Z(H.gg.x,H.gg.z,42,.4,1.05)],
  [19.5,21,Z(mid.x,mid.z,430,.4,1.25),Z(mid.x,mid.z,390,.5,1.2)],
- [21,22.5,Z(cat.x,cat.z,10,out(aCat)+Math.PI+.1,.26,3.2),Z(cat.x,cat.z,8.5,out(aCat)+Math.PI+.2,.24,3.3)],
+ [21,22.5,Z(cat.x,cat.z,14,out(aCat)+Math.PI+.1,.3,2.6),Z(cat.x,cat.z,11.5,out(aCat)+Math.PI+.2,.28,2.8)],
  [22.5,24.5,Z(r1.cx,r1.cz,150,y0+.5,.75),Z(r1.cx,r1.cz,135,y0+.7,.72)],
  [24.5,26,Z(cat.x,cat.z,8,out(aCat)+Math.PI-.1,.22,4.2),Z(cat.x,cat.z,7,out(aCat)+Math.PI,.2,4.3)],
  [26,27.5,Z(yo.x,yo.z,44,y0,.36,yo.top+3),Z(yo.x,yo.z,38,y0+.1,.34,yo.top+3)],
@@ -207,14 +202,14 @@ function buildCam(){const {H,r1,r2,aYo,aG,aCat}=W,yo=H.yo;
  [29,30.5,Z(cat.x,cat.z,10,out(aCat)+.1,.24,4.3),Z(cat.x,cat.z,6,out(aCat)+.2,.16,4.5)]]}
 
 // ---- 2D-слой: плашки, ники над домами ----
-const PLQ=[[0,1,'НОЧЬ → УТРО',''],[1,2,'IMEN ЗАХВАТИЛА','red'],[3.5,5,'СТЕНА','imen'],[5,6.5,'ФЛАГ → IMEN','imen'],[6.5,8,'НИК ОСТАЁТСЯ <b>ТВОИМ</b>',''],
+const PLQ=[[0,1,'ЗА НОЧЬ',''],[1,2,'IMEN ЗАХВАТИЛА УЧАСТКИ!','red'],[3.5,5,'СТЕНА','imen'],[5,6.5,'ФЛАГ → IMEN','imen'],[6.5,8,'НИК ОСТАЁТСЯ <b>ТВОИМ</b>',''],
  [11,12,'КОТ-МЭР',''],[12,13.5,'ЭТО ТОЛЬКО НАЧАЛО','red'],[15,16.5,'?','big'],[19.5,21,'<span class=c>ГОЛУБОЙ</span> — ГОРОД<br><span class=p>ФИОЛЕТОВЫЙ</span> — IMEN',''],
- [21,22.5,'ЗАЩИТНИКИ ГОРОДА','blue'],[22.5,24.5,'НАПИШИ В КОММЕНТАРИИ',''],[24.5,26,'ЛАЙК = +1 ЩИТ ГОРОДУ','blue'],[27.7,29,'ИМПЕРИЯ ОБЪЯВИЛА ВОЙНУ','red'],[29,30.5,'СЕРИЯ 12 — ЗАВТРА','gold']];
-const NK=[[0,2,'yo','',''],[5,6.5,'goku','',''],[6.5,8,'goku','gold',''],[8,9.5,'doni','',''],[9.5,11,'vit','',''],[15,16.5,'max','city',' ?'],[26,27.5,'yo','city','']];
+ [21,22.5,'ЗАЩИТНИКИ ГОРОДА','blue'],[22.5,24.5,'НАПИШИ В КОММЕНТАРИИ',''],[24.5,26,'ЛАЙК = +1 ЩИТ ГОРОДУ','blue'],[27.5,29,'ИМПЕРИЯ ОБЪЯВИЛА ВОЙНУ','red'],[29,30.5,'СЕРИЯ 12 — ЗАВТРА','gold']];
+const NK=[[0,2,'yo','',''],[5,6.5,'goku','',''],[6.5,8,'goku','gold',''],[8,9.5,'doni','',''],[9.5,11,'vit','',''],[15,16.5,'max','city',' ?'],[18,19.5,'gg','gold',''],[26,27.5,'yo','city','']];
 const NAME={yo:'@yo_meepo',goku:'@oooominot',doni:'@Doni03015',vit:'@cartonsstorm',max:'@Max verstappen',gg:'@ggelv2'};
 let hearts=null;
 
-window.seek=function(tv){const t=MAPT(tv),E=window.END,LU=ss(seg(tv,E-1.5,E-.02)),t2D=tv>=E-.35?0:t,tvS=tv>=E-.2?0:tv;
+window.seek=function(tv){const t=MAPT(tv),E=window.END,LU=ss(seg(tv,E-1.5,E-.02)),t2D=tv>=E-.2?0:t,tvS=tv>=E-.2?0:tv;
  const w=$('map').contentWindow,MP=w&&w.MP;if(!MP)return false;if(!W.ready)prep(w);if(!CAM)buildCam();
  // анимации карты — по времени ролика, а не по часам компьютера
  if(!w.__vt){w.__vt=true;w.performance.now=()=>w.__VT*1000}w.__VT=tv*(1-LU);
@@ -228,16 +223,11 @@ window.seek=function(tv){const t=MAPT(tv),E=window.END,LU=ss(seg(tv,E-1.5,E-.02)
   MP.K.tx=lerp(KB.tx,S0.tx,LU);MP.K.tz=lerp(KB.tz,S0.tz,LU);MP.K.d=lerp(KB.d,S0.d,LU)+170*arc;MP.K.yaw=KB.yaw+dy*LU;MP.K.p=lerp(KB.p,S0.p,LU)+.25*arc;W.ty=lerp(KB.ty,S0.ty,LU)}
  if(LU===0&&t>=1&&t<1.9){const a=1-seg(t,1,1.9);MP.K.yaw+=.018*a*Math.sin(t*93);MP.K.p+=.012*a*Math.sin(t*71)}
  if(t>=27.5&&t<28){const a=1-seg(t,27.5,28);MP.K.yaw+=.012*a*Math.sin(t*90)}
- const K=MP.K,cpk=Math.cos(K.p),cm={x:K.tx+Math.sin(K.yaw)*cpk*K.d,z:K.tz+Math.cos(K.yaw)*cpk*K.d};
- // крупные планы: прячем объекты карты вплотную к камере и на линии камера→цель (столбы, шары, «зефир», баннеры)
- {const near=K.d<90&&LU===0,dx=K.tx-cm.x,dz=K.tz-cm.z,L2=dx*dx+dz*dz||1;W.near=near;W.cm=cm;
-  W.occ.forEach(q=>{let hide=false;if(near){const ex=q.x-cm.x,ez=q.z-cm.z,u=Math.max(0,Math.min(1,(ex*dx+ez*dz)/L2)),px=cm.x+dx*u-q.x,pz=cm.z+dz*u-q.z,dt=Math.hypot(q.x-K.tx,q.z-K.tz);
-   if(dt>q.r+5&&(Math.hypot(ex,ez)<.5*K.d+q.r||(u<.85&&Math.hypot(px,pz)<q.r+2)))hide=true}if(!!q.o.userData.__h!==hide){q.o.visible=!hide;q.o.userData.__h=hide}})}
  // свет
- let night=t<1.3?1:t<2.0?1-seg(t,1.3,2.0):t>=29?1:0,dawn=t<1.3?0:t<2.6?Math.sin(Math.PI*seg(t,1.3,2.6)):0;if(LU>0){night=LU;dawn=0}
+ let night=t<.9?1:t<1.6?1-seg(t,.9,1.6):t>=29?1:0,dawn=t<.9?0:t<2.4?Math.sin(Math.PI*seg(t,.9,2.4)):0;if(LU>0){night=LU;dawn=0}
  const lk=night.toFixed(2)+dawn.toFixed(2);if(lk!==W.lk){look(night,dawn);W.lk=lk}
  // стены: первая растёт за ночь (0–1,4), вторая — на ре-хуке (12,7–14,9)
- const K1=t<1.0?.3+.7*ss(seg(t,0,1.0)):1,k1=lerp(K1,.3,LU),f1=(t<1.0?0:ss(seg(t,1.0,1.2)))*(1-LU);
+ const k1=(t<1.4?ss(seg(t,0,1.4)):1)*(1-LU),f1=(t<1.3?0:ss(seg(t,1.3,1.5)))*(1-LU);
  setWall(W.w1,k1,seg(t,12.3,13.3)*(t<29?1:0),f1);
  const k2=seg(t,12.7,14.9)*(1-LU),f2=(t<14.9?0:ss(seg(t,14.9,15.1)))*(1-LU);setWall(W.w2,k2,0,f2);W.w2.im.visible=W.w2.ie.visible=k2>0;
  const wide=(t>=2&&t<3.5)||(t>=13.5&&t<15)||(t>=19.5&&t<21)||(t>=22.5&&t<24.5);
@@ -245,15 +235,13 @@ window.seek=function(tv){const t=MAPT(tv),E=window.END,LU=ss(seg(tv,E-1.5,E-.02)
  W.w1.line.material.opacity=wide&&k1>.99?.9:0;W.w2.line.material.opacity=wide?.9*k2:0;
  // ночь — индиго поверх карты
  $('night').style.opacity=(night*.3).toFixed(2);
- // война — тёмно-красный свет на кадре у ворот Империи
- $('war').style.opacity=t>=27.5&&t<29&&LU<.3?(.3*ss(seg(t,27.5,27.8))).toFixed(2):'0';
  // флаги на крышах
  const m=new T.Matrix4(),q=new T.Quaternion(),e=new T.Euler(),p=new T.Vector3(),s=new T.Vector3(),cB=new T.Color(0x3fa8ff),cP=new T.Color(0xa64dff),cc=new T.Color();
  const fs=t>=19.5&&t<21?4.2:wide?2.2:1;
  W.FL.forEach((h,i)=>{let im=h.im;if(h.r1)im=t>=1.3;if(h.r2)im=t>=14.9;let k=im?1:0;
   if(h===H.goku)k=t<5.6?0:ss(seg(t,5.6,5.8));if(h===H.vit)k=t>=9.7?1:0;if(h===H.max&&t>=15&&t<16.5)k=Math.floor(t*5)%2;if(h===H.yo&&t>=26.6)k=1-ss(seg(t,26.6,26.8));
   if(!h.im||h.r1||h.r2)k*=1-LU;
-  const big=(h===H.goku||h===H.vit||h===H.max||h===H.yo)?1.9:1,nearCam=W.near&&big===1&&Math.hypot(h.x-W.cm.x,h.z-W.cm.z)<.5*K.d,sc2=nearCam?.001:big*fs;
+  const big=(h===H.goku||h===H.vit||h===H.max||h===H.yo)?1.9:1,sc2=big*fs;
   cc.copy(cB).lerp(cP,k);W.cloth.setColorAt(i,cc);
   e.set(0,.3*Math.sin(2*Math.PI*Math.round(E/3)*tv/E+i),0);q.setFromEuler(e);
   p.set(h.x,h.top+1.6*sc2,h.z);s.set(sc2,3.2*sc2,sc2);m.compose(p,new T.Quaternion(),s);W.pole.setMatrixAt(i,m);
@@ -263,6 +251,7 @@ window.seek=function(tv){const t=MAPT(tv),E=window.END,LU=ss(seg(tv,E-1.5,E-.02)
  const cat=W.cat,ud=cat.userData;let cp=null;
  if(t>=11&&t<27.5||t>=29)cp={x:W.catW.x,z:W.catW.z,y:3.4};else if(t>=27.5&&t<29)cp={x:42,z:90,y:1.9};
  // положение камеры этого кадра (W.cam ещё с прошлого кадра — на склейке кот смотрел бы не туда)
+ const K=MP.K,cpk=Math.cos(K.p),cm={x:K.tx+Math.sin(K.yaw)*cpk*K.d,z:K.tz+Math.cos(K.yaw)*cpk*K.d};
  cat.visible=!!cp&&LU<.3;cat.scale.setScalar(.36*Math.max(.001,1-ss(seg(LU,.06,.28))));if(cp){cat.position.set(cp.x,cp.y,cp.z);cat.rotation.y=Math.atan2(cm.x-cp.x,cm.z-cp.z);
   // 11 — хмурится, руки скрещены; 21 — кричит, машет защитникам; 22,5–27,5 — гордо держит щит; 27,5 — шок, очки съехали; 29 — решительно, кулак вверх
   const E=t<12?'angry':t<22.5?'shout':t<27.5?'proud':t<29?'shock':'brave';
@@ -291,7 +280,7 @@ window.seek=function(tv){const t=MAPT(tv),E=window.END,LU=ss(seg(tv,E-1.5,E-.02)
   if(t>=21&&t<27.5){on=true;const a=W.aCat+side*.6,R0=r1.R-3-(i%3)*1.8,run=1-ss(seg(t,21,22.4)),R=R0-run*24;g.position.set(r1.cx+Math.cos(a)*R,0,r1.cz+Math.sin(a)*R);g.position.y=run>0?Math.abs(Math.sin(t*14+i))*.6:0}
   else if(t>=27.5&&t<29){on=true;g.position.set(42+(i<5?-1:1)*(2.4+(i%5)*1.7),0,95+(i%5)*1.4)}
   g.visible=on&&LU<.3;g.scale.setScalar(.75*Math.max(.001,1-ss(seg(LU,.06,.28))));if(on){g.rotation.y=Math.atan2(cm.x-g.position.x,cm.z-g.position.z)}});
- W.hl.material.opacity=t>=17.6&&t<19.5?.9:0;W.hl.scale.setScalar(1+.08*Math.sin(t*12));
+ W.hl.material.opacity=t>=18.3&&t<19.5?.9:0;W.hl.scale.setScalar(1+.08*Math.sin(t*12));
  W.scroll.visible=t>=27.5&&t<29;W.ped.visible=W.scroll.visible;
  // ники карты в серии не нужны — свои крупные плашки
  const d=w.document;if(!d.getElementById('vcs')){const st=d.createElement('style');st.id='vcs';st.textContent='.mpn{display:none!important}';d.head.appendChild(st)}
@@ -299,7 +288,7 @@ window.seek=function(tv){const t=MAPT(tv),E=window.END,LU=ss(seg(tv,E-1.5,E-.02)
  // ---- 2D ---- (в последние 0,2 с — как в первом кадре, чтобы петля была без склейки)
  {const t=t2D;
  const sb=[...SUBV].reverse().find(a=>tvS>=a[0]);const S=$('sub'),tx=sb?sb[1]:'';S.textContent=tx;S.className='o '+(sb&&sb[2]||'');
- S.style.fontSize=(tx.length>12?Math.max(78,Math.round(118*12/tx.length)):118)+'px';S.style.transform='scale('+(sb?pop(tvS,sb[0]):1)+')';S.style.top=t>=16.5&&t<19.5?'1300px':'';
+ S.style.fontSize=(tx.length>12?Math.max(78,Math.round(118*12/tx.length)):118)+'px';S.style.transform='scale('+(sb?pop(tvS,sb[0]):1)+')';
  const pq=PLQ.find(a=>t>=a[0]&&t<a[1]);show('plq',!!pq,pq?pop(t,pq[0]):1);if(pq){$('plq').className='o '+pq[3];$('plq').firstChild.innerHTML=pq[2]}
  // счётчик участков
  const cn=t>=2&&t<3.5?'<b>'+Math.round(W.N1*ss(seg(t,2.1,3.2)))+'</b> УЧАСТКОВ':t>=13.5&&t<15?W.N1+' → <b>'+Math.round(W.N1+W.N2*ss(seg(t,13.6,14.9)))+'</b> УЧАСТКОВ':'';
@@ -316,16 +305,16 @@ window.seek=function(tv){const t=MAPT(tv),E=window.END,LU=ss(seg(tv,E-1.5,E-.02)
  const vt=t>=22.5&&t<24.5;show('vote',vt,vt?pop(t,22.5):1);if(vt){const q3='@твой_ник',n3=cl(0,q3.length,Math.floor((t-22.6)*10));$('vin').innerHTML='<em>ник:</em> '+q3.slice(0,n3)+'<i></i>';
   $('vb1').style.transform='scale('+(Math.abs(t-23.05)<.12?.9:1)+')';$('vb2').style.transform='scale('+(Math.abs(t-23.45)<.12?.9:1)+')'}
  // лайк = +1 щит
- const lk2=false;/* лайк — короткая плашка без отдельного экрана, кот со щитом виден */show('like',lk2,lk2?pop(t,24.5):1);
+ const lk2=t>=24.5&&t<26;show('like',lk2,lk2?pop(t,24.5):1);
  if(lk2){const f=ss(seg(t,24.6,25.9));$('lfill').setAttribute('y',String(440-440*f));$('lpl').textContent='+'+(1+Math.floor(seg(t,24.6,25.9)*4))+' 🛡';
   if(!hearts){hearts=[];for(let i=0;i<4;i++){const e2=document.createElement('div');e2.className='hrt';e2.textContent='❤️';$('like').appendChild(e2);hearts.push(e2)}}
   hearts.forEach((e2,i)=>{const t0=24.6+i*.35,k=seg(t,t0,t0+.45);e2.style.display=t>=t0&&k<1?'block':'none';e2.style.transform='translate('+(540+(i%2?120:-170)-55)+'px,'+Math.round(900-k*420)+'px) scale('+(1-.5*k)+')'})}
  // комментарий yo_meepo
- show('cmt',t>=25.9&&t<27.7,t>=25.9?pop(t,25.9):1);
+ show('cmt',t>=26.1&&t<27.5,t>=26.1?pop(t,26.1):1);
  // плашка Telegram в финале
  show('tgp',t>=27.5,t>=27.5?pop(t,27.5):1);
  // затемнение и вспышки
- const dark=t>=26&&t<27.5?.5:t>=12&&t<12.4?.55:1;$('map').style.filter=dark<1?'brightness('+dark+')':(t>=22.5&&t<24.5?'blur(5px) brightness(.72)':'none');
+ const dark=t>=26&&t<27.5?.5:t>=12&&t<12.4?.55:1;$('map').style.filter=dark<1?'brightness('+dark+')':(t>=22.5&&t<26?'blur(5px) brightness(.72)':'none');
  $('flash').style.opacity=t>=1.3&&t<1.6?(1-seg(t,1.3,1.6))*.45:t>=14.9&&t<15.15?(1-seg(t,14.9,15.15))*.35:t>=27.5&&t<27.7?(1-seg(t,27.5,27.7))*.4:0;
  }
  return true};
