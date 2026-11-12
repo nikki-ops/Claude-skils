@@ -39,7 +39,8 @@ function pop(t,t0){const k=(t-t0)/.12;return k>=1?1:k<0?1:(k<.5?1+.24*k:1.12-.24
 const W={};
 function mkCat(T){const g=new T.Group(),M=c=>new T.MeshLambertMaterial({color:c});
  const B=(w,h,d,c,x,y,z,p)=>{const m=new T.Mesh(new T.BoxGeometry(w,h,d),M(c));m.position.set(x,y,z);(p||g).add(m);return m};
- const SUIT=0x232a48,FUR=0xf0a24a,DARK=0xc4782a;
+ // по референсу gotovo/kot-mer.jpg: рыже-красный блочный кот, чёрные очки, чёрный костюм, белая рубашка, красный галстук
+ const SUIT=0x16161c,FUR=0xd0582a,DARK=0xa8441e;
  B(.6,1.4,.62,0x1a1f33,-.42,.7,0);B(.6,1.4,.62,0x1a1f33,.42,.7,0);B(.72,.26,.95,0x111111,-.42,.13,.16);B(.72,.26,.95,0x111111,.42,.13,.16);
  B(1.8,2.0,1.05,SUIT,0,2.4,0);B(.62,1.25,.06,0xffffff,0,2.8,.54);const tie=B(.24,1.05,.07,0xd8263a,0,2.62,.58);B(.32,.24,.08,0xd8263a,0,3.2,.58);
  B(.5,.5,.08,SUIT,-.55,3.05,.56).rotation.z=.5;B(.5,.5,.08,SUIT,.55,3.05,.56).rotation.z=-.5;
@@ -50,13 +51,13 @@ function mkCat(T){const g=new T.Group(),M=c=>new T.MeshLambertMaterial({color:c}
  const se=new T.Mesh(new T.CylinderGeometry(.85,.85,.24,6),M(0xffffff));se.rotation.x=Math.PI/2;se.position.z=.02;sh.add(se);
  const sc2=new T.Mesh(new T.CylinderGeometry(.55,.55,.26,6),M(0x2f8fff));sc2.rotation.x=Math.PI/2;sc2.position.z=.04;sh.add(sc2);sh.visible=false;
  const head=new T.Group();head.position.set(0,4.25,0);g.add(head);
- B(2.0,1.65,1.65,FUR,0,0,0,head);B(1.05,.55,.22,0xffe2c0,0,-.4,.84,head);
+ B(2.0,1.75,1.65,FUR,0,0,0,head);B(1.15,.7,.22,0xf3d2b8,0,-.42,.84,head);
  [[-.62,1],[.62,1]].forEach(([x])=>{const e=new T.Mesh(new T.ConeGeometry(.45,.85,4),M(FUR));e.position.set(x,1.15,0);e.rotation.y=Math.PI/4;head.add(e);
   const ei=new T.Mesh(new T.ConeGeometry(.25,.5,4),M(0xff9ab0));ei.position.set(x,1.08,.18);ei.rotation.y=Math.PI/4;head.add(ei)});
  B(.25,.08,1.67,DARK,0,.79,0,head);B(.25,.08,1.67,DARK,-.45,.79,0,head);B(.25,.08,1.67,DARK,.45,.79,0,head);
- B(.4,.4,.06,0xffffff,-.45,.15,.83,head);B(.4,.4,.06,0xffffff,.45,.15,.83,head);B(.2,.26,.07,0x111111,-.42,.12,.86,head);B(.2,.26,.07,0x111111,.42,.12,.86,head);
- B(.55,.13,.08,0x5a2a10,-.45,.5,.85,head).rotation.z=-.38;B(.55,.13,.08,0x5a2a10,.45,.5,.85,head).rotation.z=.38;
- B(.24,.17,.08,0xff7a9a,0,-.22,.95,head);B(.42,.07,.07,0x5a2a10,0,-.52,.95,head);
+ // чёрные очки (хмурый взгляд — очки чуть наклонены к носу)
+ B(.72,.4,.08,0x0a0a0a,-.45,.18,.86,head).rotation.z=-.08;B(.72,.4,.08,0x0a0a0a,.45,.18,.86,head).rotation.z=.08;B(1.9,.1,.06,0x0a0a0a,0,.3,.85,head);
+ B(.2,.15,.08,0xd23a4a,0,-.18,.96,head);B(.46,.07,.07,0x3a1a0a,0,-.5,.96,head);
  [[-1,.06],[-1,-.12],[1,.06],[1,-.12]].forEach(([s,y])=>{const w=B(.9,.04,.04,0x222222,s*.85,-.3+y,.9,head);w.rotation.z=s*y*1.5});
  const tail=B(.32,.32,1.7,FUR,0,1.6,-.95);tail.rotation.x=-.7;
  g.userData={head,armR,armL,tie,sh};g.scale.setScalar(1.75);return g}
@@ -175,13 +176,13 @@ function buildCam(){const {H,r1,r2,aYo,aG,aCat}=W,yo=H.yo;
  [24.5,26,Z(cat.x,cat.z,40,out(aCat)-.2,.35,6),Z(cat.x,cat.z,36,out(aCat)-.1,.33,6)],
  [26,27.5,Z(yo.x,yo.z,44,y0,.36,yo.top+3),Z(yo.x,yo.z,38,y0+.1,.34,yo.top+3)],
  [27.5,29,Z(42,102,36,Math.PI,.2,8),Z(42,102,31,Math.PI+.12,.2,9)],
- [29,30.5,Z(yo.x,yo.z,95,y0,.9,3),Z(yo.x,yo.z,62,y0+.1,.6,4)]]}
+ [29,30.5,Z(cat.x,cat.z,46,out(aCat)+.25,.34,6),Z(cat.x,cat.z,32,out(aCat)+.35,.28,7)]]}
 
 // ---- 2D-слой: плашки, ники над домами ----
 const PLQ=[[0,1,'ЗА НОЧЬ',''],[1,2,'IMEN ЗАХВАТИЛА УЧАСТКИ!','red'],[3.5,5,'СТЕНА','imen'],[5,6.5,'ФЛАГ → IMEN','imen'],[6.5,8,'НИК ОСТАЁТСЯ <b>ТВОИМ</b>',''],
  [11,12,'КОТ-МЭР',''],[12,13.5,'ЭТО ТОЛЬКО НАЧАЛО','red'],[15,16.5,'?','big'],[19.5,21,'<span class=c>ГОЛУБОЙ</span> — ГОРОД<br><span class=p>ФИОЛЕТОВЫЙ</span> — IMEN',''],
  [21,22.5,'ЗАЩИТНИКИ ГОРОДА','blue'],[22.5,24.5,'НАПИШИ В КОММЕНТАРИИ',''],[24.5,26,'ЛАЙК = +1 ЩИТ ГОРОДУ','blue'],[27.5,29,'ИМПЕРИЯ ОБЪЯВИЛА ВОЙНУ','red'],[29,30.5,'СЕРИЯ 12 — ЗАВТРА','gold']];
-const NK=[[0,2,'yo','',''],[5,6.5,'goku','',''],[6.5,8,'goku','gold',''],[8,9.5,'doni','',''],[9.5,11,'vit','',''],[15,16.5,'max','city',' ?'],[18,19.5,'gg','gold',''],[26,27.5,'yo','city',''],[29,30.5,'yo','city','']];
+const NK=[[0,2,'yo','',''],[5,6.5,'goku','',''],[6.5,8,'goku','gold',''],[8,9.5,'doni','',''],[9.5,11,'vit','',''],[15,16.5,'max','city',' ?'],[18,19.5,'gg','gold',''],[26,27.5,'yo','city','']];
 const NAME={yo:'@yo_meepo',goku:'@oooominot',doni:'@Doni03015',vit:'@cartonsstorm',max:'@Max verstappen',gg:'@ggelv2'};
 let hearts=null;
 
@@ -220,8 +221,10 @@ window.seek=function(tv){const t=MAPT(tv);
  W.pole.instanceMatrix.needsUpdate=true;W.cloth.instanceMatrix.needsUpdate=true;W.cloth.instanceColor.needsUpdate=true;
  // кот-мэр: на стене с 11 с, у Страны Imen 27,5–29, в финале на стене у дома yo_meepo
  const cat=W.cat,ud=cat.userData;let cp=null;
- if(t>=11&&t<27.5)cp={x:W.catW.x,z:W.catW.z,y:3.4};else if(t>=27.5&&t<29)cp={x:42,z:97,y:0};else if(t>=29){const a=W.aYo;cp={x:r1.cx+Math.cos(a)*r1.R,z:r1.cz+Math.sin(a)*r1.R,y:3.4}}
- cat.visible=!!cp;if(cp){cat.position.set(cp.x,cp.y,cp.z);const cm=W.cam.position;cat.rotation.y=Math.atan2(cm.x-cp.x,cm.z-cp.z);
+ if(t>=11&&t<27.5||t>=29)cp={x:W.catW.x,z:W.catW.z,y:3.4};else if(t>=27.5&&t<29)cp={x:42,z:97,y:0};
+ // положение камеры этого кадра (W.cam ещё с прошлого кадра — на склейке кот смотрел бы не туда)
+ const K=MP.K,cpk=Math.cos(K.p),cm={x:K.tx+Math.sin(K.yaw)*cpk*K.d,z:K.tz+Math.cos(K.yaw)*cpk*K.d};
+ cat.visible=!!cp;if(cp){cat.position.set(cp.x,cp.y,cp.z);cat.rotation.y=Math.atan2(cm.x-cp.x,cm.z-cp.z);
   ud.tie.rotation.z=.15*Math.sin(t*7);const shield=t>=21&&t<27.5||t>=29;ud.sh.visible=shield;
   ud.armR.rotation.x=shield?-1.6*ss(seg(t,t>=29?29:21,(t>=29?29:21)+.35)):0;ud.armR.rotation.z=0;
   ud.head.rotation.x=t>=27.5&&t<29?-.45:.05*Math.sin(t*2);ud.head.rotation.z=t>=11&&t<12?.06*Math.sin(t*3):0}
@@ -229,7 +232,7 @@ window.seek=function(tv){const t=MAPT(tv);
  W.men.forEach((g,i)=>{let on=false;const side=(i%2?1:-1)*(1+Math.floor(i/2))*.04;
   if(t>=21&&t<27.5){on=true;const a=W.aCat+side,R0=r1.R+6+(i%3)*3,run=1-ss(seg(t,21,22.4)),R=R0+run*28;g.position.set(r1.cx+Math.cos(a)*R,0,r1.cz+Math.sin(a)*R);g.position.y=run>0?Math.abs(Math.sin(t*14+i))*.6:0}
   else if(t>=27.5&&t<29){on=true;g.position.set(42+(i-4.5)*3.2,0,90-Math.abs(i-4.5)*1.2)}
-  g.visible=on;if(on){const cm=W.cam.position;g.rotation.y=Math.atan2(cm.x-g.position.x,cm.z-g.position.z)}});
+  g.visible=on;if(on){g.rotation.y=Math.atan2(cm.x-g.position.x,cm.z-g.position.z)}});
  W.hl.material.opacity=t>=18.3&&t<19.5?.9:0;W.hl.scale.setScalar(1+.08*Math.sin(t*12));
  W.scroll.visible=t>=27.5&&t<29;
  // ники карты в серии не нужны — свои крупные плашки
