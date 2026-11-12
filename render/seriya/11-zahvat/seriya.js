@@ -3,7 +3,13 @@
 // Всё ниже — во «времени сцены» (по таймлайну stsenarii/11-zahvat.md, 0–30 с).
 // Голос привязывается таблицей AN: [время голоса, время сцены] — по паузам golos/11-zahvat.mp3.
 const SCENE_END=30;
-let AN=[[0,0],[30,30]];
+let AN=[[0,0],[1.40,1],[3.0,2],[4.7,3.5],[6.75,5],[8.95,6.5],[11.05,8],[12.8,9.5],[14.85,11],[16.55,12],[18.55,13.5],[20.9,15],[22.0,16.5],[24.6,19.5],[25.45,21],[27.2,22.5],[29.85,24.5],[31.6,26],[32.5,27.5],[34.4,29],[35.28,30]];
+// субтитры по фразам озвучки (время голоса): [секунда, слово, цвет]
+const SUBV=[[0,'за ночь'],[.75,'imen…','imen'],[1.47,'захватила'],[2.1,'участки!','red'],[3.12,'как?'],[3.88,'стеной','gold'],[4.82,'построила'],[5.45,'стену'],[5.85,'вокруг района'],
+[6.85,'флаг на крыше…'],[8.09,'уже её','imen'],[9.09,'но ник…'],[9.93,'остался твоим','gold'],[11.18,'бункер дони'],[12.15,'внутри'],[12.94,'«вкусно и точка»'],[14.18,'внутри'],
+[14.97,'кот-мэр'],[15.6,'уже на стене'],[16.74,'но это было'],[17.5,'только начало…','red'],[18.68,'вторая стена'],[19.7,'вокруг центра!','red'],[21.03,'а твой'],[21.4,'участок?','tq'],
+[22.16,'проверь участок'],[23.0,'на карте'],[23.5,'в telegram','tq'],[24.29,'ссылка'],[24.7,'в профиле'],[25.53,'кот-мэр зовёт'],[26.4,'защитников','tq'],
+[27.29,'защитить','tq'],[28.14,'или вступить','imen'],[29.13,'и ник!','gold'],[29.98,'лайк —'],[30.5,'щит городу','tq'],[31.78,'а утром…'],[32.4,''],[34.57,'завтра','gold']];
 // [время сцены, слово, цвет]
 const SUB=[[0,'за ночь'],[.5,'imen…','imen'],[1,'захватила'],[1.45,'участки!','red'],[2,'как?'],[2.7,'стеной','gold'],
 [3.5,'построила'],[4,'стену'],[4.4,'вокруг района'],[5,'флаг на крыше…'],[5.9,'уже её','imen'],[6.5,'но ник…'],[7.2,'остался твоим','gold'],
@@ -13,7 +19,7 @@ const SUB=[[0,'за ночь'],[.5,'imen…','imen'],[1,'захватила'],[1
 [21,'кот-мэр зовёт'],[21.7,'защитников','tq'],[22.5,'защитить','tq'],[23.1,'или вступить','imen'],[23.9,'и ник!','gold'],
 [24.5,'лайк —'],[25,'щит городу','tq'],[26,''],[26.2,'а утром…'],[27.5,''],[29,'завтра','gold']];
 // звук на смене кадров (время сцены): [t, файл, громкость] — render.mjs переводит во время голоса
-const SFXS=[[0,'thump',.9],[.08,'whoosh2',.45],[1,'whoosh2',.55],[1.3,'thump',.75],[2,'swish',.5],[2.3,'pop',.3],[2.55,'pop',.3],[2.8,'pop',.3],[3.05,'pop',.3],[3.5,'thump',.55],
+const SFXS=[[28.45,'whoosh2',.55],[0,'thump',.9],[.08,'whoosh2',.45],[1,'whoosh2',.55],[1.3,'thump',.75],[2,'swish',.5],[2.3,'pop',.3],[2.55,'pop',.3],[2.8,'pop',.3],[3.05,'pop',.3],[3.5,'thump',.55],
 [5,'swish',.35],[5.65,'pop',.6],[5.75,'ping',.4],[6.6,'chime',.5],[8,'swish',.4],[9.5,'whoosh2',.4],[9.75,'ping',.35],[11,'swish',.4],
 [12,'thump',.45],[12.25,'thump',.45],[12.6,'thump',.8],[13.5,'whoosh2',.5],[13.8,'pop',.3],[14.1,'pop',.3],[14.4,'pop',.3],[14.9,'thump',.7],
 [15,'ping',.5],[16.5,'pop',.5],[18.05,'pop',.4],[18.3,'pop',.4],[18.9,'chime',.45],[19.5,'shimmer',.4],[21,'chime',.5],[21.2,'thump',.4],
@@ -202,23 +208,27 @@ const NK=[[0,2,'yo','',''],[5,6.5,'goku','',''],[6.5,8,'goku','gold',''],[8,9.5,
 const NAME={yo:'@yo_meepo',goku:'@oooominot',doni:'@Doni03015',vit:'@cartonsstorm',max:'@Max verstappen',gg:'@ggelv2'};
 let hearts=null;
 
-window.seek=function(tv){const t=MAPT(tv);
+window.seek=function(tv){const t=MAPT(tv),E=window.END,LU=ss(seg(tv,E-1.5,E-.02)),t2D=tv>=E-.2?0:t,tvS=tv>=E-.2?0:tv;
  const w=$('map').contentWindow,MP=w&&w.MP;if(!MP)return false;if(!W.ready)prep(w);if(!CAM)buildCam();
  // анимации карты — по времени ролика, а не по часам компьютера
- if(!w.__vt){w.__vt=true;w.performance.now=()=>w.__VT*1000}w.__VT=tv;
+ if(!w.__vt){w.__vt=true;w.performance.now=()=>w.__VT*1000}w.__VT=tv*(1-LU);
  const T=W.T,{H,r1,r2}=W;
  // камера: внутри плана — постоянная скорость
  const c=CAM.find(a=>t>=a[0]&&t<a[1])||CAM[CAM.length-1],u=cl(0,1,(t-c[0])/(c[1]-c[0]));
  for(const k of['tx','tz','d','yaw','p'])MP.K[k]=c[2][k]+(c[3][k]-c[2][k])*u;W.ty=lerp(c[2].ty,c[3].ty,u);
- if(t>=1&&t<1.9){const a=1-seg(t,1,1.9);MP.K.yaw+=.018*a*Math.sin(t*93);MP.K.p+=.012*a*Math.sin(t*71)}
+ // петля: последние 1,5 с камера плавно возвращается в стартовую точку CAM[0] — последний кадр = первый
+ if(LU>0){if(!W.KB){const tb=MAPT(E-1.5),cb=CAM.find(a=>tb>=a[0]&&tb<a[1])||CAM[CAM.length-1],ub=cl(0,1,(tb-cb[0])/(cb[1]-cb[0]));W.KB={};for(const k of['tx','tz','d','yaw','p','ty'])W.KB[k]=cb[2][k]+(cb[3][k]-cb[2][k])*ub}
+  const S0=CAM[0][2],KB=W.KB,dy=((S0.yaw-KB.yaw)%(2*Math.PI)+3*Math.PI)%(2*Math.PI)-Math.PI,arc=Math.sin(Math.PI*LU);
+  MP.K.tx=lerp(KB.tx,S0.tx,LU);MP.K.tz=lerp(KB.tz,S0.tz,LU);MP.K.d=lerp(KB.d,S0.d,LU)+170*arc;MP.K.yaw=KB.yaw+dy*LU;MP.K.p=lerp(KB.p,S0.p,LU)+.25*arc;W.ty=lerp(KB.ty,S0.ty,LU)}
+ if(LU===0&&t>=1&&t<1.9){const a=1-seg(t,1,1.9);MP.K.yaw+=.018*a*Math.sin(t*93);MP.K.p+=.012*a*Math.sin(t*71)}
  if(t>=27.5&&t<28){const a=1-seg(t,27.5,28);MP.K.yaw+=.012*a*Math.sin(t*90)}
  // свет
- const night=t<.9?1:t<1.6?1-seg(t,.9,1.6):t>=29?1:0,dawn=t<.9?0:t<2.4?Math.sin(Math.PI*seg(t,.9,2.4)):0;
+ let night=t<.9?1:t<1.6?1-seg(t,.9,1.6):t>=29?1:0,dawn=t<.9?0:t<2.4?Math.sin(Math.PI*seg(t,.9,2.4)):0;if(LU>0){night=LU;dawn=0}
  const lk=night.toFixed(2)+dawn.toFixed(2);if(lk!==W.lk){look(night,dawn);W.lk=lk}
  // стены: первая растёт за ночь (0–1,4), вторая — на ре-хуке (12,7–14,9)
- const k1=t<1.4?ss(seg(t,0,1.4)):1,f1=t<1.3?0:ss(seg(t,1.3,1.5));
+ const k1=(t<1.4?ss(seg(t,0,1.4)):1)*(1-LU),f1=(t<1.3?0:ss(seg(t,1.3,1.5)))*(1-LU);
  setWall(W.w1,k1,seg(t,12.3,13.3)*(t<29?1:0),f1);
- const k2=seg(t,12.7,14.9),f2=t<14.9?0:ss(seg(t,14.9,15.1));setWall(W.w2,k2,0,f2);W.w2.im.visible=W.w2.ie.visible=k2>0;
+ const k2=seg(t,12.7,14.9)*(1-LU),f2=(t<14.9?0:ss(seg(t,14.9,15.1)))*(1-LU);setWall(W.w2,k2,0,f2);W.w2.im.visible=W.w2.ie.visible=k2>0;
  const wide=(t>=2&&t<3.5)||(t>=13.5&&t<15)||(t>=19.5&&t<21)||(t>=22.5&&t<24.5);
  W.w1.zone.material.opacity=wide&&t>=1.3?.32:0;W.w2.zone.material.opacity=wide&&t>=14.9?.32:0;
  W.w1.line.material.opacity=wide&&k1>.99?.9:0;W.w2.line.material.opacity=wide?.9*k2:0;
@@ -229,9 +239,10 @@ window.seek=function(tv){const t=MAPT(tv);
  const fs=t>=19.5&&t<21?4.2:wide?2.2:1;
  W.FL.forEach((h,i)=>{let im=h.im;if(h.r1)im=t>=1.3;if(h.r2)im=t>=14.9;let k=im?1:0;
   if(h===H.goku)k=t<5.6?0:ss(seg(t,5.6,5.8));if(h===H.vit)k=t>=9.7?1:0;if(h===H.max&&t>=15&&t<16.5)k=Math.floor(t*5)%2;if(h===H.yo&&t>=26.6)k=1-ss(seg(t,26.6,26.8));
+  if(!h.im||h.r1||h.r2)k*=1-LU;
   const big=(h===H.goku||h===H.vit||h===H.max||h===H.yo)?1.9:1,sc2=big*fs;
   cc.copy(cB).lerp(cP,k);W.cloth.setColorAt(i,cc);
-  e.set(0,.3*Math.sin(t*2+i),0);q.setFromEuler(e);
+  e.set(0,.3*Math.sin(2*Math.PI*Math.round(E/3)*tv/E+i),0);q.setFromEuler(e);
   p.set(h.x,h.top+1.6*sc2,h.z);s.set(sc2,3.2*sc2,sc2);m.compose(p,new T.Quaternion(),s);W.pole.setMatrixAt(i,m);
   p.set(h.x+Math.cos(e.y)*1.15*sc2,h.top+2.55*sc2,h.z-Math.sin(e.y)*1.15*sc2);s.set(sc2,sc2,sc2);m.compose(p,q,s);W.cloth.setMatrixAt(i,m)});
  W.pole.instanceMatrix.needsUpdate=true;W.cloth.instanceMatrix.needsUpdate=true;W.cloth.instanceColor.needsUpdate=true;
@@ -240,7 +251,7 @@ window.seek=function(tv){const t=MAPT(tv);
  if(t>=11&&t<27.5||t>=29)cp={x:W.catW.x,z:W.catW.z,y:3.4};else if(t>=27.5&&t<29)cp={x:42,z:90,y:1.9};
  // положение камеры этого кадра (W.cam ещё с прошлого кадра — на склейке кот смотрел бы не туда)
  const K=MP.K,cpk=Math.cos(K.p),cm={x:K.tx+Math.sin(K.yaw)*cpk*K.d,z:K.tz+Math.cos(K.yaw)*cpk*K.d};
- cat.visible=!!cp;if(cp){cat.position.set(cp.x,cp.y,cp.z);cat.rotation.y=Math.atan2(cm.x-cp.x,cm.z-cp.z);
+ cat.visible=!!cp&&LU<.3;cat.scale.setScalar(.36*Math.max(.001,1-ss(seg(LU,.06,.28))));if(cp){cat.position.set(cp.x,cp.y,cp.z);cat.rotation.y=Math.atan2(cm.x-cp.x,cm.z-cp.z);
   // 11 — хмурится, руки скрещены; 21 — кричит, машет защитникам; 22,5–27,5 — гордо держит щит; 27,5 — шок, очки съехали; 29 — решительно, кулак вверх
   const E=t<12?'angry':t<22.5?'shout':t<27.5?'proud':t<29?'shock':'brave';
   ud.mS.visible=E==='proud'||E==='brave';ud.mF.visible=E==='angry';ud.mO.visible=E==='shout'||E==='shock';
@@ -267,15 +278,16 @@ window.seek=function(tv){const t=MAPT(tv);
  W.men.forEach((g,i)=>{let on=false;const side=(i%2?1:-1)*(1+Math.floor(i/2))*.04;
   if(t>=21&&t<27.5){on=true;const a=W.aCat+side*.6,R0=r1.R-3-(i%3)*1.8,run=1-ss(seg(t,21,22.4)),R=R0-run*24;g.position.set(r1.cx+Math.cos(a)*R,0,r1.cz+Math.sin(a)*R);g.position.y=run>0?Math.abs(Math.sin(t*14+i))*.6:0}
   else if(t>=27.5&&t<29){on=true;g.position.set(42+(i<5?-1:1)*(2.4+(i%5)*1.7),0,95+(i%5)*1.4)}
-  g.visible=on;if(on){g.rotation.y=Math.atan2(cm.x-g.position.x,cm.z-g.position.z)}});
+  g.visible=on&&LU<.3;g.scale.setScalar(.75*Math.max(.001,1-ss(seg(LU,.06,.28))));if(on){g.rotation.y=Math.atan2(cm.x-g.position.x,cm.z-g.position.z)}});
  W.hl.material.opacity=t>=18.3&&t<19.5?.9:0;W.hl.scale.setScalar(1+.08*Math.sin(t*12));
  W.scroll.visible=t>=27.5&&t<29;W.ped.visible=W.scroll.visible;
  // ники карты в серии не нужны — свои крупные плашки
  const d=w.document;if(!d.getElementById('vcs')){const st=d.createElement('style');st.id='vcs';st.textContent='.mpn{display:none!important}';d.head.appendChild(st)}
  MP.draw();
- // ---- 2D ----
- const sb=[...SUB].reverse().find(a=>t>=a[0]);const S=$('sub'),tx=sb?sb[1]:'';S.textContent=tx;S.className='o '+(sb&&sb[2]||'');
- S.style.fontSize=(tx.length>12?Math.max(78,Math.round(118*12/tx.length)):118)+'px';S.style.transform='scale('+(sb?pop(t,sb[0]):1)+')';
+ // ---- 2D ---- (в последние 0,2 с — как в первом кадре, чтобы петля была без склейки)
+ {const t=t2D;
+ const sb=[...SUBV].reverse().find(a=>tvS>=a[0]);const S=$('sub'),tx=sb?sb[1]:'';S.textContent=tx;S.className='o '+(sb&&sb[2]||'');
+ S.style.fontSize=(tx.length>12?Math.max(78,Math.round(118*12/tx.length)):118)+'px';S.style.transform='scale('+(sb?pop(tvS,sb[0]):1)+')';
  const pq=PLQ.find(a=>t>=a[0]&&t<a[1]);show('plq',!!pq,pq?pop(t,pq[0]):1);if(pq){$('plq').className='o '+pq[3];$('plq').firstChild.innerHTML=pq[2]}
  // счётчик участков
  const cn=t>=2&&t<3.5?'<b>'+Math.round(W.N1*ss(seg(t,2.1,3.2)))+'</b> УЧАСТКОВ':t>=13.5&&t<15?W.N1+' → <b>'+Math.round(W.N1+W.N2*ss(seg(t,13.6,14.9)))+'</b> УЧАСТКОВ':'';
@@ -303,4 +315,5 @@ window.seek=function(tv){const t=MAPT(tv);
  // затемнение и вспышки
  const dark=t>=26&&t<27.5?.5:t>=12&&t<12.4?.55:1;$('map').style.filter=dark<1?'brightness('+dark+')':(t>=22.5&&t<26?'blur(5px) brightness(.72)':'none');
  $('flash').style.opacity=t>=1.3&&t<1.6?(1-seg(t,1.3,1.6))*.45:t>=14.9&&t<15.15?(1-seg(t,14.9,15.15))*.35:t>=27.5&&t<27.7?(1-seg(t,27.5,27.7))*.4:0;
+ }
  return true};
