@@ -112,32 +112,39 @@ function setWall(Wl,k,open,flagK){const T=W.T,m=new T.Matrix4(),q=new T.Quaterni
   const u=b.gate?0:cl(0,1,(k*1.12-da)/.12),h=ss(u);
   e.set(0,-b.a-Math.PI/2,0);q.setFromEuler(e);
   p.set(r.cx+Math.cos(b.a)*r.R,1.7*h,r.cz+Math.sin(b.a)*r.R);s.set(1,Math.max(.001,h),1);m.compose(p,q,s);Wl.im.setMatrixAt(i,m);
-  p.y=3.4*h+.5;s.set(i%2?1:.001,Math.max(.001,h),1);m.compose(p,q,s);Wl.ie.setMatrixAt(i,m)}
+  const nc=Wl.catA!=null&&Math.abs(((b.a-Wl.catA)%(2*Math.PI)+3*Math.PI)%(2*Math.PI)-Math.PI)*r.R<4.5;p.y=3.4*h+.5;s.set(i%2&&!nc?1:.001,Math.max(.001,h),1);m.compose(p,q,s);Wl.ie.setMatrixAt(i,m)}
  Wl.im.instanceMatrix.needsUpdate=true;Wl.ie.instanceMatrix.needsUpdate=true;
  Wl.tw.forEach(g=>{const b=bl[g.userData.i];const da=Math.abs(((b.a-Wl.start)%(2*Math.PI)+3*Math.PI)%(2*Math.PI)-Math.PI)/Math.PI;const h=ss(cl(0,1,(k*1.12-da)/.12));
   g.scale.set(1,Math.max(.001,h),1);g.userData.fl.visible=flagK>0;g.userData.fl.scale.setScalar(Math.max(.001,flagK))});
  if(Wl.gate){Wl.gate.visible=k>.98;const o=ss(open)*1.35;Wl.gate.userData.dl.rotation.y=o;Wl.gate.userData.dr.rotation.y=-o}}
 const inR=(h,r)=>Math.hypot(h.x-r.cx,h.z-r.cz)<r.R-2;
-function prep(w){const T=w.THREE,sc=w.eval('sc'),L=w.MLIST||w.eval('MLIST');Object.assign(W,{T,sc,L,cam:w.eval('cam')});
+function prep(w){const T=w.THREE,sc=w.eval('sc'),L=w.MLIST||w.eval('MLIST');Object.assign(W,{T,sc,L,cam:w.eval('cam')});const MAP0=[...sc.children];
  const F=re=>L.find(h=>re.test(h.n)&&h.g);
  const H={yo:F(/^yo_meepo$/i),goku:F(/^oooominot$/i),doni:F(/^Doni03015$/i),vit:F(/^cartonsstorm$/i),max:F(/^Max verstappen$/i),gg:F(/^ggelv2$/i),kot:F(/^KAPAOKE_KOT$/)};
  for(const k in H)if(!H[k]){console.log('нет дома',k);H[k]={x:162,z:-64,top:6,n:k}}W.H=H;
  const ring=(hs,pad)=>{const cx=hs.reduce((s,h)=>s+h.x,0)/hs.length,cz=hs.reduce((s,h)=>s+h.z,0)/hs.length;return{cx,cz,R:Math.max(...hs.map(h=>Math.hypot(h.x-cx,h.z-cz)))+pad}};
  const r1=ring([H.yo,H.goku,H.doni],22),r2=ring([H.kot,H.vit,H.max],22);W.r1=r1;W.r2=r2;
+ {const keep=new Set(Object.values(H).map(h=>h.g)),band=(x,z)=>[r1,r2].some(r=>Math.abs(Math.hypot(x-r.cx,z-r.cz)-r.R)<7);let nh=0;
+  L.forEach(h=>{if(h.g&&!keep.has(h.g)&&band(h.x,h.z)){h.g.visible=false;h.hid=true;nh++}});
+  const bx=new T.Box3(),sz=new T.Vector3(),v=new T.Vector3();
+  MAP0.forEach(o=>{if(!o.visible||keep.has(o)||o.isLight||o.isInstancedMesh)return;o.getWorldPosition(v);if(!v.x&&!v.z)return;if(!band(v.x,v.z))return;
+   bx.setFromObject(o);bx.getSize(sz);if(Math.max(sz.x,sz.z)<24&&sz.y<40){o.visible=false;nh++}});console.log('убрано у стен',nh)}
  W.aYo=Math.atan2(H.yo.z-r1.cz,H.yo.x-r1.cx);W.aG=Math.atan2(r2.cz-r1.cz,r2.cx-r1.cx);
  W.ftex=texIMEN(w);
  W.w1=mkWall(w,r1,W.aG);W.w1.start=W.aYo+Math.PI;
  {const ta=W.w1.tw.map(g=>W.w1.bl[g.userData.i].a).sort((a,b)=>a-b),mids=ta.map((a,i)=>i<ta.length-1?(a+ta[i+1])/2:(a+ta[0]+2*Math.PI)/2),dA=(a,b)=>Math.abs(((a-b)%(2*Math.PI)+3*Math.PI)%(2*Math.PI)-Math.PI);
   W.aCat=mids.filter(a=>dA(a,W.aG)>.12).sort((a,b)=>dA(a,W.aG+.3)-dA(b,W.aG+.3))[0]}W.w2=mkWall(w,r2,null);W.w2.start=Math.atan2(r1.cz-r2.cz,r1.cx-r2.cx)+Math.PI;
  // флаги на крышах: голубой — город, фиолетовый — IMEN
- const FL=L.filter(h=>h.g&&!h.anon&&!h.site&&!h.bld&&h.day<=10&&h.top);W.FL=FL;
+ const FL=L.filter(h=>h.g&&!h.hid&&!h.anon&&!h.site&&!h.bld&&h.day<=10&&h.top);W.FL=FL;
  FL.forEach(h=>{h.r1=inR(h,r1);h.r2=!h.r1&&inR(h,r2);h.im=h.district==='Страна Imen'});
  W.N1=FL.filter(h=>h.r1).length;W.N2=FL.filter(h=>h.r2).length;console.log('участков внутри стен',W.N1,W.N2);
  W.pole=new T.InstancedMesh(new T.CylinderGeometry(.08,.08,1,5),new T.MeshLambertMaterial({color:0xe8ecf2}),FL.length);
  W.cloth=new T.InstancedMesh(new T.BoxGeometry(2.3,1.45,.07),new T.MeshLambertMaterial({color:0xffffff}),FL.length);
  const c0=new T.Color(0x3fa8ff);FL.forEach((h,i)=>W.cloth.setColorAt(i,c0));sc.add(W.pole);sc.add(W.cloth);
  // кот-мэр и защитники
- W.cat=mkCat(T);W.cat.visible=false;sc.add(W.cat);
+ W.w1.catA=W.aCat;W.cat=mkCat(T);W.cat.visible=false;sc.add(W.cat);
+ // постамент у ворот Imen — кот выше субтитров
+ W.ped=new T.Mesh(new T.BoxGeometry(2.8,1.9,2.8),new T.MeshLambertMaterial({color:0x8d7a68}));W.ped.position.set(42,.95,90);W.ped.visible=false;sc.add(W.ped);
  W.men=[];for(let i=0;i<10;i++){const g=mkMan(T,i);g.visible=false;sc.add(g);W.men.push(g)}
  // подсветка дома ggelv2 и свиток войны на воротах Страны Imen
  W.hl=new T.Mesh(new T.RingGeometry(6.5,8,48),new T.MeshBasicMaterial({color:0xf7c24a,transparent:true,opacity:0,side:T.DoubleSide,depthWrite:false}));W.hl.rotation.x=-Math.PI/2;W.hl.position.set(H.gg.x,.4,H.gg.z);sc.add(W.hl);
@@ -229,7 +236,7 @@ window.seek=function(tv){const t=MAPT(tv);
  W.pole.instanceMatrix.needsUpdate=true;W.cloth.instanceMatrix.needsUpdate=true;W.cloth.instanceColor.needsUpdate=true;
  // кот-мэр: на стене с 11 с, у Страны Imen 27,5–29, в финале на стене у дома yo_meepo
  const cat=W.cat,ud=cat.userData;let cp=null;
- if(t>=11&&t<27.5||t>=29)cp={x:W.catW.x,z:W.catW.z,y:3.4};else if(t>=27.5&&t<29)cp={x:42,z:92,y:0};
+ if(t>=11&&t<27.5||t>=29)cp={x:W.catW.x,z:W.catW.z,y:3.4};else if(t>=27.5&&t<29)cp={x:42,z:90,y:1.9};
  // положение камеры этого кадра (W.cam ещё с прошлого кадра — на склейке кот смотрел бы не туда)
  const K=MP.K,cpk=Math.cos(K.p),cm={x:K.tx+Math.sin(K.yaw)*cpk*K.d,z:K.tz+Math.cos(K.yaw)*cpk*K.d};
  cat.visible=!!cp;if(cp){cat.position.set(cp.x,cp.y,cp.z);cat.rotation.y=Math.atan2(cm.x-cp.x,cm.z-cp.z);
@@ -261,7 +268,7 @@ window.seek=function(tv){const t=MAPT(tv);
   else if(t>=27.5&&t<29){on=true;g.position.set(42+(i<5?-1:1)*(2.4+(i%5)*1.7),0,95+(i%5)*1.4)}
   g.visible=on;if(on){g.rotation.y=Math.atan2(cm.x-g.position.x,cm.z-g.position.z)}});
  W.hl.material.opacity=t>=18.3&&t<19.5?.9:0;W.hl.scale.setScalar(1+.08*Math.sin(t*12));
- W.scroll.visible=t>=27.5&&t<29;
+ W.scroll.visible=t>=27.5&&t<29;W.ped.visible=W.scroll.visible;
  // ники карты в серии не нужны — свои крупные плашки
  const d=w.document;if(!d.getElementById('vcs')){const st=d.createElement('style');st.id='vcs';st.textContent='.mpn{display:none!important}';d.head.appendChild(st)}
  MP.draw();

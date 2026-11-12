@@ -16,7 +16,7 @@ const port=srv.address().port;
 const args=SWS?['--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader']:['--ignore-gpu-blocklist','--enable-gpu-rasterization','--use-angle=default'];
 const b=await chromium.launch({executablePath:EXE,args});
 const p=await b.newPage({viewport:{width:1080,height:1920},deviceScaleFactor:SC});
-p.on('pageerror',e=>console.log('Ошибка страницы:',e.message));p.on('console',m=>{if(/нет дома|участков/.test(m.text()))console.log(m.text())});
+p.on('pageerror',e=>console.log('Ошибка страницы:',e.message));p.on('console',m=>{if(/нет дома|участков|убрано/.test(m.text()))console.log(m.text())});
 await p.goto(`http://127.0.0.1:${port}/render/seriya/${ID}/index.html`);
 await p.waitForFunction(()=>{const w=document.getElementById('map').contentWindow;return w&&w.MP},null,{timeout:180000});
 await p.waitForTimeout(2500);await p.evaluate(()=>window.seek(0));await p.waitForTimeout(500);
