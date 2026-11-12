@@ -162,10 +162,6 @@ function prep(w){const T=w.THREE,sc=w.eval('sc'),L=w.MLIST||w.eval('MLIST');Obje
  W.ty=0;const cam=W.cam;cam.lookAt=function(x,y,z){this.position.y+=W.ty;T.Object3D.prototype.lookAt.call(this,x,y+W.ty,z)};
  // свет: запомнить исходный
  W.LT=[];sc.traverse(o=>{if(o.isLight)W.LT.push([o,o.intensity,o.color.clone(),o.groundColor?o.groundColor.clone():null])});W.sky=sc.children.find(o=>o.isMesh&&o.material&&o.material.side===T.BackSide);
- // мусор переднего плана: объекты карты (дома героев не трогаем) — центр, радиус, нижняя точка
- {const keep=new Set(Object.values(H).map(h=>h.g)),bx=new T.Box3(),sz=new T.Vector3(),c=new T.Vector3();W.occ=[];
-  MAP0.forEach(o=>{if(!o.visible||keep.has(o)||o.isLight||o.isInstancedMesh||o===W.sky)return;bx.setFromObject(o);if(bx.isEmpty())return;bx.getSize(sz);bx.getCenter(c);const r=Math.max(sz.x,sz.z)/2;
-   if(r>30||sz.y>60||(!c.x&&!c.z))return;W.occ.push({o,x:c.x,z:c.z,r,y0:bx.min.y})})}
  W.ready=true}
 // ночь (индиго) → рассвет (оранжевый) → день
 function look(night,dawn){const T=W.T,sc=W.sc,c=new T.Color(),c2=new T.Color();
@@ -198,9 +194,9 @@ function buildCam(){const {H,r1,r2,aYo,aG,aCat}=W,yo=H.yo;
  [16.5,18,Z(H.gg.x+40,H.gg.z+30,170,.3,1.2),Z(H.gg.x,H.gg.z,100,.32,1.25)],
  [18,19.5,Z(H.gg.x,H.gg.z,62,.35,1.15),Z(H.gg.x,H.gg.z,42,.4,1.05)],
  [19.5,21,Z(mid.x,mid.z,430,.4,1.25),Z(mid.x,mid.z,390,.5,1.2)],
- [21,22.5,Z(cat.x,cat.z,14,out(aCat)+Math.PI-.45,.3,2.6),Z(cat.x,cat.z,11.5,out(aCat)+Math.PI-.35,.28,2.8)],
+ [21,22.5,Z(cat.x,cat.z,14,out(aCat)+Math.PI+.1,.3,2.6),Z(cat.x,cat.z,11.5,out(aCat)+Math.PI+.2,.28,2.8)],
  [22.5,24.5,Z(r1.cx,r1.cz,150,y0+.5,.75),Z(r1.cx,r1.cz,135,y0+.7,.72)],
- [24.5,26,Z(cat.x,cat.z,8,out(aCat)+Math.PI-.6,.22,4.2),Z(cat.x,cat.z,7,out(aCat)+Math.PI-.5,.2,4.3)],
+ [24.5,26,Z(cat.x,cat.z,8,out(aCat)+Math.PI-.1,.22,4.2),Z(cat.x,cat.z,7,out(aCat)+Math.PI,.2,4.3)],
  [26,27.5,Z(yo.x,yo.z,44,y0,.36,yo.top+3),Z(yo.x,yo.z,38,y0+.1,.34,yo.top+3)],
  [27.5,29,Z(42,96,15,Math.PI,.2,3.2),Z(42,96,12.5,Math.PI+.1,.22,3.5)],
  [29,30.5,Z(cat.x,cat.z,10,out(aCat)+.1,.24,4.3),Z(cat.x,cat.z,6,out(aCat)+.2,.16,4.5)]]}
@@ -227,12 +223,6 @@ window.seek=function(tv){const t=MAPT(tv),E=window.END,LU=ss(seg(tv,E-1.5,E-.02)
   MP.K.tx=lerp(KB.tx,S0.tx,LU);MP.K.tz=lerp(KB.tz,S0.tz,LU);MP.K.d=lerp(KB.d,S0.d,LU)+170*arc;MP.K.yaw=KB.yaw+dy*LU;MP.K.p=lerp(KB.p,S0.p,LU)+.25*arc;W.ty=lerp(KB.ty,S0.ty,LU)}
  if(LU===0&&t>=1&&t<1.9){const a=1-seg(t,1,1.9);MP.K.yaw+=.018*a*Math.sin(t*93);MP.K.p+=.012*a*Math.sin(t*71)}
  if(t>=27.5&&t<28){const a=1-seg(t,27.5,28);MP.K.yaw+=.012*a*Math.sin(t*90)}
- {const Kc=MP.K,pc=Math.cos(Kc.p),cmc={x:Kc.tx+Math.sin(Kc.yaw)*pc*Kc.d,z:Kc.tz+Math.cos(Kc.yaw)*pc*Kc.d},near=Kc.d<90&&LU===0,dx=Kc.tx-cmc.x,dz=Kc.tz-cmc.z,L2=dx*dx+dz*dz||1;
-  const catShot=LU===0&&((t>=11&&t<12)||(t>=21&&t<27.5)||t>=29),cw=W.catW;W.near=near;W.cm=cmc;W.Kd=Kc.d;
-  W.occ.forEach(q=>{let hide=false;if(near){const ex=q.x-cmc.x,ez=q.z-cmc.z,u=Math.max(0,Math.min(1,(ex*dx+ez*dz)/L2)),px=cmc.x+dx*u-q.x,pz=cmc.z+dz*u-q.z,dt=Math.hypot(q.x-Kc.tx,q.z-Kc.tz);
-   if(dt>q.r+5&&(Math.hypot(ex,ez)<.5*Kc.d+q.r||(u<.85&&Math.hypot(px,pz)<q.r+2)))hide=true}
-   if(catShot&&cw&&q.y0>2&&Math.hypot(q.x-cw.x,q.z-cw.z)<40)hide=true;
-   if(!!q.o.userData.__h!==hide){q.o.visible=!hide;q.o.userData.__h=hide}})}
  // свет
  let night=t<.9?1:t<2.2?1-ss(seg(t,.9,2.2)):t>=29?1:0,dawn=t<.9?0:t<2.8?Math.sin(Math.PI*seg(t,.9,2.8)):0;// плавно, без миганияif(LU>0){night=LU;dawn=0}
  const lk=night.toFixed(2)+dawn.toFixed(2);if(lk!==W.lk){look(night,dawn);W.lk=lk}
@@ -251,7 +241,7 @@ window.seek=function(tv){const t=MAPT(tv),E=window.END,LU=ss(seg(tv,E-1.5,E-.02)
  W.FL.forEach((h,i)=>{let im=h.im;if(h.r1)im=t>=1.3;if(h.r2)im=t>=14.9;let k=im?1:0;
   if(h===H.goku)k=t<5.6?0:ss(seg(t,5.6,5.8));if(h===H.vit)k=t>=9.7?1:0;if(h===H.max&&t>=15&&t<16.5)k=Math.floor(t*5)%2;if(h===H.yo&&t>=26.6)k=1-ss(seg(t,26.6,26.8));
   if(!h.im||h.r1||h.r2)k*=1-LU;
-  const big=(h===H.goku||h===H.vit||h===H.max||h===H.yo)?1.9:1,nearCam=W.near&&Math.hypot(h.x-MP.K.tx,h.z-MP.K.tz)>8&&(Math.hypot(h.x-W.cm.x,h.z-W.cm.z)<.5*W.Kd||(()=>{const K2=MP.K,dx=K2.tx-W.cm.x,dz=K2.tz-W.cm.z,L2=dx*dx+dz*dz||1,u=((h.x-W.cm.x)*dx+(h.z-W.cm.z)*dz)/L2;return u>0&&u<.85&&Math.hypot(W.cm.x+dx*u-h.x,W.cm.z+dz*u-h.z)<5&&Math.hypot(h.x-K2.tx,h.z-K2.tz)>8})()),sc2=nearCam?.001:big*fs;
+  const big=(h===H.goku||h===H.vit||h===H.max||h===H.yo)?1.9:1,sc2=big*fs;
   cc.copy(cB).lerp(cP,k);W.cloth.setColorAt(i,cc);
   e.set(0,.3*Math.sin(2*Math.PI*Math.round(E/3)*tv/E+i),0);q.setFromEuler(e);
   p.set(h.x,h.top+1.6*sc2,h.z);s.set(sc2,3.2*sc2,sc2);m.compose(p,new T.Quaternion(),s);W.pole.setMatrixAt(i,m);
