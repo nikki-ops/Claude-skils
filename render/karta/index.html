@@ -1192,7 +1192,7 @@ MLIST.forEach((h,i)=>{if(!h.g||h.site||h.bld||h.anon||!h.g.parent||h.g.userData.
  for(let x=-4.2;x<=4.2;x+=1.05){if(Math.abs(x)<1)continue;box(d,.12,.7,.12,0xf4efe6,x,.35,4.6)}box(d,3.4,.1,.1,0xf4efe6,-2.6,.6,4.6);box(d,3.4,.1,.1,0xf4efe6,2.6,.6,4.6);
  g.add(d)})}catch(e){console.warn("decor",e)}
 var J14=[{n:'kosmo_vasya',k:'Вася — первый переселенец с Марса на J1407b · дом-ракета',t:'rocket'},{n:'РУЛЕТ',k:'ЕленаГончарова-э4е: «хочу полететь на J1407b, ник РУЛЕТ» — встречен мэром',t:'roll'},{n:'GLEB444.RF4',k:'капсула · «новая планета, я подписался»',t:'capsule'},{n:'симп-и4п',k:'«Я лечу со своим домом» — прилетел вместе с домом',t:'house'},{n:'kreilek',k:'крэй_или_илья: «Я лечу с новым домом» — 3 этажа и банан на крыше',t:'banana'},{n:'pfaissd',k:'трёхэтажный супермаркет на J1407b (дом на Марсе остаётся)',t:'market'}];
-var ZC={inf:[42,269,110],yt:[42,-60,260],tt:[102,-348,240],n10:[162,-228,240],c:[162,-84,170],city:[282,-108,170],al:[222,60,200],pz:[282,-348,200],fun:[162,156,170],cos:[282,182,210],im:[42,180,150],res:[132,228,80]};
+var ZC={inf:[42,269,110],yt:[42,-60,260],tt:[102,-348,240],n10:[162,-228,240],c:[162,-84,170],city:[282,-108,170],al:[222,60,200],pz:[282,-348,200],fun:[162,156,170],cos:[282,182,210],im:[42,180,150],res:[42,-12,90],nz:[42,60,110]};
 try{// ===== ПЕРЕПЛАНИРОВКА: спланированный город — сетка улиц, Центр с площадью, Сити, Аллея желаний, жилые районы 4×3, Промзона, Страна Imen, Сопротивление =====
 (function(){
 const PI=Math.PI,LOG={j14:0,upg:0,upgReq:0,move:0,near:0,add:0,imp:0,impFound:0,res:0,resFound:0,alley:0,lm:0};
@@ -1297,8 +1297,8 @@ let yi=0;MLIST.forEach(h=>{if(!h.g||h.site||h.bld)return;if(!h.g.children.some(i
 // ---------- 4. СЕТКА ----------
 const X0=-194,Z0=-416,PX=60,PZ=48,CW=52,cx0=i=>X0+PX*i,cz0=j=>Z0+PZ*j,cd=j=>j===14?26:40;
 const ZN={},setZ=(c0,c1,r0,r1,n)=>{for(let i=c0;i<=c1;i++)for(let j=r0;j<=r1;j++)ZN[i+','+j]=n};
-setZ(7,8,0,2,'pz');setZ(5,6,6,7,'plaza');setZ(5,6,5,5,'cb');setZ(5,6,8,8,'cb');setZ(7,8,6,6,'city');setZ(5,8,9,10,'al');setZ(5,6,11,12,'fun');setZ(7,8,11,13,'cos');setZ(3,4,11,13,'im');setZ(5,5,13,13,'res');setZ(7,8,14,14,'air');setZ(3,4,14,14,'inf');
-const MERGED=['pz','plaza','al','fun','cos','im','air','inf'],merged=(a,b)=>{const x=ZN[a],y=ZN[b];return x&&x===y&&MERGED.includes(x)};
+setZ(7,8,0,2,'pz');setZ(5,6,6,7,'plaza');setZ(5,6,5,5,'cb');setZ(5,6,8,8,'cb');setZ(7,8,6,6,'city');setZ(5,8,9,10,'al');setZ(5,6,11,12,'fun');setZ(7,8,11,13,'cos');setZ(3,4,11,13,'im');setZ(3,4,8,8,'res');setZ(3,4,9,10,'nz');setZ(7,8,14,14,'air');setZ(3,4,14,14,'inf');
+const MERGED=['pz','plaza','al','fun','cos','im','air','inf','res','nz'],merged=(a,b)=>{const x=ZN[a],y=ZN[b];return x&&x===y&&MERGED.includes(x)};
 function plots(i,j,dense,c3){const cols=c3?3:dense?5:4,rows=j===14?2:3,pw=CW/cols,pd=cd(j)/rows,o=[];for(let r=0;r<rows;r++)for(let c=0;c<cols;c++)o.push({x:cx0(i)+pw*(c+.5),z:cz0(j)+pd*(r+.5),ry:r===0?PI:0,pw,pd});return o}
 const fitP=(h,p)=>h.f.w<=p.pw-.5&&h.f.d<=p.pd-.5;
 // ---------- 5. РАСПРЕДЕЛЕНИЕ ----------
@@ -1342,7 +1342,7 @@ const IMG=MLIST.find(h=>h.bld&&h.district==='Страна Imen');if(IMG){IMG.g.p
  subj.forEach((h,k)=>{const s=sl[Math.floor(k*sl.length/subj.length)];place(h,s[0],s[1],s[2],'Страна Imen')});
  IMEN.forEach(h=>{if(/o13sova/i.test(h.n)){place(h,42,269,PI,'Заражённая зона');h.kind+=' · заражение расползается от дома'}if(/Imen_Brawl/i.test(h.n))place(h,57.5,140,0,'Страна Imen')})}
 // Сопротивление
-place(RESI[0],116,219,0,'Сопротивление');place(RESI[2],116,240,PI,'Сопротивление');place(RESI[1],148,240,PI,'Сопротивление');
+place(RESI[0],-4,-21,0,'Сопротивление');place(RESI[2],-4,0,PI,'Сопротивление');place(RESI[1],28,0,PI,'Сопротивление');
 // ждут рейса — у аэропорта рядом с космодромом
 WAIT.forEach((h,i)=>place(h,236+i*13,262,0,'Космодром · ждут рейса'));
 // основатель — в центре площади
@@ -1432,7 +1432,18 @@ pl(112,136,PM(0x5f636c,3),282,-348,.07);for(let x=226;x<=338;x+=4){box(sc,.3,2.4
  lab(g,'СОПРОТИВЛЕНИЕ · ПРОТИВ ИМПЕРИИ',8,1.2,'#5a1a1a','#ffffff',132,1.4,207.2);box(g,.3,2,.3,0x2a2a2e,128,1,207);box(g,.3,2,.3,0x2a2a2e,136,1,207);
  const k=new THREE.Group();box(k,12,3.4,6,0x6a7a4a,0,1.7,0);box(k,12.4,.4,6.4,0x4a5a3a,0,3.6,0);door(k,0,3);lab(k,'КАЗАРМА',4,.8,'#3a4a2a','#ffffff',0,2.7,3.05);k.position.set(147,0,220);g.add(k);
  for(let i=0;i<6;i++)figure(g,0x5a6a3a,141+i*2.2,225.5,1.1);const t=new THREE.Group();box(t,3.4,.8,2,0x4a6a3a,0,.6,0);box(t,1.8,.7,1.4,0x5a7a4a,0,1.3,0);box(t,2.2,.2,.2,0x3a4a2a,1.6,1.4,0);t.position.set(154,0,213);g.add(t);
- for(let x=140;x<=156;x+=1.2){box(g,.12,.9,.12,0xf4efe6,x,.45,233);box(g,.12,.9,.12,0xf4efe6,x,.45,247)}for(let z=233;z<=247;z+=1.2){box(g,.12,.9,.12,0xf4efe6,140,.45,z);box(g,.12,.9,.12,0xf4efe6,156,.45,z)}sc.add(g)}
+ for(let x=140;x<=156;x+=1.2){box(g,.12,.9,.12,0xf4efe6,x,.45,233);box(g,.12,.9,.12,0xf4efe6,x,.45,247)}for(let z=233;z<=247;z+=1.2){box(g,.12,.9,.12,0xf4efe6,140,.45,z);box(g,.12,.9,.12,0xf4efe6,156,.45,z)}g.position.set(-120,0,-240);sc.add(g)}
+// база Сопротивления (север) и нейтральная полоса до стены Империи
+{const g=new THREE.Group();pl(116,44,PM(0x5a6a4a,3),42,-12,.06);
+ for(let x=-12;x<=96;x+=1.6){box(g,1.4,.7,1.4,0xc9b48a,x,.35,6.5);box(g,1.4,.7,1.4,0xb8a478,x+.8,1.05,6.5)}
+ [[44,-6],[64,-6],[84,-6]].forEach(a=>{box(g,4,1.2,4,0x5a6a4a,a[0],.6,a[1]);const b=box(g,.5,.5,4,0x2a2a2e,a[0],1.6,a[1]+2.4);b.rotation.x=-.25});
+ const fl=flag(g,74,-20,12,cvTex(256,160,(x,w,hh)=>{x.fillStyle='#1d2a6a';x.fillRect(0,0,w,hh);x.fillStyle='#ffffff';x.beginPath();for(let i=0;i<10;i++){const r=i%2?14:36,a=-PI/2+i*PI/5;x.lineTo(w/2+Math.cos(a)*r,hh/2+Math.sin(a)*r)}x.fill();x.font='900 22px Arial Black';x.textAlign='center';x.fillText('ПРОКСИМА',w/2,hh-14)}),6);
+ lab(g,'СОПРОТИВЛЕНИЕ · БАЗА',10,1.6,'#5a1a1a','#ffffff',54,2.2,7.4);for(let i=0;i<8;i++)figure(g,0x5a6a3a,40+i*3,1,1.1);sc.add(g)}
+{const g=new THREE.Group(),SC=PM(0x4a2e26,3),CR=PM(0x2a1a16,4),W=0x8a8d92;pl(116,92,SC,42,60,.06);
+ [[0,30,4],[22,48,3],[60,36,5],[86,70,4],[10,82,3.5],[50,90,3],[74,22,3]].forEach(a=>{const m=new THREE.Mesh(new THREE.CircleGeometry(a[2],12),CR);m.rotation.x=-PI/2;m.position.set(a[0],.09,a[1]);sc.add(m)});
+ [20,100].forEach(z=>{for(let x=-12;x<=96;x+=4){box(g,.25,1.8,.25,0x3a3a3e,x,.9,z)}[0.6,1.2,1.7].forEach(y=>box(g,108,.06,.06,W,42,y,z))});
+ for(let i=0;i<14;i++){const x=-6+(i%7)*16+(i>6?8:0),z=i>6?78:42,h=new THREE.Group();[0,1,2].forEach(k=>{const b=box(h,3.4,.35,.35,0x6a6e76,0,1,0);b.rotation.set(k===2?PI/2:0,k*PI/3,k===2?0:.6)});h.position.set(x,0,z);g.add(h)}
+ [[42,20,0],[42,100,PI]].forEach(a=>{const s=new THREE.Group();[-3,3].forEach(x=>box(s,.3,3.4,.3,0x2a2d34,x,1.7,0));lab(s,'НЕЙТРАЛЬНАЯ ПОЛОСА · ЛИНИЯ ФРОНТА',7.6,1.1,'#5a1a1a','#ffe0d0',0,3,.2);s.position.set(a[0],0,a[1]);s.rotation.y=a[2];g.add(s)});sc.add(g)}
 pl(112,88,PM(0x9a6a50,3),162,156,.05);
 // Страна Imen: земля, стена с башнями, флаги, ворота
 {const g=new THREE.Group(),W=0xb88a5a;pl(116,140,PM(0x9a6040,3),42,180,.06);for(let z=112;z<158;z+=4)for(let x=0;x<3;x++)pl(2.6,4,TIL[(x+z/4)%2|0],39.4+x*2.6,z+2,.08);for(let z=116;z<156;z+=8)[35,49].forEach(x=>flag(g,x,z,6,tri('#2fae4a','#f4f4f4','#ff8a2a'),2));const seg=(x1,z1,x2,z2)=>{const L=Math.hypot(x2-x1,z2-z1),m=box(g,L,3.4,1.2,W,(x1+x2)/2,1.7,(z1+z2)/2);m.rotation.y=-Math.atan2(z2-z1,x2-x1);for(let t=0;t<L;t+=2.2){const k=box(g,1,.8,1.3,0xa87a4a,x1+(x2-x1)*t/L,3.8,z1+(z2-z1)*t/L);k.rotation.y=m.rotation.y}};
@@ -1465,7 +1476,7 @@ for(let i=0;i<30;i++){const R=RT[i%RT.length],w=new THREE.Group();figure(w,[0xd9
 // ---------- 7. ПОДПИСИ РАЙОНОВ ----------
 const cen=d=>{const a=MLIST.filter(h=>h.district===d&&!h.site);if(!a.length)return null;return[a.reduce((s,h)=>s+h.x,0)/a.length,a.reduce((s,h)=>s+h.z,0)/a.length]};
 const yt=cen('Район YouTube'),tt=cen('Район TikTok'),n10=cen('Новостройки');ZC.nv=n10?[n10[0],n10[1],220]:null;if(yt)ZC.yt=[yt[0],yt[1],260];if(tt)ZC.tt=[tt[0],tt[1],240];if(n10)ZC.n10=[n10[0],n10[1],240];
-const LBL=[['ЦЕНТР','#f7c24a',162,-84],...(n10?[['НОВОСТРОЙКИ','#ffffff',n10[0],n10[1]]]:[]),...(FREEC.length?[(()=>{const fc=FREEC.reduce((a,c)=>[a[0]+cx0(c[0])+26,a[1]+cz0(c[1])+20],[0,0]);return['СВОБОДНО: '+NFREE+' УЧАСТКОВ','#ffffff',fc[0]/FREEC.length,fc[1]/FREEC.length]})()]:[]),['РАЙОН YOUTUBE','#ff5a5a',ZC.yt[0],ZC.yt[1]],['РАЙОН TIKTOK','#5fe0ff',ZC.tt[0],ZC.tt[1]],['СИТИ','#9fd4ff',282,-108],['АЛЛЕЯ ЖЕЛАНИЙ','#f7c24a',222,60],['ПРОМЗОНА','#f7c24a',282,-348],['ЗОНА РАЗВЛЕЧЕНИЙ','#6fe07a',162,156],['КОСМОДРОМ','#ffffff',282,182],['СТРАНА IMEN','#6fe07a',42,180],['СОПРОТИВЛЕНИЕ','#ff6a5a',132,228],['АЭРОПОРТ','#ffffff',300,269],['ЗАРАЖЕНИЕ O13SOVA','#c06aff',42,269]];
+const LBL=[['ЦЕНТР','#f7c24a',162,-84],...(n10?[['НОВОСТРОЙКИ','#ffffff',n10[0],n10[1]]]:[]),...(FREEC.length?[(()=>{const fc=FREEC.reduce((a,c)=>[a[0]+cx0(c[0])+26,a[1]+cz0(c[1])+20],[0,0]);return['СВОБОДНО: '+NFREE+' УЧАСТКОВ','#ffffff',fc[0]/FREEC.length,fc[1]/FREEC.length]})()]:[]),['РАЙОН YOUTUBE','#ff5a5a',ZC.yt[0],ZC.yt[1]],['РАЙОН TIKTOK','#5fe0ff',ZC.tt[0],ZC.tt[1]],['СИТИ','#9fd4ff',282,-108],['АЛЛЕЯ ЖЕЛАНИЙ','#f7c24a',222,60],['ПРОМЗОНА','#f7c24a',282,-348],['ЗОНА РАЗВЛЕЧЕНИЙ','#6fe07a',162,156],['КОСМОДРОМ','#ffffff',282,182],['СТРАНА IMEN','#6fe07a',42,180],['СОПРОТИВЛЕНИЕ','#ff6a5a',42,-12],['ЛИНИЯ ФРОНТА','#ff8a6a',42,60],['АЭРОПОРТ','#ffffff',300,269],['ЗАРАЖЕНИЕ O13SOVA','#c06aff',42,269]];
 LBL.forEach((q,i)=>{let d=DL[i];if(!d){const e=document.createElement('div');e.className='o';e.style.cssText=DL[0].e.style.cssText;st.appendChild(e);d={e,x:0,z:0};DL.push(d)}d.e.textContent=q[0];d.e.style.color=q[1];d.e.style.fontSize=q[0].length>14?'4.4em':'5.4em';d.x=q[2];d.z=q[3]});
 window.__PLAN={roads:RD,log:LOG,spare:SPARE.length,free:NFREE,freeCells:FREEC.length,park:PARK.length,over:OVER.length};console.log('replan',JSON.stringify(window.__PLAN.log));
 })();
