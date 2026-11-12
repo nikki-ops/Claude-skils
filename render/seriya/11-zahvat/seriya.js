@@ -55,19 +55,25 @@ function mkCat(T){const g=new T.Group(),M=c=>new T.MeshLambertMaterial({color:c}
  [[-.62,1],[.62,1]].forEach(([x])=>{const e=new T.Mesh(new T.ConeGeometry(.45,.85,4),M(FUR));e.position.set(x,1.15,0);e.rotation.y=Math.PI/4;head.add(e);
   const ei=new T.Mesh(new T.ConeGeometry(.25,.5,4),M(0xff9ab0));ei.position.set(x,1.08,.18);ei.rotation.y=Math.PI/4;head.add(ei)});
  B(.25,.08,1.67,DARK,0,.79,0,head);B(.25,.08,1.67,DARK,-.45,.79,0,head);B(.25,.08,1.67,DARK,.45,.79,0,head);
- // чёрные очки (хмурый взгляд — очки чуть наклонены к носу)
- B(.72,.4,.08,0x0a0a0a,-.45,.18,.86,head).rotation.z=-.08;B(.72,.4,.08,0x0a0a0a,.45,.18,.86,head).rotation.z=.08;B(1.9,.1,.06,0x0a0a0a,0,.3,.85,head);
- B(.2,.15,.08,0xd23a4a,0,-.18,.96,head);B(.4,.07,.07,0x3a1a0a,0,-.52,.96,head);B(.1,.07,.07,0x3a1a0a,-.24,-.47,.96,head);B(.1,.07,.07,0x3a1a0a,.24,-.47,.96,head);
- [[-1,.06],[-1,-.12],[1,.06],[1,-.12]].forEach(([s,y])=>{const w=B(.9,.04,.04,0x222222,s*.85,-.3+y,.9,head);w.rotation.z=s*y*1.5});
+ // лицо: очки (от удивления съезжают на нос), глаза под ними, брови, три рта — эмоции меняются по сюжету
+ const gl=new T.Group();head.add(gl);B(.72,.4,.08,0x0a0a0a,-.45,.18,.88,gl);B(.72,.4,.08,0x0a0a0a,.45,.18,.88,gl);B(1.9,.1,.06,0x0a0a0a,0,.3,.87,gl);
+ const eyes=new T.Group();head.add(eyes);[-1,1].forEach(k=>{B(.44,.44,.05,0xffffff,k*.45,.2,.83,eyes);B(.2,.26,.06,0x111111,k*.43,.22,.85,eyes)});eyes.visible=false;
+ const bL=B(.58,.13,.08,0x5a220a,-.45,.55,.86,head),bR=B(.58,.13,.08,0x5a220a,.45,.55,.86,head);
+ B(.2,.15,.08,0xd23a4a,0,-.18,.96,head);
+ const mS=new T.Group();head.add(mS);B(.4,.07,.07,0x3a1a0a,0,-.52,.96,mS);B(.1,.07,.07,0x3a1a0a,-.24,-.47,.96,mS);B(.1,.07,.07,0x3a1a0a,.24,-.47,.96,mS);
+ const mF=new T.Group();head.add(mF);B(.4,.07,.07,0x3a1a0a,0,-.5,.96,mF);B(.1,.07,.07,0x3a1a0a,-.24,-.55,.96,mF);B(.1,.07,.07,0x3a1a0a,.24,-.55,.96,mF);mF.visible=false;
+ const mO=new T.Group();mO.position.set(0,-.5,.96);head.add(mO);B(.36,.3,.07,0x3a1a0a,0,0,0,mO);B(.2,.1,.08,0xff7a9a,0,-.08,.01,mO);mO.visible=false;
+ [[-1,.06],[-1,-.12],[1,.06],[1,-.12]].forEach(([k,y])=>{const w=B(.9,.04,.04,0x222222,k*.85,-.3+y,.9,head);w.rotation.z=k*y*1.5});
  const tail=B(.32,.32,1.7,FUR,0,2.2,-.95);tail.rotation.x=-.7;
- g.userData={head,armR,armL,tie,sh};g.scale.setScalar(.62);return g}
+ // рост ≈ 2,4 — как человек рядом со стеной 3,4
+ g.userData={head,armR,armL,tie,sh,gl,eyes,bL,bR,mS,mF,mO,tail};g.scale.setScalar(.36);return g}
 function mkMan(T,i){const g=new T.Group(),M=c=>new T.MeshLambertMaterial({color:c}),B=(w,h,d,c,x,y,z)=>{const m=new T.Mesh(new T.BoxGeometry(w,h,d),M(c));m.position.set(x,y,z);g.add(m);return m};
  const sk=[0xf2c9a0,0xd9a77a,0xffd8b0][i%3],cl2=[0x2f6fd0,0x3f9a5a,0xe0e4ea,0x1d2a44][i%4];
  B(.32,.9,.36,0x1d2238,-.2,.45,0);B(.32,.9,.36,0x1d2238,.2,.45,0);B(.9,1.1,.5,cl2,0,1.45,0);B(.7,.7,.7,sk,0,2.35,0);B(.16,.16,.05,0x111111,-.16,2.4,.36);B(.16,.16,.05,0x111111,.16,2.4,.36);
  const s=new T.Mesh(new T.CylinderGeometry(.6,.6,.12,6),M(0x2f8fff));s.rotation.x=Math.PI/2;s.position.set(.1,1.4,.42);g.add(s);
  const s2=new T.Mesh(new T.CylinderGeometry(.35,.35,.14,6),M(0xffffff));s2.rotation.x=Math.PI/2;s2.position.set(.1,1.4,.44);g.add(s2);
  if(i%3===0){const p=B(.08,3,.08,0xd8dce4,-.6,2,0);const f=B(1.2,.75,.05,0x2f8fff,-.0,3.1,0)}
- g.scale.setScalar(1.15);return g}
+ g.scale.setScalar(.75);return g}
 function texIMEN(w){const cv=w.document.createElement('canvas');cv.width=256;cv.height=160;const x=cv.getContext('2d');
  x.fillStyle='#7b2fbe';x.fillRect(0,0,256,160);x.fillStyle='#d8263a';x.fillRect(0,112,256,48);x.fillStyle='#f7c24a';x.fillRect(0,104,256,8);
  x.fillStyle='#fff';x.font='900 72px Arial Black, Arial';x.textAlign='center';x.textBaseline='middle';x.fillText('IMEN',128,58);return new w.THREE.CanvasTexture(cv)}
@@ -166,19 +172,19 @@ function buildCam(){const {H,r1,r2,aYo,aG,aCat}=W,yo=H.yo;
  [6.5,8,Z(H.goku.x,H.goku.z,30,inYaw(H.goku,r1)+.25,.32,H.goku.top+3),Z(H.goku.x,H.goku.z,26,inYaw(H.goku,r1)+.35,.3,H.goku.top+3)],
  [8,9.5,Z(wd.x,wd.z,40,inYaw(H.doni,r1)+.5,.4,2),Z(H.doni.x,H.doni.z,28,inYaw(H.doni,r1)+.2,.42,3)],
  [9.5,11,Z(H.vit.x,H.vit.z,70,.9,.55,3),Z(H.vit.x,H.vit.z,38,1.0,.42,5)],
- [11,12,Z(cat.x,cat.z,10,out(aCat)+.15,.2,5.2),Z(cat.x,cat.z,8.5,out(aCat)+.25,.18,5.3)],
+ [11,12,Z(cat.x,cat.z,6.2,out(aCat)+.15,.18,4.4),Z(cat.x,cat.z,5.2,out(aCat)+.25,.16,4.5)],
  [12,13.5,Z(gt.x,gt.z,95,Math.atan2(-Math.cos(aG),-Math.sin(aG)),.36,4),Z(gt.x,gt.z,82,Math.atan2(-Math.cos(aG),-Math.sin(aG)),.32,4)],
  [13.5,15,Z(r2.cx,r2.cz,170,.5,1.1),Z(r2.cx,r2.cz,240,.6,1.3)],
  [15,16.5,Z(H.max.x,H.max.z,40,inYaw(H.max,r2),.38,H.max.top+3),Z(H.max.x,H.max.z,34,inYaw(H.max,r2)+.15,.34,H.max.top+3)],
  [16.5,18,Z(H.gg.x+40,H.gg.z+30,170,.3,1.2),Z(H.gg.x,H.gg.z,100,.32,1.25)],
  [18,19.5,Z(H.gg.x,H.gg.z,62,.35,1.15),Z(H.gg.x,H.gg.z,42,.4,1.05)],
  [19.5,21,Z(mid.x,mid.z,430,.4,1.25),Z(mid.x,mid.z,390,.5,1.2)],
- [21,22.5,Z(cat.x,cat.z,15,out(aCat)+.05,.24,4.2),Z(cat.x,cat.z,12.5,out(aCat)+.15,.22,4.4)],
+ [21,22.5,Z(cat.x,cat.z,14,out(aCat)+Math.PI+.1,.3,2.6),Z(cat.x,cat.z,11.5,out(aCat)+Math.PI+.2,.28,2.8)],
  [22.5,24.5,Z(r1.cx,r1.cz,150,y0+.5,.75),Z(r1.cx,r1.cz,135,y0+.7,.72)],
- [24.5,26,Z(cat.x,cat.z,13,out(aCat)-.05,.22,4.6),Z(cat.x,cat.z,11.5,out(aCat)+.05,.2,4.7)],
+ [24.5,26,Z(cat.x,cat.z,8,out(aCat)+Math.PI-.1,.22,4.2),Z(cat.x,cat.z,7,out(aCat)+Math.PI,.2,4.3)],
  [26,27.5,Z(yo.x,yo.z,44,y0,.36,yo.top+3),Z(yo.x,yo.z,38,y0+.1,.34,yo.top+3)],
- [27.5,29,Z(42,100,22,Math.PI,.12,6),Z(42,100,19,Math.PI+.1,.14,6.5)],
- [29,30.5,Z(cat.x,cat.z,17,out(aCat)+.1,.26,4.5),Z(cat.x,cat.z,10,out(aCat)+.2,.18,5)]]}
+ [27.5,29,Z(42,96,15,Math.PI,.2,3.2),Z(42,96,12.5,Math.PI+.1,.22,3.5)],
+ [29,30.5,Z(cat.x,cat.z,10,out(aCat)+.1,.24,4.3),Z(cat.x,cat.z,6,out(aCat)+.2,.16,4.5)]]}
 
 // ---- 2D-слой: плашки, ники над домами ----
 const PLQ=[[0,1,'ЗА НОЧЬ',''],[1,2,'IMEN ЗАХВАТИЛА УЧАСТКИ!','red'],[3.5,5,'СТЕНА','imen'],[5,6.5,'ФЛАГ → IMEN','imen'],[6.5,8,'НИК ОСТАЁТСЯ <b>ТВОИМ</b>',''],
@@ -223,17 +229,36 @@ window.seek=function(tv){const t=MAPT(tv);
  W.pole.instanceMatrix.needsUpdate=true;W.cloth.instanceMatrix.needsUpdate=true;W.cloth.instanceColor.needsUpdate=true;
  // кот-мэр: на стене с 11 с, у Страны Imen 27,5–29, в финале на стене у дома yo_meepo
  const cat=W.cat,ud=cat.userData;let cp=null;
- if(t>=11&&t<27.5||t>=29)cp={x:W.catW.x,z:W.catW.z,y:3.4};else if(t>=27.5&&t<29)cp={x:42,z:97,y:0};
+ if(t>=11&&t<27.5||t>=29)cp={x:W.catW.x,z:W.catW.z,y:3.4};else if(t>=27.5&&t<29)cp={x:42,z:92,y:0};
  // положение камеры этого кадра (W.cam ещё с прошлого кадра — на склейке кот смотрел бы не туда)
  const K=MP.K,cpk=Math.cos(K.p),cm={x:K.tx+Math.sin(K.yaw)*cpk*K.d,z:K.tz+Math.cos(K.yaw)*cpk*K.d};
  cat.visible=!!cp;if(cp){cat.position.set(cp.x,cp.y,cp.z);cat.rotation.y=Math.atan2(cm.x-cp.x,cm.z-cp.z);
-  ud.tie.rotation.z=.15*Math.sin(t*7);const shield=t>=21&&t<27.5||t>=29;ud.sh.visible=shield;
-  ud.armR.rotation.x=shield?-1.6*ss(seg(t,t>=29?29:21,(t>=29?29:21)+.35)):0;ud.armR.rotation.z=0;ud.armL.rotation.z=t>=21&&t<22.5?-1.35*ss(seg(t,21,21.3)):0;
-  ud.head.rotation.x=t>=27.5&&t<29?-.45:.05*Math.sin(t*2);ud.head.rotation.z=t>=11&&t<12?.06*Math.sin(t*3):0}
+  // 11 — хмурится, руки скрещены; 21 — кричит, машет защитникам; 22,5–27,5 — гордо держит щит; 27,5 — шок, очки съехали; 29 — решительно, кулак вверх
+  const E=t<12?'angry':t<22.5?'shout':t<27.5?'proud':t<29?'shock':'brave';
+  ud.mS.visible=E==='proud'||E==='brave';ud.mF.visible=E==='angry';ud.mO.visible=E==='shout'||E==='shock';
+  ud.mO.scale.set(1,E==='shout'?.55+.65*Math.abs(Math.sin(t*9)):1.3,1);
+  const sk=E==='shock'?ss(seg(t,27.6,27.85)):0;ud.gl.position.y=-.4*sk;ud.eyes.visible=sk>.3;ud.eyes.scale.set(1,1+.3*sk,1);
+  const bA={angry:.45,shout:.35,proud:0,shock:-.28,brave:.3}[E],bY={angry:.47,shout:.5,proud:.55,shock:.74,brave:.5}[E];
+  ud.bL.rotation.z=-bA;ud.bR.rotation.z=bA;ud.bL.position.y=ud.bR.position.y=bY;
+  ud.tie.rotation.z=.15*Math.sin(t*7);ud.tail.rotation.z=.35*Math.sin(t*(E==='angry'?10:3));
+  const shield=t>=21&&t<27.5||t>=29;ud.sh.visible=shield;
+  const aR=ud.armR.rotation,aL=ud.armL.rotation;aR.set(0,0,0);aL.set(0,0,0);
+  if(E==='angry'){aL.set(-1.2,0,.75);aR.set(-1.2,0,-.75)}
+  if(shield)aR.x=-1.6*ss(seg(t,t>=29?29:21,(t>=29?29:21)+.35));
+  if(E==='shout')aL.z=-1.6-.45*Math.sin(t*11);
+  if(E==='proud')aL.z=-.35;
+  if(E==='shock'){aL.z=-2.5;aR.z=2.5}
+  if(E==='brave')aL.z=-2.7*ss(seg(t,29.25,29.5));
+  const h=ud.head.rotation;h.set(0,0,0);
+  if(E==='angry'){h.x=.12;h.z=.06*Math.sin(t*16)}
+  if(E==='shout')h.x=-.15+.08*Math.sin(t*9);
+  if(E==='proud'){h.x=-.12+.06*Math.sin(t*3);h.z=.1}
+  if(E==='shock')h.x=-.5;
+  cat.position.y+=E==='shout'||E==='proud'?.08*Math.abs(Math.sin(t*6)):E==='brave'?.25*Math.sin(Math.PI*seg(t,29.2,29.5)):0}
  // защитники бегут к коту (21–22,5), стоят со щитами до 27,5, у Страны Imen 27,5–29
  W.men.forEach((g,i)=>{let on=false;const side=(i%2?1:-1)*(1+Math.floor(i/2))*.04;
-  if(t>=21&&t<27.5){on=true;const a=W.aCat+side,R0=r1.R+6+(i%3)*3,run=1-ss(seg(t,21,22.4)),R=R0+run*28;g.position.set(r1.cx+Math.cos(a)*R,0,r1.cz+Math.sin(a)*R);g.position.y=run>0?Math.abs(Math.sin(t*14+i))*.6:0}
-  else if(t>=27.5&&t<29){on=true;g.position.set(42+(i<5?-1:1)*(3.2+(i%5)*2.4),0,99+(i%5)*1.6)}
+  if(t>=21&&t<27.5){on=true;const a=W.aCat+side*.6,R0=r1.R-3-(i%3)*1.8,run=1-ss(seg(t,21,22.4)),R=R0-run*24;g.position.set(r1.cx+Math.cos(a)*R,0,r1.cz+Math.sin(a)*R);g.position.y=run>0?Math.abs(Math.sin(t*14+i))*.6:0}
+  else if(t>=27.5&&t<29){on=true;g.position.set(42+(i<5?-1:1)*(2.4+(i%5)*1.7),0,95+(i%5)*1.4)}
   g.visible=on;if(on){g.rotation.y=Math.atan2(cm.x-g.position.x,cm.z-g.position.z)}});
  W.hl.material.opacity=t>=18.3&&t<19.5?.9:0;W.hl.scale.setScalar(1+.08*Math.sin(t*12));
  W.scroll.visible=t>=27.5&&t<29;
