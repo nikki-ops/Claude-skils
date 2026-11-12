@@ -1,0 +1,76 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><title>Космодром · концепт</title>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@700;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+html,body{margin:0;overflow:hidden;font-family:Rubik,sans-serif;background:linear-gradient(#3b2a6e 0%,#b2507a 45%,#f39a4f 75%,#ffd28a 100%)}
+canvas{display:block}
+.o{position:absolute;left:0;right:0;text-align:center;pointer-events:none}
+.pl span{display:inline-block;color:#fff;font-weight:900;padding:.18em .7em;border-radius:.35em;border:.12em solid #fff;background:linear-gradient(#222845,#141829)}
+.pl.red span{background:#d8263a}.pl.gold span{background:#f7c24a;color:#1a1410}
+.hud{position:absolute;top:12%;font-weight:900;color:#fff;-webkit-text-stroke:.18em #141829;paint-order:stroke fill}
+.lbl{position:absolute;transform:translateX(-50%);text-align:center;color:#fff;font-weight:900;-webkit-text-stroke:.16em #141829;paint-order:stroke fill;white-space:nowrap}
+.lbl small{display:block;font-weight:700;-webkit-text-stroke:.1em #141829;opacity:.95}
+</style></head><body>
+<div id="ov"></div>
+<script src="modeli.js"></script>
+<script>
+const P=new URLSearchParams(location.search),SHOT=+(P.get('shot')||1),W=+(P.get('w')||1080),H=+(P.get('h')||1920);
+document.body.style.width=W+'px';document.body.style.height=H+'px';document.documentElement.style.fontSize=(W/1080*40)+'px';
+const R=new THREE.WebGLRenderer({antialias:true,alpha:true,preserveDrawingBuffer:true});R.setPixelRatio(1);R.setSize(W,H);document.body.prepend(R.domElement);
+const ov=document.getElementById('ov'),add=h=>{ov.insertAdjacentHTML('beforeend',h)};
+const {sc,sun}=KM.stepScene(R,{});const cam=new THREE.PerspectiveCamera(SHOT===1?32:50,W/H,.1,800);
+function look(x,y,z,tx,ty,tz){cam.position.set(x,y,z);cam.lookAt(tx,ty,tz)}
+function hud(budget,day){add(`<div class="hud" style="left:5%;font-size:1.3rem">ДЕНЬ ${day||1} / 30</div><div class="hud" style="right:5%;font-size:1.3rem">БЮДЖЕТ ${budget}</div>`)}
+function engine(rust){const g=new THREE.Group();KM.C(g,1.1,1.1,2.6,rust?0x7a4a2a:0xc8ccd2,0,4.3,0,16);KM.C(g,1.3,1.1,.4,rust?0x5a3a22:0x8a8d92,0,5.8,0,16);const n=new THREE.Mesh(new THREE.ConeGeometry(1.7,2.8,16,1,true),KM.M(rust?0x5a3a22:0x8a8d92));n.material.side=THREE.DoubleSide;n.position.y=1.6;g.add(n);
+ for(let i=0;i<6;i++){KM.C(g,.1,.1,2.8,rust?0x6a3a1a:0xd8b04a,Math.cos(i)*1.15,4.3,Math.sin(i)*1.15,6)}return g}
+let finalRender=()=>R.render(sc,cam);
+if(SHOT===1){// лист персонажей
+ sc.fog=null;const k=KM.kluch({text:':)',wave:1});k.position.set(-6.5,0,0);k.rotation.y=.35;sc.add(k);
+ const s=KM.seryi();s.position.set(-1.2,0,0);s.rotation.y=-.2;sc.add(s);
+ const v=KM.vorona();v.position.set(2.6,0,1.5);v.scale.setScalar(2.2);v.rotation.y=1.25;sc.add(v);
+ const r=KM.raketa({rust:1});r.position.set(7,0,-2);r.scale.setScalar(.42);sc.add(r);
+ const kd=KM.kluch({text:'ДВИГАТЕЛЯ\nНЕТ',tilt:.12});kd.position.set(-6.5,0,-9);kd.scale.setScalar(.7);kd.rotation.y=.2;// второй ракурс экрана
+ look(0,4.2,22,0,3.2,0);
+ add(`<div class="o pl gold" style="top:4%;font-size:1.3rem"><span>КОСМОДРОМ ЗА 1 ₽ · ГЕРОИ</span></div>`);
+ const L=[[-6.5,'КЛЮЧ','робот-сторож · говорит экраном и писком'],[-1.2,'СЕРЫЙ','из Агентства · лица не видно'],[2.6,'ВОРОНА','живёт на ракете'],[7,'РАКЕТА','пока без имени']];
+ finalRender=()=>{R.render(sc,cam);L.forEach(a=>{const v=new THREE.Vector3(a[0],-.4,0).project(cam);add(`<div class="lbl" style="left:${(v.x+1)/2*W}px;top:${(1-v.y)/2*H+10}px;font-size:.95rem">${a[1]}<small style="font-size:.42rem;white-space:normal;width:300px;margin:0 auto">${a[2]}</small></div>`)})};
+}
+if(SHOT===2){// хук: ракета на боку, ворона, монета
+ const st=KM.stol();st.position.set(0,0,-30);sc.add(st);const b=KM.bashnya(26);b.position.set(6,0,-32);sc.add(b);
+ const r=KM.raketa({rust:1});r.rotation.z=Math.PI/2-.06;r.position.set(4,1.6,0);sc.add(r);
+ const v=KM.vorona();v.position.set(-5,3.2,0);v.scale.setScalar(1.8);v.rotation.y=1.2;sc.add(v);
+ const m=KM.moneta();m.position.set(-4,8.5,2);m.rotation.set(.9,0,.4);m.scale.setScalar(1.4);sc.add(m);
+ look(-2,7,30,-4,4,-6);
+ add(`<div class="o pl" style="top:22%;font-size:1.6rem"><span>КОСМОДРОМ ЗА 1 ₽</span></div><div class="o" style="bottom:20%;font-size:1.25rem;font-weight:900;color:#fff;-webkit-text-stroke:.16em #141829;paint-order:stroke fill">«Ты купил космодром за 1 рубль...»</div>`);hud('5 000 000 ₽',1);
+}
+if(SHOT===3){// Ключ просыпается в ангаре
+ sc.fog=new THREE.Fog(0x1a1420,20,90);sc.children.filter(o=>o.isHemisphereLight).forEach(h=>h.intensity=.35);sun.intensity=.25;
+ const a=KM.angar();a.position.set(0,0,-4);sc.add(a);
+ for(let i=0;i<28;i++){const s=.4+(i%4)*.3;KM.B(sc,s*2,s,s*1.4,[0x6a4a3a,0x5a5e66,0x8a4a2a][i%3],-4+Math.cos(i*2.4)*(1.5+i*.12),s/2+(i%5)*.15,-2+Math.sin(i*2.4)*1.6).rotation.y=i}
+ const k=KM.kluch({text:'ПРИВЕТ,\nХОЗЯИН :)',glow:2.5});k.position.set(.5,0,1);k.rotation.y=-.25;sc.add(k);
+ const lamp=new THREE.SpotLight(0xffe0b0,1.4,40,.5,.6);lamp.position.set(-6,12,8);lamp.target=k;sc.add(lamp);
+ look(-2.5,3.2,8.5,.4,2.6,0);
+ add(`<div class="o pl" style="top:22%;font-size:1.5rem"><span>КЛЮЧ — РОБОТ-СТОРОЖ</span></div><div class="o pl red" style="bottom:18%;font-size:1.1rem"><span>−50 000 ₽ · БАТАРЕЙКА</span></div>`);hud('4 450 000 ₽',1);
+ document.body.style.background='linear-gradient(#0c0a14,#1e1626)';
+}
+if(SHOT===4){// ракета встала, кран
+ const st=KM.stol();sc.add(st);const r=KM.raketa({rust:1});r.position.set(0,1.2,0);sc.add(r);const b=KM.bashnya(26);b.position.set(-6,0,-1);sc.add(b);
+ const kr=KM.kran();kr.position.set(16,0,4);kr.rotation.y=-1.9;sc.add(kr);const g=KM.generator();g.position.set(-10,0,8);sc.add(g);
+ const k=KM.kluch({text:'УРА!',wave:1});k.position.set(5,1.2,6);k.rotation.y=-.5;k.scale.setScalar(1.1);sc.add(k);
+ look(14,6,30,0,9,0);
+ add(`<div class="o pl gold" style="top:22%;font-size:1.5rem"><span>РАКЕТА ВСТАЛА!</span></div><div class="o pl red" style="bottom:18%;font-size:1.1rem"><span>−1 200 000 ₽ · КРАН</span></div>`);hud('3 200 000 ₽',1);
+}
+if(SHOT===5){// выбор: старый двигатель / новый в кредит
+ const e1=engine(1);e1.position.set(-30,0,0);e1.rotation.z=.25;sc.add(e1);for(let i=0;i<16;i++)KM.B(sc,1+i%3*.5,.6+i%2*.6,1.2,[0x6a4a3a,0x5a5e66,0x8a4a2a][i%3],-30+Math.cos(i*2.4)*(3+i*.25),.4,Math.sin(i*2.4)*3-1).rotation.y=i;
+ const e2=engine(0);e2.position.set(30,0,0);sc.add(e2);const s=KM.seryi();s.position.set(33.5,0,.5);s.rotation.y=-.5;sc.add(s);KM.B(sc,8,.3,6,0xe8ecf2,30,.15,0);
+ const c1=new THREE.PerspectiveCamera(42,W/(H/2),.1,500);c1.position.set(-35,4,11);c1.lookAt(-30,3,0);const c2=new THREE.PerspectiveCamera(42,W/(H/2),.1,500);c2.position.set(25,4.5,11);c2.lookAt(31,3.2,0);
+ finalRender=()=>{R.setScissorTest(true);R.setViewport(0,H/2,W,H/2);R.setScissor(0,H/2,W,H/2);R.render(sc,c1);R.setViewport(0,0,W,H/2);R.setScissor(0,0,W,H/2);R.render(sc,c2);R.setScissorTest(false)};
+ add(`<div style="position:absolute;left:0;right:0;top:calc(50% - .12rem);height:.24rem;background:#fff"></div>
+ <div class="o" style="top:13%;font-size:5rem;font-weight:900;color:#f7c24a;-webkit-text-stroke:.08em #141829;paint-order:stroke fill">1</div>
+ <div class="o pl" style="top:38%;font-size:.95rem"><span>СТАРЫЙ ДВИГАТЕЛЬ 1991 г. · 3 МЛН</span></div>
+ <div class="o" style="top:58%;font-size:5rem;font-weight:900;color:#4fd6e8;-webkit-text-stroke:.08em #141829;paint-order:stroke fill">2</div>
+ <div class="o pl" style="bottom:12%;font-size:.95rem"><span>НОВЫЙ В КРЕДИТ · 20 МЛН</span></div>
+ <div class="o pl gold" style="top:47.5%;font-size:.8rem"><span>1 или 2 — В КОММЕНТЫ 👇</span></div>`);hud('3 200 000 ₽',1);
+}
+document.fonts.ready.then(()=>{finalRender();window.READY=1});
+</script></body></html>
