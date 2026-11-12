@@ -154,13 +154,14 @@ function prep(w){const T=w.THREE,sc=w.eval('sc'),L=w.MLIST||w.eval('MLIST');Obje
  // камера: цель на высоте ty (кот на стене выше земли)
  W.ty=0;const cam=W.cam;cam.lookAt=function(x,y,z){this.position.y+=W.ty;T.Object3D.prototype.lookAt.call(this,x,y+W.ty,z)};
  // свет: запомнить исходный
- W.LT=[];sc.traverse(o=>{if(o.isLight)W.LT.push([o,o.intensity])});W.sky=sc.children.find(o=>o.isMesh&&o.material&&o.material.side===T.BackSide);
+ W.LT=[];sc.traverse(o=>{if(o.isLight)W.LT.push([o,o.intensity,o.color.clone(),o.groundColor?o.groundColor.clone():null])});W.sky=sc.children.find(o=>o.isMesh&&o.material&&o.material.side===T.BackSide);
  W.ready=true}
 // ночь (индиго) → рассвет (оранжевый) → день
 function look(night,dawn){const T=W.T,sc=W.sc,c=new T.Color(),c2=new T.Color();
- W.LT.forEach(([o,i])=>o.intensity=i*(1-.5*night)*(1+.1*dawn));
- if(sc.fog){c.setHex(0xe8a98a).lerp(c2.setHex(0xff8a4a),dawn).lerp(c2.setHex(0x2a2a6a),night);sc.fog.color.copy(c);sc.fog.near=520;sc.fog.far=1100}
- if(W.sky){c.setHex(0xffffff).lerp(c2.setHex(0xffb080),dawn).lerp(c2.setHex(0x3a3a8a),night);W.sky.material.color.copy(c)}}
+ const IND=new T.Color(0x4a52ff),IND2=new T.Color(0x1c1a5a);
+ W.LT.forEach(([o,i,col,gcol])=>{o.intensity=i*(1-.28*night)*(1+.1*dawn);o.color.copy(col).lerp(IND,.88*night);if(gcol)o.groundColor.copy(gcol).lerp(IND2,.9*night)});
+ if(sc.fog){c.setHex(0xe8a98a).lerp(c2.setHex(0xff8a4a),dawn).lerp(c2.setHex(0x1e1f66),night);sc.fog.color.copy(c);sc.fog.near=520;sc.fog.far=1100}
+ if(W.sky){c.setHex(0xffffff).lerp(c2.setHex(0xffb080),dawn).lerp(c2.setHex(0x2a2f9a),night);W.sky.material.color.copy(c)}}
 
 // ---- камера: [t0,t1, от, до]; Z(цель x, z, дистанция, поворот, наклон, высота цели) ----
 const Z=(tx,tz,d,yaw,p,ty=0)=>({tx,tz,d,yaw,p,ty});
@@ -175,8 +176,8 @@ function buildCam(){const {H,r1,r2,aYo,aG,aCat}=W,yo=H.yo;
  [1,2,Z(yo.x,yo.z,62,y0+.35,.42,3),Z(yo.x,yo.z,72,y0+.45,.5,3)],
  [2,3.5,Z(r1.cx,r1.cz,150,.3,1.0),Z(r1.cx,r1.cz,240,.42,1.3)],
  [3.5,5,Z(o1.x,o1.z,36,out(aYo+.9),.3,3),Z(o2.x,o2.z,34,out(aYo+1.7),.3,3)],
- [5,6.5,Z(H.goku.x,H.goku.z,38,inYaw(H.goku,r1),.38,H.goku.top+3),Z(H.goku.x,H.goku.z,32,inYaw(H.goku,r1)+.15,.34,H.goku.top+3)],
- [6.5,8,Z(H.goku.x,H.goku.z,30,inYaw(H.goku,r1)+.25,.32,H.goku.top+3),Z(H.goku.x,H.goku.z,26,inYaw(H.goku,r1)+.35,.3,H.goku.top+3)],
+ [5,6.5,Z(H.goku.x,H.goku.z,38,inYaw(H.goku,r1)-.75,.38,H.goku.top+3),Z(H.goku.x,H.goku.z,32,inYaw(H.goku,r1)-.6,.34,H.goku.top+3)],
+ [6.5,8,Z(H.goku.x,H.goku.z,30,inYaw(H.goku,r1)-.5,.32,H.goku.top+3),Z(H.goku.x,H.goku.z,26,inYaw(H.goku,r1)-.4,.3,H.goku.top+3)],
  [8,9.5,Z(wd.x,wd.z,40,inYaw(H.doni,r1)+.5,.4,2),Z(H.doni.x,H.doni.z,28,inYaw(H.doni,r1)+.2,.42,3)],
  [9.5,11,Z(H.vit.x,H.vit.z,70,.9,.55,3),Z(H.vit.x,H.vit.z,38,1.0,.42,5)],
  [11,12,Z(cat.x,cat.z,6.2,out(aCat)+.15,.18,4.4),Z(cat.x,cat.z,5.2,out(aCat)+.25,.16,4.5)],
@@ -222,7 +223,7 @@ window.seek=function(tv){const t=MAPT(tv);
  W.w1.zone.material.opacity=wide&&t>=1.3?.32:0;W.w2.zone.material.opacity=wide&&t>=14.9?.32:0;
  W.w1.line.material.opacity=wide&&k1>.99?.9:0;W.w2.line.material.opacity=wide?.9*k2:0;
  // ночь — индиго поверх карты
- $('night').style.opacity=(night*.62).toFixed(2);
+ $('night').style.opacity=(night*.3).toFixed(2);
  // флаги на крышах
  const m=new T.Matrix4(),q=new T.Quaternion(),e=new T.Euler(),p=new T.Vector3(),s=new T.Vector3(),cB=new T.Color(0x3fa8ff),cP=new T.Color(0xa64dff),cc=new T.Color();
  const fs=t>=19.5&&t<21?4.2:wide?2.2:1;
