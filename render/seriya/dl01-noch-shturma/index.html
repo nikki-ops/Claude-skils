@@ -1,0 +1,35 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><title>Ночь штурма · демо</title>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@700;900&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#141829;--tq:#4fd6e8;--gold:#ffd860;--red:#ff5a6a;--imen:#a64dff;--city:#3fa8ff}
+html,body{margin:0;width:1920px;height:1080px;overflow:hidden;background:#0b0a10;font-family:Rubik,sans-serif}
+#map{position:absolute;inset:0;width:1920px;height:1080px;border:0}
+.o{position:absolute;left:0;right:0;text-align:center;pointer-events:none}
+#night{position:absolute;inset:0;pointer-events:none;background:#2b2a8a;mix-blend-mode:multiply;opacity:0}
+#vg{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at center,rgba(20,8,4,0) 50%,rgba(20,8,4,.45) 100%)}
+#flash{position:absolute;inset:0;background:#fff3d0;opacity:0;pointer-events:none}
+#sub{top:880px;font-weight:900;font-size:76px;line-height:1.05;color:#fff;-webkit-text-stroke:14px var(--ink);paint-order:stroke fill;text-shadow:0 9px 0 var(--ink)}
+#sub.gold{color:var(--gold)}#sub.red{color:var(--red)}#sub.tq{color:var(--tq)}#sub.imen{color:#d49bff}
+#plq{top:70px}#plq span{display:inline-block;color:#fff;font-weight:900;font-size:58px;padding:12px 40px;border-radius:20px;border:5px solid #fff;background:linear-gradient(#222845,#141829)}
+#plq.red span{background:#d8263a}#plq.imen span{background:#7b2fbe}#plq.blue span{background:#1f6fd6}#plq.gold span{background:#f7c24a;color:#1a1410}
+#clock{left:40px;top:40px;right:auto;font-weight:900;font-size:52px;color:#fff;-webkit-text-stroke:10px var(--ink);paint-order:stroke fill}
+#wave{right:40px;left:auto;top:44px;width:360px;text-align:left}#wave .l{font-weight:900;font-size:30px;color:#fff;-webkit-text-stroke:7px var(--ink);paint-order:stroke fill}
+#wave .b{height:22px;border-radius:12px;background:#141829;border:4px solid #fff;margin-top:6px;overflow:hidden}#wave .b i{display:block;height:100%;width:0;background:linear-gradient(90deg,#a64dff,#ff3b5c)}
+#cnt{top:200px}#cnt span{display:inline-block;background:linear-gradient(#222845,#141829);color:#fff;font-weight:900;font-size:84px;padding:14px 50px;border-radius:26px;border:6px solid #f7c24a}#cnt b{color:#f7c24a}
+#hint{top:190px}#hint span{display:inline-block;background:rgba(20,24,41,.88);color:#fff;font-weight:900;font-size:64px;padding:14px 44px;border-radius:24px}#hint b{color:#ffd860}
+#vote{top:330px}#vote .bs{display:flex;gap:40px;justify-content:center}#vote .b{width:560px;padding:40px 0;border-radius:36px;color:#fff;font-weight:900;font-size:72px;border:7px solid #fff;box-shadow:0 14px 0 rgba(0,0,0,.3)}
+#vote .b.d{background:#1f6fd6}#vote .b.j{background:#7b2fbe}#vote .n{margin-top:26px;font-weight:900;font-size:52px;color:#fff;-webkit-text-stroke:10px var(--ink);paint-order:stroke fill}
+#demo{right:30px;left:auto;bottom:24px;top:auto;font-weight:700;font-size:26px;color:rgba(255,255,255,.75)}
+</style></head><body>
+<iframe id="map" src="../../karta/index.html?video"></iframe>
+<div id="night"></div><div id="vg"></div><div id="flash"></div>
+<div class="o" id="clock">22:00</div>
+<div class="o" id="wave"><div class="l">ВОЛНА IMEN</div><div class="b"><i id="wv"></i></div></div>
+<div class="o" id="plq"><span></span></div>
+<div class="o" id="cnt"><span></span></div>
+<div class="o" id="hint"><span></span></div>
+<div class="o" id="vote"><div class="bs"><div class="b d">🛡 ОТБИТЬ</div><div class="b j">🤝 ДОГОВОРИТЬСЯ</div></div><div class="n">+ ТВОЙ НИК — В КОММЕНТАРИИ</div></div>
+<div class="o" id="sub"></div>
+<div class="o" id="demo">ДЕМО · без озвучки</div>
+<script src="seriya.js"></script>
+</body></html>
