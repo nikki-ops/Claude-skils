@@ -60,7 +60,7 @@ function base(){mode=1;night(0);LAMPS.forEach(l=>l.intensity=0);lampMat.color.se
  rocket.position.set(0,1.6,0);rocket.rotation.set(0,0,Math.PI/2);crow.position.set(-6,3.25,0);crow.rotation.set(0,1.3,0);crow.visible=true;coin.position.set(-3.5,1.7,2);coin.rotation.set(Math.PI/2-.3,0,0);
  gen.position.set(12,0,9);tractor.position.set(-60,0,32);weeds.forEach(w=>w.visible=true);marks.forEach(m=>m.visible=false);cable.visible=false;kluch.visible=false;battery.visible=false;namePl.visible=false;hatchM.visible=false;win.material.color.set(0x141018);kluch.rotation.set(0,0,0);kluch.scale.setScalar(1);kluch.userData.head.rotation.set(0,0,0)}
 const SCN={
-hook(t,u){coin.position.set(-3.5,t<1.5?lerp(14,1.7,ease(t/1.5)**1.5):1.7+Math.abs(Math.sin((t-1.5)*9))*1.2*Math.max(0,1-(t-1.5)*2),2);coin.rotation.set(Math.PI/2-.3,t*3,0);crow.position.y=3.25+Math.sin(t*5)*.05;look(lv([-1,7,34],[-2,6.5,30],u),V(-4,4,0))},
+hook(t,u){coin.position.set(-3.5,t<1.5?lerp(14,1.7,ease(t/1.5)**1.5):1.7+Math.abs(Math.sin((t-1.5)*9))*1.2*Math.max(0,1-(t-1.5)*2),2);coin.rotation.set(Math.PI/2-.3,Math.sin(t*4)*.25,0);crow.position.y=3.25+Math.sin(t*5)*.05;look(lv([-1,7,34],[-2,6.5,30],u),V(-4,4,0))},
 cond(t,u){look(lv([-2,6.5,30],[8,12,46],ease(u)),lv([-4,4,0],[-4,9,-4],ease(u)))},
 fine(t,u){const d=ease(seg(t,7.6,8));stamper.position.set(0,lerp(8,0,d),2.6);stamp.visible=t>=8;stamp.material.opacity=Math.min(1,(t-8)*4);look(V(OX+lerp(-1,0,u),17-u*2,9),V(OX,0,.5))},
 safe(t,u){door.rotation.y=-ease(seg(t,10.2,11))*1.9;look(V(-200+lerp(5,3,u),5.5,17-u*2),V(-200,3,0))},
@@ -76,22 +76,22 @@ crane(t,u){const k=ease(seg(t,35.2,37.6));rocket.position.set(0,lerp(1.6,1.2,k),
  cable.visible=t>34;const top=V(-Math.sin(rocket.rotation.z)*15,rocket.position.y+Math.cos(rocket.rotation.z)*15,0),tip=V(14,26,4);cable.position.copy(top.clone().add(tip).multiplyScalar(.5));cable.scale.y=top.distanceTo(tip);cable.lookAt(tip);cable.rotateX(Math.PI/2);
  kluch.visible=true;kluch.position.set(7,1.2,7);kluch.rotation.y=-.6;kluch.scale.setScalar(.9);look(lv([20,8,40],[16,12,42],u),V(0,8,0))},
 hatch(t,u){rocket.position.set(0,1.2,0);rocket.rotation.z=0;crow.visible=false;kluch.visible=true;kluch.position.set(-3.5,1.2,4.5);kluch.rotation.y=.6;
- kluch.userData.head.rotation.z=t>45&&t<46?Math.sin(t*30)*.08:0;kluch.userData.scr.material.color.setHex(t>=45?0xff8a8a:0xffffff);hatchM.visible=t>42.8;look(lv([-7,4.5,15],[-6,4,13],u),V(-1.5,3,0))},
+ kluch.userData.head.rotation.z=t>45&&t<46?Math.sin(t*30)*.08:0;kluch.userData.scr.material.color.setHex(t>=45?0xff8a8a:0xffffff);hatchM.visible=t>42.8;look(lv([-10,4.2,20],[-9,4,18],u),V(-1.5,2.6,0))},
 choice(t,u){mode=2;const s1=ease(seg(t,53,53.6)),s2=ease(seg(t,60,60.6));E1.position.x=-900-(1-s1)*20;E2.position.x=900+(1-s2)*20;seryi2.position.x=903.5+(1-s2)*20;
- c1.position.set(-905,4,11);c1.lookAt(-900,3,0);c2.position.set(895,4.5,11);c2.lookAt(901,3.2,0)},
+ c1.position.set(-905,4,11);c1.lookAt(-900,3,0);c2.position.set(895,4.5,11);c2.lookAt(901,1.4,0)},
 name(t,u){rocket.position.set(0,1.2,0);rocket.rotation.z=0;crow.visible=false;namePl.visible=true;namePl.position.set(0,7.2,1.65);namePl.material.map=nameTex[Math.floor(t*2.5)%2];look(V(0,7.2,lerp(6,5,u)),V(0,7.2,0))},
 night(t,u){night(1);rocket.position.set(0,1.2,0);rocket.rotation.z=0;crow.visible=false;LAMPS.forEach(l=>l.intensity=1.2);lampMat.color.set(0xfff3c0);
  win.material.color.set(t>76&&(Math.floor(t*7)%3!==0)?0xffe89a:0x141018);kluch.visible=true;kluch.position.set(8,1.2,8);kluch.rotation.y=t>75.2?-1.1:-.4;
  const e=ease(seg(t,78,79.2));look(lv([-6,7,30],[6,4.8,14.5],e),lv([10,4,-2],[8.3,4.4,8],e));if(t>=82.6){hemi.intensity=.1}}
 };
 UI.init(document.getElementById('ov'),W,H);
-window.seek=t=>{base();const s=S.scene(t);SCN[s.id](t,s.u);screen(t);if(mode===2){R.setScissorTest(true);R.setViewport(0,H/2,W,H/2);R.setScissor(0,H/2,W,H/2);R.render(sc,c1);R.setViewport(0,0,W,H/2);R.setScissor(0,0,W,H/2);R.render(sc,c2);R.setScissorTest(false);R.setViewport(0,0,W,H)}else R.render(sc,cam);
+window.seek=t=>{base();const s=S.scene(t);if(s.id==='name'||s.id==='choice')cam.clearViewOffset();else cam.setViewOffset(W,H,0,150,W,H);coin.visible=t<7;SCN[s.id](t,s.u);screen(t);if(mode===2){R.setScissorTest(true);R.setViewport(0,H/2,W,H/2);R.setScissor(0,H/2,W,H/2);R.render(sc,c1);R.setViewport(0,0,W,H/2);R.setScissor(0,0,W,H/2);R.render(sc,c2);R.setScissorTest(false);R.setViewport(0,0,W,H)}else R.render(sc,cam);
  UI.update(t,S);chUI(t)};
 // подписи выбора 1/2 поверх (как в 2D)
 const ch=document.createElement('div');ch.style.cssText='position:absolute;inset:0;pointer-events:none;font-family:Rubik,sans-serif';document.getElementById('ov').appendChild(ch);
 function chUI(t){if(t<51||t>=69){ch.innerHTML='';return}const a1=t<60||t>=66,a2=t>=60,pl=(top,txt)=>`<div style="position:absolute;left:12%;right:12%;top:${top}px;text-align:center"><span style="display:inline-block;background:linear-gradient(#222845,#141829);color:#fff;font-weight:900;font-size:34px;padding:10px 26px;border-radius:16px;border:5px solid #fff">${txt}</span></div>`;
  ch.innerHTML=`<div style="position:absolute;left:0;right:0;top:${H/2-6}px;height:12px;background:#fff"></div>${a1?'':`<div style="position:absolute;left:0;right:0;top:0;height:${H/2}px;background:rgba(10,8,20,.55)"></div>`}${a2?'':`<div style="position:absolute;left:0;right:0;top:${H/2}px;height:${H/2}px;background:rgba(10,8,20,.55)"></div>`}
- <div style="position:absolute;left:60px;top:470px;font-weight:900;font-size:170px;color:#f7c24a;-webkit-text-stroke:12px #1b1426;paint-order:stroke fill">1</div><div style="position:absolute;left:60px;top:1360px;font-weight:900;font-size:170px;color:#4fd6e8;-webkit-text-stroke:12px #1b1426;paint-order:stroke fill">2</div>
- ${t>=53.3?pl(H*.405,'СТАРЫЙ 1991 г. · 3 МЛН'):''}${t>=60.3?pl(H*.905,'НОВЫЙ В КРЕДИТ · 20 МЛН'):''}`}
+ <div style="position:absolute;left:60px;top:470px;font-weight:900;font-size:170px;color:#f7c24a;-webkit-text-stroke:12px #1b1426;paint-order:stroke fill">1</div><div style="position:absolute;left:60px;top:1030px;font-weight:900;font-size:170px;color:#4fd6e8;-webkit-text-stroke:12px #1b1426;paint-order:stroke fill">2</div>
+ ${t>=53.3?pl(H*.405,'СТАРЫЙ 1991 г. · 3 МЛН'):''}${t>=60.3?pl(1310,'НОВЫЙ В КРЕДИТ · 20 МЛН'):''}`}
 window.END=S.END;Promise.all([document.fonts.load('900 40px Rubik'),document.fonts.load('700 40px Rubik')]).then(()=>{seek(0);window.READY=1});
 </script></body></html>
