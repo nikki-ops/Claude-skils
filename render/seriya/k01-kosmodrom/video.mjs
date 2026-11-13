@@ -18,7 +18,7 @@ const frame=async t=>{await p.evaluate(t=>window.seek(t),t);await p.evaluate(()=
 if(KADRY){const dir=path.join(ROOT,'render/_istochniki/kosmodrom/kadry');fs.mkdirSync(dir,{recursive:true});
  for(const t of KADRY.split(',').map(Number)){await frame(t);const f=path.join(dir,`${V}${VAR?'-'+VAR:''}-${String(t).replace('.','_')}.png`);await p.screenshot({path:f});console.log(f)}await b.close();srv.close();process.exit(0)}
 const END=await p.evaluate(()=>window.END),N=Math.round(END*FPS),SFX=await p.evaluate(()=>window.SFXV?window.SFXV():SER.SFX);
-const voice=path.join(ROOT,'golos/k01-kosmodrom.mp3'),hasV=fs.existsSync(voice),music=path.join(ROOT,'muzyka/trevoga-100bpm.mp3'),hasM=fs.existsSync(music)&&fs.existsSync(music.replace(/\.mp3$/,'.litsenziya.md'));
+const voice=path.join(ROOT,'golos/k01-kosmodrom.mp3'),hasV=fs.existsSync(voice)&&(VAR==='pravki'||process.argv.includes('--golos')),music=path.join(ROOT,'muzyka/trevoga-100bpm.mp3'),hasM=fs.existsSync(music)&&fs.existsSync(music.replace(/\.mp3$/,'.litsenziya.md'));
 const SFXD=path.join(ROOT,'render/seriya/10-777-domov/sfx');let ain=[],fc='',lab=[],k=1;
 if(hasV){ain.push('-i',voice);fc+=`[${k}]loudnorm=I=-16:TP=-2,aformat=channel_layouts=stereo[v];`;lab.push('[v]');k++}
 if(hasM){ain.push('-stream_loop','-1','-i',music);fc+=`[${k}]volume=${hasV?0.12:0.32},atrim=0:${END},afade=t=in:d=0.5,afade=t=out:st=${END-2}:d=2[m];`;lab.push('[m]');k++}

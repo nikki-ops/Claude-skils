@@ -120,9 +120,12 @@ night(t,u){const e=ease(seg(t,78,79.2)),z=1+e*1.1,hx=W*.5,hy=H*.92-230;cam(z,hx,
 UI.init(document.getElementById('ov'),W,H);
 const VAR=new URLSearchParams(location.search).get('var')||'';
 const CUTS={pravki:[[0,69],[74,86]],korotko:[[0,9.6],[14.4,16.9],[26.8,31],[34.8,39.4],[44.8,50],[52.9,58],[59.9,64.9],[65.9,69],[77.6,86]]}[VAR]||[[0,S.END]];
-const OUTEND=CUTS.reduce((a,c)=>a+c[1]-c[0],0);
-const mapT=t=>{let o=0;for(const c of CUTS){const d=c[1]-c[0];if(t<o+d)return{src:c[0]+(t-o),dt:t-o,first:o===0};o+=d}const c=CUTS[CUTS.length-1];return{src:c[1]-.001,dt:9,first:false}};
-window.SFXV=()=>{const out=[];let o=0;for(const c of CUTS){S.SFX.forEach(q=>{if(q[0]>=c[0]&&q[0]<c[1])out.push([o+q[0]-c[0],q[1],q[2]])});o+=c[1]-c[0]}return out};
+// версия «с правками» идёт под голос: [время голоса, время сцены]; сцена «имя ракеты» (69–74) пропускается
+const AN=[[0,0],[1.57,1.6],[3.04,3],[4,3.8],[7.64,7],[8.67,8],[11.48,10],[13.52,12],[14.65,13],[16.36,14.6],[18.55,16.3],[20.29,18],[22.25,19.4],[24.81,21.2],[25.76,22],[28.41,25],[31.02,27],[32.74,28.4],[34.66,30.2],[36.74,32],[38.77,33.6],[40.72,35.2],[42.9,37.6],[44.04,39.2],[46.64,42],[48.38,43.4],[49.52,45],[50.8,46.4],[52.24,48],[54.34,49.6],[55.49,51],[57.11,53],[61.4,55.5],[63.72,57.6],[66.43,60],[69.87,62.8],[72.91,64.6],[74.22,66],[76.44,68.99],[76.45,74],[77.28,75.2],[78.9,77.5],[82.69,82],[85.4,86]];
+const USE_AN=VAR==='pravki';const ip=(A,t,i,j)=>{if(t<=A[0][i])return A[0][j];for(let k=1;k<A.length;k++)if(t<=A[k][i]){const a=A[k-1],b=A[k];return b[i]===a[i]?b[j]:a[j]+(b[j]-a[j])*(t-a[i])/(b[i]-a[i])}return A[A.length-1][j]};
+const OUTEND=USE_AN?AN[AN.length-1][0]:CUTS.reduce((a,c)=>a+c[1]-c[0],0);
+const mapT=t=>{if(USE_AN)return{src:Math.min(S.END-.001,ip(AN,t,0,1)),dt:9,first:true};let o=0;for(const c of CUTS){const d=c[1]-c[0];if(t<o+d)return{src:c[0]+(t-o),dt:t-o,first:o===0};o+=d}const c=CUTS[CUTS.length-1];return{src:c[1]-.001,dt:9,first:false}};
+window.SFXV=()=>{if(USE_AN)return S.SFX.filter(q=>q[0]<69||q[0]>=74).map(q=>[ip(AN,q[0],1,0),q[1],q[2]]);const out=[];let o=0;for(const c of CUTS){S.SFX.forEach(q=>{if(q[0]>=c[0]&&q[0]<c[1])out.push([o+q[0]-c[0],q[1],q[2]])});o+=c[1]-c[0]}return out};
 const dip=document.createElement('div');dip.style.cssText='position:absolute;inset:0;background:#000;pointer-events:none;opacity:0';document.getElementById('ov').appendChild(dip);
 window.seek=to=>{const m=mapT(to),t=m.src;dip.style.opacity=(!m.first&&m.dt<.12)?(1-m.dt/.12)*.8:0;x.setTransform(1,0,0,1,0,0);x.clearRect(0,0,W,H);const sc=S.scene(t);OFF=(sc.id==='choice'||sc.id==='name')?0:-300;try{SCN[sc.id](t,sc.u)}catch(e){console.error(e)}x.setTransform(1,0,0,1,0,0);UI.update(t,S)};
 window.END=OUTEND;Promise.all([document.fonts.load('900 40px Rubik'),document.fonts.load('700 40px Rubik')]).then(()=>{seek(0);window.READY=1});
