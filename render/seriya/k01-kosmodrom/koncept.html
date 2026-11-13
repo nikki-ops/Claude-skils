@@ -12,7 +12,7 @@ canvas{display:block}
 .lbl small{display:block;font-weight:700;-webkit-text-stroke:.1em #141829;opacity:.95}
 </style></head><body>
 <div id="ov"></div>
-<script src="modeli.js"></script>
+<script src="modeli.js"></script><script src="tablo.js"></script>
 <script>
 const P=new URLSearchParams(location.search),SHOT=+(P.get('shot')||1),W=+(P.get('w')||1080),H=+(P.get('h')||1920);
 document.body.style.width=W+'px';document.body.style.height=H+'px';document.documentElement.style.fontSize=(W/1080*40)+'px';
@@ -20,7 +20,8 @@ const R=new THREE.WebGLRenderer({antialias:true,alpha:true,preserveDrawingBuffer
 const ov=document.getElementById('ov'),add=h=>{ov.insertAdjacentHTML('beforeend',h)};
 const {sc,sun}=KM.stepScene(R,{});const cam=new THREE.PerspectiveCamera(SHOT===1?32:50,W/H,.1,800);
 function look(x,y,z,tx,ty,tz){cam.position.set(x,y,z);cam.lookAt(tx,ty,tz)}
-function hud(budget,day){add(`<div class="hud" style="left:5%;font-size:1.3rem">ДЕНЬ ${day||1} / 30</div><div class="hud" style="right:5%;font-size:1.3rem">БЮДЖЕТ ${budget}</div>`)}
+const READY={2:0,3:5,4:25,5:25};
+function hud(budget,day){ov.style.cssText='position:absolute;inset:0;width:'+W+'px;height:'+H+'px';tablo(ov,{days:30-((day||1)-1),ready:READY[SHOT]||0,budget:+String(budget).replace(/\D/g,'')})}
 function engine(rust){const g=new THREE.Group();KM.C(g,1.1,1.1,2.6,rust?0x7a4a2a:0xc8ccd2,0,4.3,0,16);KM.C(g,1.3,1.1,.4,rust?0x5a3a22:0x8a8d92,0,5.8,0,16);const n=new THREE.Mesh(new THREE.ConeGeometry(1.7,2.8,16,1,true),KM.M(rust?0x5a3a22:0x8a8d92));n.material.side=THREE.DoubleSide;n.position.y=1.6;g.add(n);
  for(let i=0;i<6;i++){KM.C(g,.1,.1,2.8,rust?0x6a3a1a:0xd8b04a,Math.cos(i)*1.15,4.3,Math.sin(i)*1.15,6)}return g}
 let finalRender=()=>R.render(sc,cam);
@@ -66,7 +67,7 @@ if(SHOT===5){// выбор: старый двигатель / новый в кр
  const c1=new THREE.PerspectiveCamera(42,W/(H/2),.1,500);c1.position.set(-35,4,11);c1.lookAt(-30,3,0);const c2=new THREE.PerspectiveCamera(42,W/(H/2),.1,500);c2.position.set(25,4.5,11);c2.lookAt(31,3.2,0);
  finalRender=()=>{R.setScissorTest(true);R.setViewport(0,H/2,W,H/2);R.setScissor(0,H/2,W,H/2);R.render(sc,c1);R.setViewport(0,0,W,H/2);R.setScissor(0,0,W,H/2);R.render(sc,c2);R.setScissorTest(false)};
  add(`<div style="position:absolute;left:0;right:0;top:calc(50% - .12rem);height:.24rem;background:#fff"></div>
- <div class="o" style="top:13%;font-size:5rem;font-weight:900;color:#f7c24a;-webkit-text-stroke:.08em #141829;paint-order:stroke fill">1</div>
+ <div class="o" style="top:19%;font-size:4rem;font-weight:900;color:#f7c24a;-webkit-text-stroke:.08em #141829;paint-order:stroke fill">1</div>
  <div class="o pl" style="top:38%;font-size:.95rem"><span>СТАРЫЙ ДВИГАТЕЛЬ 1991 г. · 3 МЛН</span></div>
  <div class="o" style="top:58%;font-size:5rem;font-weight:900;color:#4fd6e8;-webkit-text-stroke:.08em #141829;paint-order:stroke fill">2</div>
  <div class="o pl" style="bottom:12%;font-size:.95rem"><span>НОВЫЙ В КРЕДИТ · 20 МЛН</span></div>

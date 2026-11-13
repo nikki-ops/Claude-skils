@@ -1,0 +1,34 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Космодром: 2D и 3D</title>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#141020;--panel:#1e1830;--ink:#f4f1fa;--muted:#b6aecb;--gold:#f7c24a;--line:#352c4d}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]){--bg:#f6f2ea;--panel:#ffffff;--ink:#1d1830;--muted:#5d5670;--gold:#c9901a;--line:#e3dccd}}
+:root[data-theme="dark"]{--bg:#141020;--panel:#1e1830;--ink:#f4f1fa;--muted:#b6aecb;--gold:#f7c24a;--line:#352c4d}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:Rubik,system-ui,sans-serif}
+header{padding:20px 16px 8px;max-width:1100px;margin:0 auto}h1{margin:0;font-weight:900;font-size:clamp(24px,5vw,36px)}header p{margin:6px 0 0;color:var(--muted)}
+.tabs{position:sticky;top:0;z-index:2;background:var(--bg);display:flex;gap:8px;padding:12px 16px;max-width:1100px;margin:0 auto;flex-wrap:wrap}
+.tabs button{font:700 16px Rubik,sans-serif;padding:10px 18px;border-radius:999px;border:2px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer}
+.tabs button[aria-pressed="true"]{background:var(--gold);border-color:var(--gold);color:#1a1410}
+main{max-width:1100px;margin:0 auto;padding:4px 16px 40px}
+.sheet img{width:100%;border-radius:14px;display:block;border:1px solid var(--line)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-top:12px}
+figure{margin:0;background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden}figure img{width:100%;display:block;aspect-ratio:9/16;object-fit:cover;cursor:zoom-in}
+figcaption{padding:8px 10px;font-weight:700;font-size:14px}figcaption span{display:block;font-weight:500;color:var(--muted);font-size:12px}
+.both{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+#zoom{position:fixed;inset:0;background:rgba(0,0,0,.92);display:none;align-items:center;justify-content:center;z-index:9}#zoom img{max-width:96vw;max-height:94vh;border-radius:10px}
+</style></head><body>
+<header><h1>Космодром за 1 ₽ — 2D и 3D</h1><p>Герои и 4 ключевых кадра серии 1 в двух стилях. Нажми на кадр, чтобы открыть крупно.</p></header>
+<div class="tabs" role="group" aria-label="Версия"><button data-v="2d">2D (плоская)</button><button data-v="3d">3D (как MARS CITY)</button><button data-v="both">Сравнить рядом</button></div>
+<main id="m"></main>
+<div id="zoom"><img alt=""></div>
+<script>
+const KADRY=[['kadr-huk','Хук','Ракета на боку, монета 1 ₽'],['kadr-kluch','Ключ просыпается','−50 000 ₽ батарейка'],['kadr-raketa','Ракета встала','−1 200 000 ₽ кран'],['kadr-vybor','Выбор','1 — старый, 2 — в кредит']];
+const src=(v,n)=>`img/k01-kosmodrom-${v}-${n}.png`,m=document.getElementById('m');
+function show(v){document.querySelectorAll('.tabs button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===v));try{localStorage.setItem('kv',v)}catch(e){}
+ if(v==='both'){m.innerHTML=KADRY.map(k=>`<h3 style="margin:18px 0 8px">${k[1]} <small style="color:var(--muted);font-weight:500">${k[2]}</small></h3><div class="both"><figure><img src="${src('2d',k[0])}" alt="2D: ${k[1]}"><figcaption>2D</figcaption></figure><figure><img src="${src('3d',k[0])}" alt="3D: ${k[1]}"><figcaption>3D</figcaption></figure></div>`).join('');return}
+ m.innerHTML=`<div class="sheet"><img src="${src(v,'geroi')}" alt="Герои ${v}"></div><div class="grid">`+KADRY.map(k=>`<figure><img src="${src(v,k[0])}" alt="${k[1]}"><figcaption>${k[1]}<span>${k[2]}</span></figcaption></figure>`).join('')+'</div>'}
+document.querySelector('.tabs').onclick=e=>{const b=e.target.closest('button');if(b)show(b.dataset.v)};
+const z=document.getElementById('zoom');m.onclick=e=>{if(e.target.tagName==='IMG'){z.firstChild.src=e.target.src;z.style.display='flex'}};z.onclick=()=>z.style.display='none';
+let v='2d';try{v=localStorage.getItem('kv')||'2d'}catch(e){}show(v);
+</script></body></html>
