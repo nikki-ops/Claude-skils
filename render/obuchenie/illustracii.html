@@ -4,7 +4,7 @@
 <script>
 // Иллюстрации к обучению «Как делать мультики через терминал» в стиле MARS CITY: кот-мэр KARAOKE_KOT (блочная рыжая голова,
 // чёрные очки, чёрный костюм, красный галстук), тёмно-синий фон, золотые акценты. ?id=01…17 → один кадр 1280×600.
-const W=1280,H=600,cv=document.getElementById('c');cv.width=W;cv.height=H;const x=cv.getContext('2d');
+const QS=new URLSearchParams(location.search),W=+(QS.get('w')||1280),H=+(QS.get('h')||600),cv=document.getElementById('c');cv.width=W;cv.height=H;const x=cv.getContext('2d');
 const OUT='#1b1426',GOLD='#f7c24a',NAVY='#141829',PANEL='#1d2440';
 const rr=(X,Y,w,h,r,f,st,lw)=>{x.beginPath();x.roundRect(X,Y,w,h,r);if(f){x.fillStyle=f;x.fill()}if(st){x.strokeStyle=st;x.lineWidth=lw||4;x.stroke()}};
 const poly=(p,f,st,lw)=>{x.beginPath();p.forEach((q,i)=>i?x.lineTo(q[0],q[1]):x.moveTo(q[0],q[1]));x.closePath();if(f){x.fillStyle=f;x.fill()}if(st){x.strokeStyle=st;x.lineWidth=lw||4;x.stroke()}};
@@ -83,5 +83,29 @@ const P={
 '16':()=>{bg();x.save();x.translate(820,260);x.rotate(-.15);poly([[-160,30],[170,-110],[60,130],[10,60]],'#2aa3e8',OUT,8);poly([[10,60],[60,130],[30,70]],'#1a7ab8',OUT,6);x.restore();rr(980,360,240,130,22,PANEL,GOLD,4);txt('закрытый',1100,405,28,'#fff');txt('канал',1100,450,28,GOLD);arrow(560,300,650,280);kot(340,560,1.05,{arm:'point',face:'smile'})},
 '17':()=>{bg();x.fillStyle='#4a3a50';poly([[560,600],[760,600],[1000,360],[960,360]],'#3a2a40');for(let i=0;i<6;i++)rr(760-i*0+ (i*40),560-i*40,30,10,3,GOLD);rocket(1080,470,.75,0);x.save();x.globalAlpha=.25;circ(1080,300,180,'#ffd27a');x.restore();folder(560,170,200,110,'#3fae5a','новый-мультик');kot(320,560,1.05,{arm:'wave',face:'smile'})}
 };
-const id=new URLSearchParams(location.search).get('id')||'01';document.fonts.load('900 40px Rubik').then(()=>{P[id]();window.READY=1});
+// ---------- ВКонтакте: шапка сообщества и обложки 1-й серии MARS CITY ----------
+function mars(sky){const g=x.createLinearGradient(0,0,0,H);g.addColorStop(0,'#2a1a46');g.addColorStop(.55,'#b2507a');g.addColorStop(.8,'#f39a4f');g.addColorStop(1,'#ffcf86');x.fillStyle=g;x.fillRect(0,0,W,H);
+ for(let i=0;i<60;i++)circ((i*977)%W,(i*389)%(H*.45),(i%3+1)*1.3,`rgba(255,255,255,${.25+(i%4)*.1})`);
+ const gy=H*(sky||.72);circ(W*.82,gy-H*.12,H*.13,'#ffd9a0');circ(W*.82,gy-H*.12,H*.19,'rgba(255,217,160,.25)');
+ x.fillStyle='#6a2a4a';x.beginPath();x.moveTo(0,H);for(let i=0;i<=20;i++)x.lineTo(i*W/20,gy-Math.sin(i*1.4)*H*.05-(i%3)*H*.015);x.lineTo(W,H);x.fill();
+ x.fillStyle='#d8743e';x.fillRect(0,gy,W,H-gy);x.fillStyle='rgba(120,50,20,.25)';for(let i=0;i<6;i++)x.fillRect(0,gy+H*.03+i*i*H*.012,W,3);return gy}
+function dome(X,Y,r,lbl){x.save();x.globalAlpha=.85;x.beginPath();x.arc(X,Y,r,Math.PI,0);x.closePath();const g=x.createRadialGradient(X-r*.3,Y-r*.6,r*.1,X,Y-r*.3,r);g.addColorStop(0,'#e8fbff');g.addColorStop(1,'#7fd0ec');x.fillStyle=g;x.fill();x.restore();
+ x.beginPath();x.arc(X,Y,r,Math.PI,0);x.strokeStyle=OUT;x.lineWidth=6;x.stroke();for(let k=1;k<4;k++){x.beginPath();x.ellipse(X,Y,r*k/4,r,0,Math.PI,0);x.strokeStyle='rgba(27,20,38,.35)';x.lineWidth=3;x.stroke()}
+ rr(X-r-14,Y-4,2*r+28,22,8,'#5a5e66',OUT,5);if(lbl){rr(X-r*.8,Y-r*1.32,r*1.6,r*.34,10,NAVY,GOLD,4);txt(lbl,X,Y-r*1.15,r*.17,GOLD)}}
+function sign(X,Y,s,t){x.save();x.translate(X,Y);x.scale(s,s);rr(-8,-160,16,160,4,'#6a4326',OUT,4);rr(-110,-200,220,90,10,'#8a5a30',OUT,5);txt(t,0,-155,56,'#fff3d0');x.restore()}
+function plashka(t,X,Y,s,bg,fg){x.font=`900 ${s}px Rubik`;const w=x.measureText(t).width+s*1.2;rr(X-w/2,Y-s*.8,w,s*1.6,s*.4,bg||NAVY,'#fff',s*.12);txt(t,X,Y+s*.04,s,fg||'#fff')}
+function stroke(t,X,Y,s,f,al){x.font=`900 ${s}px Rubik, Arial Black`;x.textAlign=al||'center';x.textBaseline='middle';x.lineJoin='round';x.strokeStyle=OUT;x.lineWidth=s*.22;x.strokeText(t,X,Y);x.fillStyle=f;x.fillText(t,X,Y)}
+Object.assign(P,{
+// шапка сообщества 1920×768: важное — в центре (на телефоне видно ~1200×480 по центру, сверху поле статус-бара)
+'vk-shapka':()=>{const gy=mars(.74);[[90,.9,'#3fae5a','#2a7a3a'],[200,.75,'#2f6fd0','#1f4f9a'],[1700,.8,'#e8902a','#a8601a'],[1800,.95,'#8a4ad8','#5a2a9a'],[1890,.7,'#d8263a','#9a1a2a']].forEach(q=>house(q[0],gy+40,q[1]*1.6,q[2],q[3]));
+ dome(1530,gy+30,110,'KAPAOKE_KOT');kot(250,gy+150,.82,{arm:'wave',face:'smile'});
+ stroke('MARS CITY',W/2,240,150,GOLD);stroke('город, который строят подписчики',W/2+30,370,50,'#fff');plashka('1 ПОДПИСЧИК = 1 ДОМ',W/2,480,46,'#d8263a')},
+// обложка клипа 1080×1920
+'vk-klip':()=>{const gy=mars(.66);sign(300,gy+60,1.5,'???');dome(780,gy+40,170,'KAPAOKE_KOT');kot(540,H-120,1.25,{arm:'point',face:'smile'});
+ stroke('Я ПРИЕХАЛ',W/2,330,130,'#fff');stroke('НА МАРС',W/2,480,170,GOLD);plashka('1 ПОДПИСЧИК = 1 ДОМ',W/2,650,58,'#d8263a');stroke('построю дом и тебе 👇',W/2,780,52,'#fff')},
+// обложка видео 1280×720
+'vk-video':()=>{const gy=mars(.72);sign(150,gy+40,1,'???');dome(1010,gy+20,130,'KAPAOKE_KOT');kot(380,H-30,.62,{arm:'point',face:'smile'});
+ stroke('Я ПРИЕХАЛ НА МАРС',W/2+90,150,76,'#fff');stroke('1 подписчик = 1 дом',W/2+90,260,60,GOLD);plashka('СЕРИЯ 1',W/2+90,360,40,'#d8263a')}
+});
+const id=QS.get('id')||'01';document.fonts.load('900 40px Rubik').then(()=>{P[id]();window.READY=1});
 </script></body></html>
