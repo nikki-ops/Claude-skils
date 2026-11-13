@@ -24,11 +24,15 @@ figcaption{padding:8px 10px;font-weight:700;font-size:14px}figcaption span{displ
 <div id="zoom"><img alt=""></div>
 <script>
 const KADRY=[['kadr-huk','Хук','Ракета на боку, монета 1 ₽'],['kadr-kluch','Ключ просыпается','−50 000 ₽ батарейка'],['kadr-raketa','Ракета встала','−1 200 000 ₽ кран'],['kadr-vybor','Выбор','1 — старый, 2 — в кредит']];
-const src=(v,n)=>`img/k01-kosmodrom-${v}-${n}.png`,m=document.getElementById('m');
+// картинки: через сервер для телефона — /img/…, при открытии файла с диска — из папки gotovo/
+const BASE=(location.protocol==='file:'||/\/render\/seriya\//.test(location.pathname))?'../../../gotovo/':'img/';
+const src=(v,n)=>`${BASE}k01-kosmodrom-${v}-${n}.png`,m=document.getElementById('m');
 function show(v){document.querySelectorAll('.tabs button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===v));try{localStorage.setItem('kv',v)}catch(e){}
  if(v==='both'){m.innerHTML=KADRY.map(k=>`<h3 style="margin:18px 0 8px">${k[1]} <small style="color:var(--muted);font-weight:500">${k[2]}</small></h3><div class="both"><figure><img src="${src('2d',k[0])}" alt="2D: ${k[1]}"><figcaption>2D</figcaption></figure><figure><img src="${src('3d',k[0])}" alt="3D: ${k[1]}"><figcaption>3D</figcaption></figure></div>`).join('');return}
  m.innerHTML=`<div class="sheet"><img src="${src(v,'geroi')}" alt="Герои ${v}"></div><div class="grid">`+KADRY.map(k=>`<figure><img src="${src(v,k[0])}" alt="${k[1]}"><figcaption>${k[1]}<span>${k[2]}</span></figcaption></figure>`).join('')+'</div>'}
 document.querySelector('.tabs').onclick=e=>{const b=e.target.closest('button');if(b)show(b.dataset.v)};
 const z=document.getElementById('zoom');m.onclick=e=>{if(e.target.tagName==='IMG'){z.firstChild.src=e.target.src;z.style.display='flex'}};z.onclick=()=>z.style.display='none';
+// если картинка не нашлась по одному пути — пробуем другой (сервер для телефона / файл с диска)
+document.addEventListener('error',e=>{const i=e.target;if(i.tagName!=='IMG'||i.dataset.alt)return;i.dataset.alt=1;const n=i.src.split('/').pop();i.src=(i.src.includes('/img/')?'../../../gotovo/':'img/')+n},true);
 let v='2d';try{v=localStorage.getItem('kv')||'2d'}catch(e){}show(v);
 </script></body></html>
