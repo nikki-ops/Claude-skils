@@ -10,7 +10,7 @@ window.UI=(function(){let R,W,H,s,E={};
   E.uTab.innerHTML='';if(t>=S.TAB_FROM){const a=Math.min(1,(t-S.TAB_FROM)/.35);E.uTab.style.opacity=a;E.uTab.style.transform=`translateY(${(1-a)*-40*s}px)`;tablo(E.uTab,{days:S.day(t),ready:S.ready(t),budget:S.budget(t)})}
   // плашка
   const p=S.plq(t);if(p){const c=C[p.st]||C.dark,o=Math.min(1,p.left/.2);E.uPl.style.top=380*s+'px';E.uPl.style.opacity=o;
-   E.uPl.innerHTML=`<span style="display:inline-block;transform:scale(${pop(p.age)});background:${c[0]};color:${c[1]};font-weight:900;font-size:${Math.min(62,1700/p.text.length)*s}px;padding:${14*s}px ${40*s}px;white-space:nowrap;border-radius:${22*s}px;border:${6*s}px solid #fff;box-shadow:0 ${10*s}px 0 rgba(0,0,0,.3)">${p.text}</span>`}else E.uPl.innerHTML='';
+   E.uPl.innerHTML=`<span style="display:inline-block;transform:scale(${pop(p.age)});background:${c[0]};color:${c[1]};font-weight:900;font-size:${Math.min(62,1450/p.text.length)*s}px;padding:${14*s}px ${40*s}px;white-space:nowrap;border-radius:${22*s}px;border:${6*s}px solid #fff;box-shadow:0 ${10*s}px 0 rgba(0,0,0,.3)">${p.text}</span>`}else E.uPl.innerHTML='';
   // ценник
   const g=S.tag(t);if(g){const fall=Math.min(1,g.age/.35),y=(1-fall)*-200*s,o=Math.min(1,(2.2-g.age)/.3);E.uTag.style.top=(1290*s+y)+'px';E.uTag.style.opacity=o;
    E.uTag.innerHTML=`<span style="display:inline-block;transform:rotate(${-4+Math.sin(g.age*6)*2*Math.max(0,1-g.age)}deg) scale(${pop(g.age)});background:#d8263a;color:#fff;font-weight:900;font-size:${54*s}px;padding:${12*s}px ${30*s}px;border-radius:${14*s}px;border:${6*s}px dashed #fff;box-shadow:0 ${8*s}px 0 rgba(0,0,0,.35)">${g.text}</span>`}else E.uTag.innerHTML='';
@@ -19,5 +19,5 @@ window.UI=(function(){let R,W,H,s,E={};
    E.uSub.innerHTML=`<span style="display:inline-block;transform:scale(${.85+.15*k});font-weight:900;font-size:${70*s}px;line-height:1.1;color:${col};-webkit-text-stroke:${13*s}px #141829;paint-order:stroke fill;text-shadow:0 ${8*s}px 0 #141829">${sb.text}</span>`}else E.uSub.innerHTML='';
   // затемнение в конце и вспышки на ударах
   E.uFade.style.opacity=Math.max(0,Math.min(1,(t-(S.END-.6))/.6))+(t<.25?1-t/.25:0);
-  const fl=[1.5,8,16.3,37.6,45].reduce((m,q)=>Math.max(m,t>=q&&t<q+.25?.5*(1-(t-q)/.25):0),0);E.uFlash.style.opacity=fl}
+  const fl=[.6,8,16.3,37.6,45].reduce((m,q)=>Math.max(m,t>=q&&t<q+.25?.5*(1-(t-q)/.25):0),0);E.uFlash.style.opacity=fl}
  return{init,update}})();

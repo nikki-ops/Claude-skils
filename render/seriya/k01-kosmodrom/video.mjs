@@ -8,16 +8,16 @@ import {createRequire} from 'node:module';const require=createRequire(import.met
 let chromium;try{({chromium}=await import('playwright'))}catch{({chromium}=require('playwright'))}
 const HERE=path.dirname(fileURLToPath(import.meta.url)),ROOT=path.resolve(HERE,'../../..');
 const arg=(k,d)=>{const i=process.argv.indexOf('--'+k);return i>0?process.argv[i+1]:d};
-const V=arg('v','2d'),FPS=+arg('fps',30),KADRY=arg('kadry',null),OUT=path.resolve(ROOT,arg('out',`gotovo/k01-kosmodrom-${V}.mp4`));
+const V=arg('v','2d'),VAR=arg('var',''),FPS=+arg('fps',30),KADRY=arg('kadry',null),OUT=path.resolve(ROOT,arg('out',`gotovo/k01-kosmodrom-${V}${VAR?'-'+VAR:''}.mp4`));
 const MIME={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8'};
 const srv=http.createServer((q,r)=>{const f=path.join(ROOT,decodeURIComponent(q.url.split('?')[0]));if(!f.startsWith(ROOT)||!fs.existsSync(f)||fs.statSync(f).isDirectory()){r.writeHead(404);return r.end()}r.writeHead(200,{'content-type':MIME[path.extname(f)]||'application/octet-stream'});fs.createReadStream(f).pipe(r)}).listen(0);
 const b=await chromium.launch({args:['--ignore-gpu-blocklist','--enable-gpu-rasterization','--use-angle=default']});
 const p=await b.newPage({viewport:{width:1080,height:1920}});p.on('pageerror',e=>console.log('Ошибка страницы:',e.message));p.on('console',m=>{if(m.type()==='error')console.log('console:',m.text())});
-await p.goto(`http://127.0.0.1:${srv.address().port}/render/seriya/k01-kosmodrom/video${V}.html`);await p.waitForFunction(()=>window.READY,null,{timeout:120000});
+await p.goto(`http://127.0.0.1:${srv.address().port}/render/seriya/k01-kosmodrom/video${V}.html${VAR?'?var='+VAR:''}`);await p.waitForFunction(()=>window.READY,null,{timeout:120000});
 const frame=async t=>{await p.evaluate(t=>window.seek(t),t);await p.evaluate(()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r))))};
 if(KADRY){const dir=path.join(ROOT,'render/_istochniki/kosmodrom/kadry');fs.mkdirSync(dir,{recursive:true});
- for(const t of KADRY.split(',').map(Number)){await frame(t);const f=path.join(dir,`${V}-${String(t).replace('.','_')}.png`);await p.screenshot({path:f});console.log(f)}await b.close();srv.close();process.exit(0)}
-const END=await p.evaluate(()=>window.END),N=Math.round(END*FPS),SFX=await p.evaluate(()=>SER.SFX);
+ for(const t of KADRY.split(',').map(Number)){await frame(t);const f=path.join(dir,`${V}${VAR?'-'+VAR:''}-${String(t).replace('.','_')}.png`);await p.screenshot({path:f});console.log(f)}await b.close();srv.close();process.exit(0)}
+const END=await p.evaluate(()=>window.END),N=Math.round(END*FPS),SFX=await p.evaluate(()=>window.SFXV?window.SFXV():SER.SFX);
 const voice=path.join(ROOT,'golos/k01-kosmodrom.mp3'),hasV=fs.existsSync(voice),music=path.join(ROOT,'muzyka/trevoga-100bpm.mp3'),hasM=fs.existsSync(music)&&fs.existsSync(music.replace(/\.mp3$/,'.litsenziya.md'));
 const SFXD=path.join(ROOT,'render/seriya/10-777-domov/sfx');let ain=[],fc='',lab=[],k=1;
 if(hasV){ain.push('-i',voice);fc+=`[${k}]loudnorm=I=-16:TP=-2,aformat=channel_layouts=stereo[v];`;lab.push('[v]');k++}
