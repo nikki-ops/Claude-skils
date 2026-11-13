@@ -93,8 +93,8 @@ function dome(X,Y,r,lbl){x.save();x.globalAlpha=.85;x.beginPath();x.arc(X,Y,r,Ma
  x.beginPath();x.arc(X,Y,r,Math.PI,0);x.strokeStyle=OUT;x.lineWidth=6;x.stroke();for(let k=1;k<4;k++){x.beginPath();x.ellipse(X,Y,r*k/4,r,0,Math.PI,0);x.strokeStyle='rgba(27,20,38,.35)';x.lineWidth=3;x.stroke()}
  rr(X-r-14,Y-4,2*r+28,22,8,'#5a5e66',OUT,5);if(lbl){rr(X-r*.8,Y-r*1.32,r*1.6,r*.34,10,NAVY,GOLD,4);txt(lbl,X,Y-r*1.15,r*.17,GOLD)}}
 function sign(X,Y,s,t){x.save();x.translate(X,Y);x.scale(s,s);rr(-8,-160,16,160,4,'#6a4326',OUT,4);rr(-110,-200,220,90,10,'#8a5a30',OUT,5);txt(t,0,-155,56,'#fff3d0');x.restore()}
-function plashka(t,X,Y,s,bg,fg){x.font=`900 ${s}px Rubik`;const w=x.measureText(t).width+s*1.2;rr(X-w/2,Y-s*.8,w,s*1.6,s*.4,bg||NAVY,'#fff',s*.12);txt(t,X,Y+s*.04,s,fg||'#fff')}
-function stroke(t,X,Y,s,f,al){x.font=`900 ${s}px Rubik, Arial Black`;x.textAlign=al||'center';x.textBaseline='middle';x.lineJoin='round';x.strokeStyle=OUT;x.lineWidth=s*.22;x.strokeText(t,X,Y);x.fillStyle=f;x.fillText(t,X,Y)}
+function plashka(t,X,Y,s,bg,fg){x.font=`900 ${s}px Rubik, Arial Black`;while(x.measureText(t).width>W-140&&s>20){s-=2;x.font=`900 ${s}px Rubik, Arial Black`}const w=x.measureText(t).width+s*1.4;rr(X-w/2,Y-s*.8,w,s*1.6,s*.4,bg||NAVY,'#fff',s*.12);txt(t,X,Y+s*.04,s,fg||'#fff')}
+function stroke(t,X,Y,s,f,al){x.font=`900 ${s}px Rubik, Arial Black`;while(x.measureText(t).width>W-90&&s>24){s-=4;x.font=`900 ${s}px Rubik, Arial Black`}x.textAlign=al||'center';x.textBaseline='middle';x.lineJoin='round';x.strokeStyle=OUT;x.lineWidth=s*.22;x.strokeText(t,X,Y);x.fillStyle=f;x.fillText(t,X,Y)}
 Object.assign(P,{
 // шапка сообщества 1920×768: важное — в центре (на телефоне видно ~1200×480 по центру, сверху поле статус-бара)
 'vk-shapka':()=>{const gy=mars(.74);[[90,.9,'#3fae5a','#2a7a3a'],[200,.75,'#2f6fd0','#1f4f9a'],[1700,.8,'#e8902a','#a8601a'],[1800,.95,'#8a4ad8','#5a2a9a'],[1890,.7,'#d8263a','#9a1a2a']].forEach(q=>house(q[0],gy+40,q[1]*1.6,q[2],q[3]));
@@ -107,5 +107,31 @@ Object.assign(P,{
 'vk-video':()=>{const gy=mars(.72);sign(150,gy+40,1,'???');dome(1010,gy+20,130,'KAPAOKE_KOT');kot(380,H-30,.62,{arm:'point',face:'smile'});
  stroke('Я ПРИЕХАЛ НА МАРС',W/2+90,150,76,'#fff');stroke('1 подписчик = 1 дом',W/2+90,260,60,GOLD);plashka('СЕРИЯ 1',W/2+90,360,40,'#d8263a')}
 });
+// ---------- 12 обложек серий для ВК (1080×1920): ?id=ep&n=1…12 ----------
+function flagIMEN(X,Y,s){x.save();x.translate(X,Y);x.scale(s,s);rr(-4,-120,8,120,3,'#d8dce4',OUT,3);rr(4,-120,90,56,4,'#7b2fbe',OUT,4);rr(4,-80,90,16,0,'#d8263a');txt('IMEN',49,-98,24,'#fff');x.restore()}
+function meteor(X,Y,r){x.save();x.globalAlpha=.55;poly([[X-r*.6,Y-r*.6],[X-r*3.6,Y-r*3.2],[X-r*2.6,Y-r*3.8],[X+r*.4,Y-r*.9]],'#ff9a3a');x.restore();circ(X,Y,r,'#4a4250',OUT,6);circ(X-r*.3,Y-r*.2,r*.25,'#2a2530');circ(X+r*.35,Y+r*.25,r*.18,'#2a2530');x.save();x.globalAlpha=.8;circ(X,Y,r*1.15,null,'#ffb03a',8);x.restore()}
+function stadium(X,Y,s){x.save();x.translate(X,Y);x.scale(s,s);x.beginPath();x.ellipse(0,0,230,90,0,0,7);x.fillStyle='#8a929c';x.fill();x.strokeStyle=OUT;x.lineWidth=6;x.stroke();x.beginPath();x.ellipse(0,0,170,58,0,0,7);x.fillStyle='#3fae5a';x.fill();x.stroke();line(0,-58,0,58,'#fff',4);circ(0,0,20,null,'#fff',4);for(let i=0;i<4;i++)rr(-220+i*146,-150,10,70,3,'#d8dce4',OUT,3);x.restore()}
+function aes(X,Y,s){x.save();x.translate(X,Y);x.scale(s,s);poly([[-110,0],[-80,-260],[80,-260],[110,0]],'#d8dce4',OUT,6);rr(-82,-200,164,22,0,'#d8263a');for(let k=0;k<3;k++){x.save();x.globalAlpha=.6-k*.15;circ(-20+k*30,-300-k*60,50+k*16,'#f4f1ea');x.restore()}rr(130,-120,120,120,8,'#9aa3ad',OUT,5);x.restore()}
+function falling(X,Y,s,c,roof,a){x.save();x.translate(X,Y);x.rotate(a);x.save();x.globalAlpha=.4;[-24,0,24].forEach(d=>line(d,-90,d,-190,'#fff',5));x.restore();house(0,0,s,c,roof);x.restore()}
+function nicks(){const N=['@yo_meepo','@Bee','@777','@Max','@kreilek','@Doni','@ggelv2','@RUT','@Kir2525','@кот','@Bokl','@ZXC'];N.forEach((n,i)=>{const X=120+(i%3)*300,Y=820+Math.floor(i/3)*110;rr(X,Y,250,70,14,i===4?GOLD:'#f4f1ea',OUT,4);txt(n,X+125,Y+36,30,'#1b1426')})}
+function wallIMEN(cx,gy){for(let i=0;i<12;i++){const X=60+i*85;rr(X,gy-130,80,130,6,'#8d7a68',OUT,4);rr(X+10,gy-160,26,32,3,'#8d7a68',OUT,3);rr(X+46,gy-160,26,32,3,'#8d7a68',OUT,3)}[180,540,900].forEach(X=>flagIMEN(X,gy-160,1.3))}
+function planet(X,Y,r){circ(X,Y,r,'#6a8ad8',OUT,6);x.save();x.globalAlpha=.5;circ(X-r*.3,Y-r*.2,r*.3,'#9ab8f0');x.restore();x.beginPath();x.ellipse(X,Y,r*1.6,r*.35,-.3,0,7);x.strokeStyle='#e8d0a0';x.lineWidth=10;x.stroke()}
+const EP={
+1:['Я ПРИЕХАЛ','НА МАРС','1 подписчик = 1 дом',(gy)=>{sign(250,gy+60,1.4,'???');dome(800,gy+40,160,'KAPAOKE_KOT')}],
+2:['ДОМА ПАДАЮТ','С НЕБА','24 дома за день',(gy)=>{[[290,1080,1.9,'#3fae5a','#2a7a3a',.2],[560,780,1.6,'#2f6fd0','#1f4f9a',-.15],[880,980,1.8,'#e8902a','#a8601a',.25],[700,1180,1.4,'#8a4ad8','#5a2a9a',-.1]].forEach(q=>falling(q[0],q[1],q[2],q[3],q[4],q[5]));house(860,gy+60,1.8,'#d8263a','#9a1a2a')}],
+3:['ПОСТРОИЛ АЭС','НА МАРСЕ','для подписчиков ⚡',(gy)=>{aes(780,gy+40,1.2);house(220,gy+60,1.6,'#3fae5a','#2a7a3a')}],
+4:['СТАДИОН','НА МАРСЕ','для 165 подписчиков',(gy)=>{stadium(620,gy+90,1.6)}],
+5:['НАЙДИ','СВОЙ НИК','среди 177 домов 👀',(gy)=>{nicks()}],
+6:['САЙТ, ГДЕ ЖИВУТ','ПОДПИСЧИКИ','найди свой дом по нику',(gy)=>{laptop(620,gy+60,1.5,()=>{rr(-140,-190,280,160,6,'#b85a34');for(let i=0;i<14;i++)house(-120+(i%7)*40,-120+Math.floor(i/7)*60,.35,['#3fae5a','#2f6fd0','#e8902a','#8a4ad8'][i%4],'#2a2a3a');rr(-130,-186,150,26,8,'#f4f1ea');txt('найти: @ник',-55,-172,16,'#1b1426')})}],
+7:['ОДИН ДОМ','НАЧАЛ ЗАХВАТ','остановить или вступить?',(gy)=>{x.save();x.globalAlpha=.35;circ(700,gy+40,260,'#8a3fe0');x.restore();house(700,gy+60,2.2,'#5a2a7a','#3a1a5a');flagIMEN(760,gy-140,1.2);house(240,gy+60,1.6,'#3fae5a','#2a7a3a')}],
+8:['ОН УЛЕТЕЛ','С МАРСА','на другую планету 🚀',(gy)=>{planet(820,900,120);rocket(500,gy-60,.75,.6);house(880,gy+60,1.4,'#2f6fd0','#1f4f9a')}],
+9:['МЕТЕОРИТ','НА 10 ПОДПИСЧИКОВ','один выжил ☄️',(gy)=>{meteor(700,1020,100);[[200,1.5],[380,1.3],[880,1.5]].forEach((q,i)=>house(q[0],gy+60,q[1],['#3fae5a','#2f6fd0','#e8902a'][i],'#3a2a20'))}],
+10:['777 ДОМОВ','ЗА НОЧЬ','найди свой ник!',(gy)=>{for(let r=0;r<4;r++)for(let c=0;c<9;c++)house(80+c*115+(r%2)*40,gy-60+r*110,1.1,['#3fae5a','#2f6fd0','#e8902a','#8a4ad8','#d8263a'][(r+c)%5],'#3a2a20')}],
+11:['IMEN','ЗАХВАТИЛА УЧАСТКИ','твой дом — тоже?',(gy)=>{wallIMEN(540,gy+80)}],
+12:['КОСМОДРОМ','ЗА 1 ₽','но есть условие…',(gy)=>{x.save();x.translate(560,gy+70);x.rotate(Math.PI/2);x.restore();rocket(240,gy+90,.9,Math.PI/2);circ(820,gy-230,90,'#d9dde2',OUT,6);txt('1₽',820,gy-226,70,'#7a7e86')}]
+};
+P.ep=()=>{const n=+QS.get('n'),[t1,t2,sub,draw]=EP[n];const gy=mars(.66);x.save();x.translate(W/2,gy);const SC={5:1,10:1.15,11:1.1,9:1.2}[n]||1.45;x.scale(SC,SC);x.translate(-W/2,-gy);draw(gy);x.restore();
+ const big=n===12||n===11?1:0;kot((n%2&&n!==5||n===10||n===4)?170:910,H-90,.95,{arm:n%3?'point':'wave',face:n===7||n===9||n===11?'wow':'smile'});
+ stroke(t1,W/2,300,t1.length>11?96:130,'#fff');stroke(t2,W/2,450,t2.length>11?92:150,GOLD);plashka(sub,W/2,600,48,'#d8263a');plashka('СЕРИЯ '+n,W/2,150,40,NAVY,GOLD)};
 const id=QS.get('id')||'01';document.fonts.load('900 40px Rubik').then(()=>{P[id]();window.READY=1});
 </script></body></html>
