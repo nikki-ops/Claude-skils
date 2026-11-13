@@ -107,6 +107,11 @@ Object.assign(P,{
 'vk-video':()=>{const gy=mars(.72);sign(150,gy+40,1,'???');dome(1010,gy+20,130,'KAPAOKE_KOT');kot(380,H-30,.62,{arm:'point',face:'smile'});
  stroke('Я ПРИЕХАЛ НА МАРС',W/2+90,150,76,'#fff');stroke('1 подписчик = 1 дом',W/2+90,260,60,GOLD);plashka('СЕРИЯ 1',W/2+90,360,40,'#d8263a')}
 });
+// шапка YouTube 2560×1440: всё важное — в безопасной зоне 1546×423 по центру (x 507…2053, y 509…932)
+P['yt-shapka']=()=>{const gy=mars(.66);[[180,1.5,'#3fae5a','#2a7a3a'],[380,1.3,'#2f6fd0','#1f4f9a'],[560,1.6,'#e8902a','#a8601a'],[2060,1.4,'#8a4ad8','#5a2a9a'],[2420,1.5,'#d8263a','#9a1a2a']].forEach(q=>house(q[0],gy+70,q[1]*1.4,q[2],q[3]));
+ dome(2240,gy+40,130,'KAPAOKE_KOT');rocket(2500,gy-80,.75,.25);
+ kot(560,gy+120,.66,{arm:'wave',face:'smile'});
+ stroke('MARS CITY',W/2+130,640,170,GOLD);stroke('город, который строят подписчики',W/2+130,775,56,'#fff');plashka('1 ПОДПИСЧИК = 1 ДОМ · НОВАЯ СЕРИЯ КАЖДЫЙ ДЕНЬ',W/2+130,880,36,'#d8263a')};
 // ---------- 12 обложек серий для ВК (1080×1920): ?id=ep&n=1…12 ----------
 function flagIMEN(X,Y,s){x.save();x.translate(X,Y);x.scale(s,s);rr(-4,-120,8,120,3,'#d8dce4',OUT,3);rr(4,-120,90,56,4,'#7b2fbe',OUT,4);rr(4,-80,90,16,0,'#d8263a');txt('IMEN',49,-98,24,'#fff');x.restore()}
 function meteor(X,Y,r){x.save();x.globalAlpha=.55;poly([[X-r*.6,Y-r*.6],[X-r*3.6,Y-r*3.2],[X-r*2.6,Y-r*3.8],[X+r*.4,Y-r*.9]],'#ff9a3a');x.restore();circ(X,Y,r,'#4a4250',OUT,6);circ(X-r*.3,Y-r*.2,r*.25,'#2a2530');circ(X+r*.35,Y+r*.25,r*.18,'#2a2530');x.save();x.globalAlpha=.8;circ(X,Y,r*1.15,null,'#ffb03a',8);x.restore()}
