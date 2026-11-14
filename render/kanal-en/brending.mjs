@@ -22,9 +22,9 @@ await p.setViewportSize({width:2560,height:1440});await p.evaluate(()=>{const c=
  x.fillStyle='#5a2a5a';x.beginPath();x.moveTo(0,1440);for(let i=0;i<=26;i++)x.lineTo(i*100,930-Math.sin(i*1.7)*50-Math.cos(i*.9)*30);x.lineTo(2560,1440);x.fill();
  x.fillStyle='#d39a5a';x.fillRect(0,1010,2560,430);
  tower(2230,1040,620,.7);rocketE(1980,1040,.75);x.save();x.translate(250,420);x.rotate(-.2);x.beginPath();x.ellipse(0,0,100,92,0,0,7);x.fillStyle='#d9dde2';x.fill();x.strokeStyle=OUT;x.lineWidth=6;x.stroke();x.beginPath();x.ellipse(0,0,80,72,0,0,7);x.strokeStyle='#a9adb6';x.lineWidth=4;x.stroke();txt('$1',0,4,72,'#7a7e86');x.restore();for(let i=0;i<60;i++){const X=(i*263)%2560,Y=1060+((i*137)%360);poly([[X,Y],[X+12,Y-40],[X+24,Y]],'#8a8a3a',OUT,2)}kluch(420,1060,.75,'1 / 2',{armR:-2.3});vera(2420,1060,.62,{helmet:1,armR:-2.4,still:1});vorona(1980,1040-760*.75*.94-200,.7);
- const g2=x.createLinearGradient(0,420,0,1000);g2.addColorStop(0,'rgba(14,10,30,0)');g2.addColorStop(.5,'rgba(14,10,30,.55)');g2.addColorStop(1,'rgba(14,10,30,0)');x.fillStyle=g2;x.fillRect(560,420,1440,580);
- txt('COMMENT DECIDES',1280,640,160,'#ffd860',OUT);
- rr(700,760,1160,96,30,'#d8263a','#fff',8);txt('YOU CHOOSE WHAT HAPPENS NEXT',1280,810,52,'#fff');
- txt('ANIMATED SERIES · NEW EPISODE EVERY DAY',1280,915,44,'#fff',OUT)});
+ const g2=x.createLinearGradient(0,420,0,1000);g2.addColorStop(0,'rgba(14,10,30,0)');g2.addColorStop(.5,'rgba(14,10,30,.55)');g2.addColorStop(1,'rgba(14,10,30,0)');x.fillStyle=g2;x.fillRect(507,480,1546,480);
+ txt('COMMENT DECIDES',1280,615,118,'#ffd860',OUT);
+ rr(820,700,920,82,26,'#d8263a','#fff',7);txt('YOU CHOOSE WHAT HAPPENS NEXT',1280,742,44,'#fff');
+ txt('ANIMATED SERIES · NEW EPISODE EVERY DAY',1280,850,38,'#fff',OUT)});
 await p.screenshot({path:path.join(OUT,'shapka.png')});
 await b.close();srv.close();console.log('ok');
