@@ -1604,8 +1604,9 @@ try{// ===== ЗОЛОТАЯ БАШНЯ (серия 12, 1000 подписчико
  for(let i=0;i<N;i++){const u=i/N,w=W0*(1-.35*u),f=new THREE.Group();const m=new THREE.Mesh(new THREE.BoxGeometry(w,FH*.86,w),i%2?glass:glass2);f.add(m);const r=new THREE.Mesh(new THREE.BoxGeometry(w+.25,FH*.14,w+.25),frame);r.position.y=FH*.5;f.add(r);f.position.y=4+i*FH+FH/2;f.rotation.y=u*1.2;g.add(f)}
  const cr=new THREE.Mesh(new THREE.ConeGeometry(W0*.45,9,4),glass);cr.position.y=4+N*FH+4.5;cr.rotation.y=Math.PI/4+1.2;g.add(cr);
  const lt=new THREE.Mesh(new THREE.SphereGeometry(1,10,8),new THREE.MeshBasicMaterial({color:0xfff2b0}));lt.position.y=4+N*FH+14;g.add(lt);
+ {const y=4+N*FH-4,w=W0*.66;[0,1,2,3].forEach(k=>{const p=lab(g,'@БалгинДоканова',w*.95,2.2,'#141829','#ffd860',0,y,0);p.rotation.y=k*Math.PI/2+1.2*(N-4)/N;p.translateZ(w/2+.25)});lab(g,'ЗОЛОТАЯ БАШНЯ · @БалгинДоканова',24,2.6,'#141829','#ffd860',0,2.2,15.2)}
  g.position.set(TP.x,0,TP.z);g.userData.top=4+N*FH+15;g.userData.dyn=1;sc.add(g);
- MLIST.push({n:'Золотая башня · @БалгинДоканова',g,x:TP.x,z:TP.z,top:g.userData.top,bld:1,kind:'Золотая башня, 100 этажей (1000 подписчиков). Верхний этаж — @БалгинДоканова (розыгрыш среди 825 комментаторов). Остальные 99 этажей свободны',day:12,district:'Сити'});
+ MLIST.push({n:'БалгинДоканова 🏆',g,x:TP.x,z:TP.z,top:g.userData.top,bld:1,kind:'Золотая башня, 100 этажей (1000 подписчиков). Верхний этаж — @БалгинДоканова (розыгрыш среди 825 комментаторов). Остальные 99 этажей свободны',day:12,district:'Сити'});
  window.ZTOWER=g})()}catch(e){console.warn("tower",e)}
 MLIST.forEach(h=>{if(h.district==='Квартал 10 ноября')h.district='Район YouTube'});
 try{// ===== ОПТИМИЗАЦИЯ: склеиваем мелкие детали (десятки тысяч → сотни объектов) =====
