@@ -50,7 +50,7 @@ function seryi(X,Y,s){x.save();x.translate(X,Y);x.scale(s,s);rr(-45,-90,35,90,6,
 function vorona(X,Y,s,flip,wing){x.save();x.translate(X,Y);x.scale(flip?-s:s,s);x.beginPath();x.ellipse(0,-35,55,32,-.15,0,7);x.fillStyle='#15161a';x.fill();
  if(wing){poly([[-20,-50],[-60,-50-wing*80],[20,-55]],'#15161a')}poly([[-50,-30],[-100,-20],[-55,-15]],'#15161a');circ(45,-65,26,'#15161a');poly([[65,-70],[100,-60],[66,-56]],'#4a4a4a');circ(52,-72,6,'#ffd84a');if(!wing){line(-10,-5,-14,12,'#4a4a4a',5);line(10,-5,8,12,'#4a4a4a',5)}x.restore()}
 function coin(X,Y,r,rot){x.save();x.translate(X,Y);x.rotate(rot||-.25);x.beginPath();x.ellipse(0,0,r,r*.92,0,0,7);x.fillStyle='#d9dde2';x.fill();x.strokeStyle=OUT;x.lineWidth=6;x.stroke();x.beginPath();x.ellipse(0,0,r*.8,r*.72,0,0,7);x.strokeStyle='#a9adb6';x.lineWidth=4;x.stroke();txt('1₽',0,4,r*.75,'#7a7e86');x.restore()}
-function engine(X,Y,s,rust){x.save();x.translate(X,Y);x.scale(s,s);x.rotate(rust?.2:0);
+function engine(X,Y,s,rust,rot){x.save();x.translate(X,Y);x.scale(s,s);x.rotate(rot!=null?rot:(rust?.2:0));
  poly([[-60,-120],[60,-120],[110,0],[-110,0]],rust?'#6a3a1a':'#8a8d92',OUT,6);rr(-70,-330,140,215,14,rust?'#8a4a2a':'#d8dce4',OUT,7);
  for(let i=-2;i<=2;i++)line(i*28,-320,i*28,-125,rust?'#5a2a10':'#e8b84a',8);rr(-80,-350,160,30,8,rust?'#5a3a22':'#9aa3ad',OUT,5);
  if(rust)[[-40,-260],[30,-180]].forEach(a=>rr(a[0],a[1],40,24,8,'#b06a3a'));else{x.save();x.globalAlpha=.6;line(-40,-300,-40,-150,'#fff',10);x.restore()}x.restore()}
