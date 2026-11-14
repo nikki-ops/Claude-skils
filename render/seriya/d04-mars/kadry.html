@@ -1,0 +1,50 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><title>Один на Марсе — ключевые кадры</title>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@700;900&display=swap" rel="stylesheet">
+<style>html,body{margin:0;overflow:hidden;background:#000}canvas{display:block}</style></head><body>
+<canvas id="c"></canvas>
+<script>window.SER={W:1920,H:1080,ease:u=>u<0?0:u>1?1:u*u*(3-2*u),seg:(t,a,b)=>Math.max(0,Math.min(1,(t-a)/(b-a)))};</script>
+<script src="../k02-kosmodrom/prim.js"></script><script src="mir.js"></script>
+<script>
+// 10 ключевых кадров «Один на Марсе» (16:9) — утверждение стиля. ?k=N
+const KS=[
+// 1 · ХУК день 67: трещина в шлюзе, давление падает
+()=>{interior('red');rr(W*.46,H*.1,W*.3,H*.64,20,'#5a6a7c',OUT,8);rr(W*.49,H*.16,W*.24,H*.52,14,'#2a3a4c',OUT,6);
+ x.save();x.beginPath();const cx=W*.61,cy=H*.4;[[0,0],[-30,40],[10,90],[-20,140],[20,200]].forEach((p,i)=>i?x.lineTo(cx+p[0],cy+p[1]):x.moveTo(cx+p[0],cy+p[1]));x.strokeStyle='#ff4a4a';x.lineWidth=8;x.stroke();x.restore();
+ for(let i=0;i<6;i++){const q=(TT*1.5+i/6)%1;line(W*.61+10,H*.5+i*14,W*.61+10+q*260,H*.5+i*14-q*40,`rgba(255,255,255,${.7*(1-q)})`,4)}
+ gauge(W*.25,H*.4,170,720,1000,'ДАВЛЕНИЕ');hero(W*.83,H*.9,1.05,{tshirt:1,eyes:'wide',mouth:'grit',armL:2.3,flip:1});
+ tablo({day:67,water:110,food:17,air:14,energy:70,warn:['air']});sub('День шестьдесят седьмой... Воздух уходит со свистом.')},
+// 2 · пробуждение на полу, в иллюминаторе тает корабль
+()=>{interior('red');porthole(W*.5,H*.36,200,'day',(X,Y,r)=>{for(let i=0;i<6;i++)circ(X+40+i*14,Y-r*.2+i*22,6-i*.6,'rgba(255,240,200,'+(.8-i*.12)+')');ship(X+30,Y-r*.35,.22,1,TT)});
+ x.save();x.translate(W*.36,H*.7);x.rotate(-Math.PI/2);hero(0,0,.95,{tshirt:1,eyes:'closed',mouth:'sad'});x.restore();
+ sub('Ты лежишь на полу базы... а в иллюминаторе тает огонёк.')},
+// 3 · стена «100», маркер, табло
+()=>{interior();rr(W*.08,H*.14,W*.56,H*.56,10,'#3e4e60',OUT,6);wallTally(W*.36,H*.33,0,{big:100});
+ hero(W*.74,H*.9,1.05,{tshirt:1,armL:2.5,look:-1,flip:1});line(W*.66,H*.5,W*.69,H*.44,'#1a1a1e',14);
+ tablo({day:1,water:300,food:40,air:30,energy:60});sub('Ты берёшь маркер и пишешь на стене... сто.')},
+// 4 · Ключ из-за шкафа
+()=>{interior();shelf(W*.3,H*.76);kluchM(W*.48,H*.88,.75,'?',{armR:-1.8});hero(W*.8,H*.9,1.05,{tshirt:1,eyes:'wide',mouth:'o',flip:1,look:-1});
+ sub('«Я Ключ... Робот-техник... Ты есть хочешь?»')},
+// 5 · рециклер, фонарик
+()=>{interior('dark');rr(W*.22,H*.64,W*.56,40,8,'#8a6a4a',OUT,6);rr(W*.38,H*.5,W*.22,H*.14,16,'#9aa3ad',OUT,6);for(let i=0;i<10;i++)circ(W*.4+(i*53)%W*.18,H*.62-(i%3)*10,10,'#c8783a');
+ kluchM(W*.22,H*.92,.55,':)',{armR:-1.5});hero(W*.76,H*.9,1.05,{tshirt:1,armR:-1.2,flip:1,look:-1});
+ x.save();x.globalAlpha=.3;poly([[W*.66,H*.48],[W*.4,H*.5],[W*.4,H*.66],[W*.66,H*.52]],'#fff3c0');x.restore();
+ tablo({day:9,water:276,food:37,air:27,energy:60,warn:['water']});sub('Внутри пыль... как мука.')},
+// 6 · картошка под лампой
+()=>{interior('dark');box(W*.5,H*.82,1.3,.9,0);hero(W*.25,H*.9,1.05,{tshirt:1,eyes:'wide',mouth:'o'});kluchM(W*.78,H*.92,.55,':)',{fixed:1});
+ tablo({day:41,water:170,food:23,air:30,energy:70});sub('Картошка... Живая картошка на Марсе.')},
+// 7 · пылевая буря в иллюминаторе
+()=>{interior('dark');porthole(W*.42,H*.4,250,'storm');hero(W*.8,H*.9,1.05,{tshirt:1,eyes:'wide',mouth:'o',flip:1,look:-1});
+ tablo({day:31,water:200,food:28,air:33,energy:8,warn:['energy']});sub('Ты выбегаешь к иллюминатору... а за ним стена.')},
+// 8 · Ключ чистит панели в буре
+()=>{marsSky('storm');marsGround(H*.7,'storm');panel(W*.3,H*.8,1.6,.2);panel(W*.6,H*.8,1.6,.8);kluchM(W*.47,H*.86,.6,'>_<',{dust:1,armR:-2,armL:-.5});storm(TT,1);
+ tablo({day:33,water:190,food:27,air:31,energy:12,warn:['energy']});sub('Через ветер, через красный туман он добирается до панелей.')},
+// 9 · антенна на скале, сигнал
+()=>{marsSky('dusk');marsGround(H*.72,'dusk');base(W*.28,H*.8,.7,{lit:1,noAnt:1});rr(W*.6,H*.6,W*.18,H*.16,40,'#8a3a1a',OUT,6);antenna(W*.69,H*.62,1.2,1,TT);hero(W*.86,H*.86,.8,{helmet:1,flip:1,armR:-1,look:-1});
+ tablo({day:52,water:150,food:21,air:28,energy:75});sub('«Живой... Марс... Жду»')},
+// 10 · день 100: корабль, 100 чёрточек, огонёк на юге
+()=>{marsSky('day');marsGround(H*.72,'day');ship(W*.66,H*.74,1.1,0);base(W*.2,H*.8,.6,{lit:0});hero(W*.45,H*.86,.75,{helmet:1,armL:2.6,armR:-2.6});kluchM(W*.36,H*.88,.38,'!!!',{});
+ circ(W*.95,H*.62,8,'#5dff8a');circ(W*.95,H*.62,22,'rgba(93,255,138,.3)');
+ tablo({day:100,water:30,food:14,air:12,energy:90});sub('Там сто чёрточек... Ты ставил только девяносто девять.')}];
+window.shot=(k,t)=>{TT=t||1.2;OFF=0;x.setTransform(1,0,0,1,0,0);x.clearRect(0,0,W,H);try{KS[k]()}catch(e){console.error('кадр',k+1,e)}};
+Promise.all([document.fonts.load('900 40px Rubik','АаЯя'),document.fonts.load('700 40px Rubik','АаЯя')]).then(()=>new Promise(r=>setTimeout(r,500))).then(()=>{shot(+(new URLSearchParams(location.search).get('k')||0));window.READY=1});
+</script></body></html>
