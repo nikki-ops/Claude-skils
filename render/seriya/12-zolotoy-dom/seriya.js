@@ -2,9 +2,9 @@
 // Ник тысячного: ?nik=ИМЯ в адресе страницы или NIK ниже. window.seek(tv) рисует кадр на секунде голоса tv.
 const NIK=(new URLSearchParams(location.search).get('nik'))||'ТЫСЯЧНЫЙ';
 // AN: [время голоса, время сцены]; до озвучки — 1:1 (сцена 32 с)
-let AN=[[0,0],[32,32]];
-const SUBV=[[0,'нас было 777...'],[1.5,'а стало...'],[2.2,'тысяча!','gold'],[3,'и я обещал...'],[5,'тысячному —'],[5.8,'золотой дом','gold'],[7,'строим...'],[10,'100 этажей'],[10.9,'золотого стекла!','gold'],[12,'самый высокий'],[12.8,'дом на марсе'],[14,'и он...'],[14.8,'твой...'],[15.5,'@'+NIK,'gold'],[17.5,'ты — тысячный'],[18.2,'житель марса','gold'],[19,'а теперь...'],[20,'новая цель'],[21,'3000 подписчиков'],[23.5,'все дома станут'],[24.6,'коттеджами','gold'],[26,'хочешь дом'],[26.9,'рядом с башней?'],[28.5,'подпишись'],[29.5,'и напиши ник!','red'],[31,'']];
-const SFXS=[[0,'swish',.4],[1.6,'drumroll',.35],[2.2,'boom',.5],[2.25,'chime',.5],[3.1,'shimmer',.4],[5.8,'chime',.4],[7,'wall',.45],[8.2,'thump',.3],[9.4,'thump',.3],[10.4,'shimmer',.5],[12,'whoosh2',.4],[14,'heartbeat',.7],[15.5,'boom',.5],[15.5,'chime',.6],[17.5,'pop',.4],[21,'drumroll',.3],[23.6,'swish',.4],[24.6,'chime',.4],[26.1,'pop',.4],[28.6,'thump',.4]];
+let AN=[[0,0],[2.85,1.5],[4.09,2.2],[5.14,3],[6.45,5.8],[7.8,6.5],[9.07,7],[11.16,10.9],[12.83,12],[15.16,14],[16.48,14.8],[17.12,15.5],[18.6,17.4],[18.61,26],[22,27.4],[23.93,28.5],[26.12,30],[27.44,31.2],[28.4,32]];// под golos/12-zolotoy-dom.mp3 (паузы — silencedetect, 18 фраз); сцены 17.5–26 (житель №1000, цель 3000) вырезаны
+const SUBV=[[0,'нас было 777...'],[2.85,'а стало...'],[4.09,'тысяча!','gold'],[5.14,'и я обещал...'],[6.45,'золотой дом...','gold'],[7.8,'одному из вас.'],[9.07,'строим...'],[9.95,'100 этажей'],[11.16,'золотого стекла!','gold'],[12.83,'самый высокий'],[13.8,'дом на марсе'],[15.16,'и верхний этаж...'],[16.48,'твой...'],[17.12,'@'+NIK,'gold'],[18.72,'а остальные 99 этажей...'],[20.95,'свободны','gold'],[22,'хочешь свою квартиру'],[22.8,'в башне?'],[23.93,'пиши ник в комментариях'],[25,'в телеграме'],[26.12,'ссылка в описании!','gold'],[27.3,'']];// время голоса
+const SFXS=[[0,'swish',.4],[2.85,'drumroll',.35],[4.09,'boom',.5],[4.12,'chime',.5],[5.2,'shimmer',.4],[6.45,'chime',.4],[9.07,'wall',.45],[9.6,'thump',.3],[10.3,'thump',.3],[11,'shimmer',.5],[12.83,'whoosh2',.4],[15.16,'heartbeat',.7],[17.12,'boom',.5],[17.12,'chime',.6],[18.72,'swish',.4],[20.95,'chime',.4],[23.93,'thump',.4]];// время голоса
 let AM=null;
 function prepAN(){const n=AN.length,h=[],d=[],m=[];for(let i=0;i<n-1;i++){h[i]=AN[i+1][0]-AN[i][0];d[i]=(AN[i+1][1]-AN[i][1])/h[i]}
  m[0]=d[0];m[n-1]=d[n-2];for(let i=1;i<n-1;i++)m[i]=d[i-1]*d[i]<=0?0:3*(h[i-1]+h[i])/((2*h[i]+h[i-1])/d[i-1]+(h[i]+2*h[i-1])/d[i]);AM=m}
@@ -64,7 +64,7 @@ function mkTower(T){const g=new T.Group(),FL=[],N=100,FH=.84,W0=13;
  const sp=new T.Mesh(new T.CylinderGeometry(.25,.25,10,6),frame);sp.position.y=13;top.add(sp);
  const lt=new T.Mesh(new T.SphereGeometry(1,10,8),new T.MeshBasicMaterial({color:0xfff2b0}));lt.position.y=18.5;top.add(lt);
  top.position.y=4+N*FH;top.rotation.y=1.2;g.add(top);
- const c=document.createElement('canvas');c.width=640;c.height=156;const x=c.getContext('2d');x.fillStyle='#141829';x.fillRect(0,0,640,156);x.strokeStyle='#f7c24a';x.lineWidth=10;x.strokeRect(5,5,630,146);x.fillStyle='#ffd860';x.font='900 72px Rubik, Arial Black';x.textAlign='center';x.textBaseline='middle';x.fillText('ЖИТЕЛЬ № 1000',320,80);
+ const c=document.createElement('canvas');c.width=640;c.height=156;const x=c.getContext('2d');x.fillStyle='#141829';x.fillRect(0,0,640,156);x.strokeStyle='#f7c24a';x.lineWidth=10;x.strokeRect(5,5,630,146);x.fillStyle='#ffd860';x.font='900 72px Rubik, Arial Black';x.textAlign='center';x.textBaseline='middle';x.fillText('100 ЭТАЖЕЙ',320,80);
  const sign=new T.Mesh(new T.PlaneGeometry(14,3.4),new T.MeshBasicMaterial({map:new T.CanvasTexture(c)}));sign.position.set(0,3,15.1);g.add(sign);
  g.position.set(TP.x,0,TP.z);g.userData={FL,top,N,FH,H:4+N*FH+18};return g}
 const W={};
@@ -72,7 +72,7 @@ function prep(w){const T=w.THREE,sc=w.eval('sc'),L=w.MLIST||w.eval('MLIST');Obje
  const near=(x,z,R)=>Math.hypot(x-TP.x,z-TP.z)<R;
  L.forEach(h=>{if(h.g&&near(h.x,h.z,24)){h.g.visible=false;h.hid=1}});
  const v=new T.Vector3();sc.children.slice().forEach(o=>{if(!o.visible||o.isLight||o.isInstancedMesh)return;o.getWorldPosition(v);if((v.x||v.z)&&near(v.x,v.z,22)){const b=new T.Box3().setFromObject(o),s=new T.Vector3();b.getSize(s);if(Math.max(s.x,s.z)<40)o.visible=false}});
- W.tower=mkTower(T);sc.add(W.tower);
+ if(w.ZTOWER)w.ZTOWER.visible=false;W.tower=mkTower(T);sc.add(W.tower);
  W.cat=mkCat(T);W.cat.scale.setScalar(.55);sc.add(W.cat);W.catP={x:TP.x-6,z:TP.z+24};
  const key=new T.Group(),km=new T.MeshBasicMaterial({color:0xffd860}),kr=new T.Mesh(new T.TorusGeometry(.35,.1,8,16),km);kr.position.y=.5;key.add(kr);key.add(new T.Mesh(new T.BoxGeometry(.12,.9,.12),km));
  key.position.set(0,-1.6,.3);W.cat.userData.armL.add(key);W.key=key;
@@ -98,7 +98,7 @@ function buildCam(){const t=TP,c=W.catP,y=W.ytC,HT=W.tower.userData.H;
  [26,28.5,Z(t.x,t.z,90,.9,.7,10),Z(t.x,t.z,80,1.05,.62,12)],
  [28.5,31,Z(c.x,c.z,10,.25,.16,1.9),Z(c.x,c.z,8.5,.3,.14,1.9)],
  [31,32,Z(c.x,c.z,8.5,.3,.14,1.9),Z(162,-64,640,.4,1.3)]]}
-const PLQ=[[0,1.5,'НАС БЫЛО 777',''],[3,5,'ОБЕЩАЛ — <b>СДЕЛАЛ</b>',''],[7,10,'СТРОИМ',''],[10,12,'100 ЭТАЖЕЙ','gold'],[17.5,19,'ЖИТЕЛЬ № 1000','gold'],[23.5,26,'ВСЕ ДОМА → <b>КОТТЕДЖИ</b>',''],[26,28.5,'УЧАСТКИ У БАШНИ <b>СВОБОДНЫ</b>',''],[28.5,31,'ПОДПИШИСЬ + НИК 👇','red']];
+const PLQ=[[0,1.5,'НАС БЫЛО 777',''],[3,5,'ОБЕЩАЛ — <b>СДЕЛАЛ</b>',''],[7,8.6,'СТРОИМ',''],[8.6,12,'100 ЭТАЖЕЙ','gold'],[26,28.5,'99 ЭТАЖЕЙ <b>СВОБОДНЫ</b>','']];
 window.seek=function(tv){const t=MAPT(tv);const w=$('map').contentWindow,MP=w&&w.MP;if(!MP)return false;if(!W.ready)prep(w);if(!CAM)buildCam();
  if(!w.__vt){w.__vt=true;w.performance.now=()=>w.__VT*1000}w.__VT=tv;
  const T=W.T,c=CAM.find(a=>t>=a[0]&&t<a[1])||CAM[CAM.length-1],lin=cl(0,1,(t-c[0])/(c[1]-c[0])),u=c[0]>=31?ss(lin):lin;
