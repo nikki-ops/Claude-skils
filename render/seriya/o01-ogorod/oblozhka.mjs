@@ -13,6 +13,12 @@ await p.evaluate(()=>{document.getElementById('ov').style.display='none';TT=.4;x
  txt('ОГОРОДНЫЕ СТРАСТИ',W/2,190,70,'#ffd860',EYE);txt('ЖЕНИХ —',W/2,350,130,'#fff',EYE);txt('СОЛЁНЫЙ?!',W/2,500,140,'#ff5a6a',EYE);
  rr(W/2-200,1700,400,110,30,'#3aa04a','#fff',8);txt('ЧАСТЬ 1',W/2,1757,62,'#fff')});
 await p.screenshot({path:path.join(ROOT,'gotovo/o01-ogorod-oblozhka.png')});
+await p.evaluate(()=>{TT=.4;x.setTransform(1,0,0,1,0,0);x.clearRect(0,0,W,H);OFF=0;
+ garden();focus(1.35,W*.5,GY-260,1180);pomidorka(W*.3,GY,1.2,{wide:1,mouth:{o:1},armL:2.6,armR:-2.6,veilFly:.3});jar(W*.73,GY,.85,{twist:1});x.save();x.setTransform(1,0,0,1,0,0);lines(W*.3,1040,0);x.restore();
+ x.setTransform(1,0,0,1,0,0);const g=x.createLinearGradient(0,240,0,900);g.addColorStop(0,'rgba(14,10,30,.85)');g.addColorStop(1,'rgba(14,10,30,0)');x.fillStyle=g;x.fillRect(0,0,W,900);
+ txt('ОГОРОДНЫЕ СТРАСТИ',W/2,330,66,'#ffd860',EYE);txt('ЖЕНИХ —',W/2,480,130,'#fff',EYE);txt('СОЛЁНЫЙ?!',W/2,630,140,'#ff5a6a',EYE);
+ rr(W/2-190,1500,380,104,30,'#3aa04a','#fff',8);txt('ЧАСТЬ 1',W/2,1554,58,'#fff')});
+await p.screenshot({path:path.join(ROOT,'gotovo/o01-ogorod-oblozhka-tiktok.png')});
 await p.setViewportSize({width:1920,height:1080});await p.evaluate(()=>{const c=document.getElementById('c');c.width=1920;c.height=1080;x.setTransform(1,0,0,1,0,0);OFF=0;
  OFF=-560;garden();x.setTransform(1,0,0,1,820,-560);pomidorka(W*.35,GY,1.05,{wide:1,mouth:{o:1},armL:2.6,armR:-2.6});jar(W*.85,GY,.8,{twist:1});OFF=0;
  x.setTransform(1,0,0,1,0,0);const g=x.createLinearGradient(0,0,1100,0);g.addColorStop(0,'rgba(14,10,30,.88)');g.addColorStop(1,'rgba(14,10,30,0)');x.fillStyle=g;x.fillRect(0,0,1920,1080);
