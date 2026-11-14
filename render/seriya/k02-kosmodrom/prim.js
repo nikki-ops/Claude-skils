@@ -7,7 +7,7 @@ const poly=(pts,f,st,lw)=>{x.beginPath();pts.forEach((p,i)=>i?x.lineTo(p[0],p[1]
 const circ=(X,Y,r,f,st,lw)=>{x.beginPath();x.arc(X,Y,Math.max(.1,r),0,7);if(f){x.fillStyle=f;x.fill()}if(st){x.strokeStyle=st;x.lineWidth=lw||4;x.stroke()}};
 const line=(a,b,c,d,col,lw)=>{x.beginPath();x.moveTo(a,b);x.lineTo(c,d);x.strokeStyle=col;x.lineWidth=lw;x.lineCap='round';x.stroke()};
 const txt=(t,X,Y,size,f,st)=>{x.font=`900 ${size}px Rubik, Arial Black`;x.textAlign='center';x.textBaseline='middle';if(st){x.lineJoin='round';x.strokeStyle=st;x.lineWidth=size*.22;x.strokeText(t,X,Y)}x.fillStyle=f;x.fillText(t,X,Y)};
-let OFF=0;// сдвиг сцены вверх, чтобы низ кадра оставался под субтитры
+let OFF=0,TT=0;const BL=(k)=>((TT+k)%3.3)<.13;// TT — время ролика для «живых» движений, BL — моргание// сдвиг сцены вверх, чтобы низ кадра оставался под субтитры
 function cam(z,cx,cy,dx,dy){x.setTransform(z,0,0,z,(1-z)*cx+(dx||0),(1-z)*cy+(dy||0)+OFF)}
 const reset=()=>x.setTransform(1,0,0,1,0,OFF);
 // ---------- фон ----------
@@ -31,23 +31,23 @@ function rocket(X,Y,s,rot,o){o=o||{};x.save();x.translate(X,Y);x.rotate(rot||0);
  if(!o.dark)[[-40,-180,50,26],[20,-470,40,22],[-30,-330,30,18]].forEach(a=>rr(a[0],a[1],a[2],a[3],8,'#b06a3a'));
  if(o.hatch){rr(-50,-100,100,80,8,'#120e14',OUT,5);for(let i=0;i<4;i++)circ(-38+i*25,-92,5,'#7a7e86')}
  rr(-60,0,120,40,10,'#5a5e66',OUT,6);x.restore()}
-function kluch(X,Y,s,screen,o){o=o||{};x.save();x.translate(X,Y);x.scale(s,s);
+function kluch(X,Y,s,screen,o){o=o||{};x.save();x.translate(X,Y);x.scale(s,s);x.translate(0,Math.sin(TT*5+X*.01)*5);
  rr(-120,-70,240,70,35,'#2a2622',OUT,6);[-80,-27,27,80].forEach(c=>circ(c,-35,22,'#5a5450',OUT,4));
  rr(-110,-260,220,190,18,'#b0582e',OUT,7);rr(-85,-150,170,55,8,'#3a2a20');[-60,-25,10].forEach((c,i)=>rr(c,-235,26,26,5,i==2?'#d83a2a':'#e8c24a',OUT,3));rr(40,-200,40,30,6,'#8a3a1a');
  const arm=(sx,a)=>{x.save();x.translate(sx*115,-235);x.rotate(sx*a);rr(-15,0,30,110,12,'#b0582e',OUT,5);rr(-12,100,24,70,10,'#c9784a',OUT,5);line(-10,170,-18,200,'#5a5a5a',8);line(10,170,18,200,'#5a5a5a',8);x.restore()};
- arm(-1,o.armL==null?.25:o.armL);arm(1,o.armR==null?.25:o.armR);
- x.save();x.translate(0,0);x.rotate(o.tilt||0);rr(-14,-300,28,45,6,'#2a2622');rr(-120,-470,240,175,22,'#5a5e66',OUT,7);
+ arm(-1,(o.armL==null?.25:o.armL)+Math.sin(TT*3)*.1);arm(1,(o.armR==null?.25:o.armR)+Math.sin(TT*3+1.5)*.1);
+ x.save();x.translate(0,-300);x.rotate((o.tilt||0)+Math.sin(TT*2.2+X*.01)*.04);x.translate(0,300);rr(-14,-300,28,45,6,'#2a2622');rr(-120,-470,240,175,22,'#5a5e66',OUT,7);
  if(o.off){rr(-100,-452,200,140,14,'#1a2230')}else{const g=x.createRadialGradient(0,-385,10,0,-385,140);g.addColorStop(0,o.red?'#ff9a9a':'#8ff6ff');g.addColorStop(1,o.red?'#c01a2a':'#1a8fd0');rr(-100,-452,200,140,14,g);
   x.save();x.shadowColor=o.red?'#ff4a4a':'#7ff3ff';x.shadowBlur=50;rr(-100,-452,200,140,14,'rgba(127,243,255,.12)');x.restore();
-  if(!screen||screen===':)'){circ(-38,-395,16,'#0b2a44');circ(38,-395,16,'#0b2a44');x.beginPath();x.arc(0,-385,45,.2*Math.PI,.8*Math.PI);x.strokeStyle='#0b2a44';x.lineWidth=10;x.stroke()}
+  if(!screen||screen===':)'){if(BL(.7)){line(-52,-395,-24,-395,'#0b2a44',8);line(24,-395,52,-395,'#0b2a44',8)}else{circ(-38,-395,16,'#0b2a44');circ(38,-395,16,'#0b2a44')}x.beginPath();x.arc(0,-385,45,.2*Math.PI,.8*Math.PI);x.strokeStyle='#0b2a44';x.lineWidth=10;x.stroke()}
   else{const L=screen.split('\n');L.forEach((l,i)=>txt(l,0,-382+(i-(L.length-1)/2)*40,L.length>1?34:46,'#0b2a44'))}}
- line(60,-470,60,-560,'#9aa3ad',8);circ(60,-585,24,null,'#e8b84a',10);line(60,-560,60,-510,'#e8b84a',8);line(60,-530,78,-530,'#e8b84a',7);line(60,-515,74,-515,'#e8b84a',7);x.restore();x.restore()}
-function seryi(X,Y,s){x.save();x.translate(X,Y);x.scale(s,s);rr(-45,-90,35,90,6,'#1f2126',OUT,5);rr(10,-90,35,90,6,'#1f2126',OUT,5);
+ x.save();x.translate(60,-470);x.rotate(Math.sin(TT*6+X*.02)*.22);x.translate(-60,470);line(60,-470,60,-560,'#9aa3ad',8);circ(60,-585,24,null,'#e8b84a',10);line(60,-560,60,-510,'#e8b84a',8);line(60,-530,78,-530,'#e8b84a',7);line(60,-515,74,-515,'#e8b84a',7);x.restore();x.restore();x.restore()}
+function seryi(X,Y,s,walk){x.save();x.translate(X,Y);x.scale(s,s);const st=walk?Math.sin(TT*11):0;x.translate(0,walk?-Math.abs(st)*10:0);rr(-45,-90-Math.max(0,st)*22,35,90,6,'#1f2126',OUT,5);rr(10,-90-Math.max(0,-st)*22,35,90,6,'#1f2126',OUT,5);x.translate(0,-90);x.scale(1,1+Math.sin(TT*2.4+X*.01)*.015);x.translate(0,90);
  poly([[-60,-430],[60,-430],[95,-80],[-95,-80]],'#5a5f68',OUT,7);line(0,-420,0,-90,'#3a3e46',6);[-330,-260,-190].forEach(y=>circ(14,y,6,'#1a1a1a'));
  rr(-110,-420,40,230,18,'#5a5f68',OUT,6);rr(70,-420,40,230,18,'#5a5f68',OUT,6);x.save();x.rotate(-.12);rr(60,-300,90,120,8,'#8a1a1a',OUT,6);rr(70,-290,70,100,4,'#f1e9d8');x.restore();
  rr(-50,-470,100,50,14,'#3a3e46',OUT,5);x.beginPath();x.ellipse(0,-510,45,55,0,0,7);x.fillStyle='#16171c';x.fill();x.strokeStyle=OUT;x.lineWidth=6;x.stroke();
  rr(-90,-560,180,20,10,'#2a2c32',OUT,5);rr(-50,-620,100,65,12,'#2a2c32',OUT,5);rr(-50,-575,100,12,0,'#14151a');x.restore()}
-function vorona(X,Y,s,flip,wing){x.save();x.translate(X,Y);x.scale(flip?-s:s,s);x.beginPath();x.ellipse(0,-35,55,32,-.15,0,7);x.fillStyle='#15161a';x.fill();
+function vorona(X,Y,s,flip,wing){x.save();x.translate(X,Y);x.scale(flip?-s:s,s);if(!wing){const pk=((TT+X*.003)%2.6)<.25?Math.sin(((TT+X*.003)%2.6)/.25*Math.PI)*.35:0;x.rotate(Math.sin(TT*2.5)*.04+pk)}x.beginPath();x.ellipse(0,-35,55,32,-.15,0,7);x.fillStyle='#15161a';x.fill();
  if(wing){poly([[-20,-50],[-60,-50-wing*80],[20,-55]],'#15161a')}poly([[-50,-30],[-100,-20],[-55,-15]],'#15161a');circ(45,-65,26,'#15161a');poly([[65,-70],[100,-60],[66,-56]],'#4a4a4a');circ(52,-72,6,'#ffd84a');if(!wing){line(-10,-5,-14,12,'#4a4a4a',5);line(10,-5,8,12,'#4a4a4a',5)}x.restore()}
 function coin(X,Y,r,rot){x.save();x.translate(X,Y);x.rotate(rot||-.25);x.beginPath();x.ellipse(0,0,r,r*.92,0,0,7);x.fillStyle='#d9dde2';x.fill();x.strokeStyle=OUT;x.lineWidth=6;x.stroke();x.beginPath();x.ellipse(0,0,r*.8,r*.72,0,0,7);x.strokeStyle='#a9adb6';x.lineWidth=4;x.stroke();txt('1₽',0,4,r*.75,'#7a7e86');x.restore()}
 function engine(X,Y,s,rust,rot){x.save();x.translate(X,Y);x.scale(s,s);x.rotate(rot!=null?rot:(rust?.2:0));

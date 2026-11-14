@@ -7,22 +7,22 @@
 // Серия 2 в 2D. Примитивы (rr, poly, circ, txt, cam, rocket, kluch, seryi, engine, crane…) — в prim.js.
 const SKIN='#f2c9a0';
 // ---------- Вера Ивановна ----------
-function vera(X,Y,s,o){o=o||{};x.save();x.translate(X,Y);x.scale(s,s);const suit=o.helmet?'#e8ecf2':'#3a74c0',dk=o.helmet?'#b8c0cc':'#2f5fa0';
+function vera(X,Y,s,o){o=o||{};x.save();x.translate(X,Y);x.scale(s,s);const sw=o.still?0:1;x.translate(0,-40);x.scale(1,1+Math.sin(TT*2.8+X*.01)*.018*sw);x.translate(0,40);const suit=o.helmet?'#e8ecf2':'#3a74c0',dk=o.helmet?'#b8c0cc':'#2f5fa0';
  rr(-58,-40,48,40,10,'#3a2a20',OUT,5);rr(10,-40,48,40,10,'#3a2a20',OUT,5);rr(-50,-175,38,140,8,dk,OUT,5);rr(12,-175,38,140,8,dk,OUT,5);
  const arm=(sx,a,tool)=>{x.save();x.translate(sx*78,-390);x.rotate(sx*a);rr(-17,0,34,150,14,suit,OUT,5);
   if(tool){x.save();x.translate(0,170);x.rotate(-sx*a*.3);line(0,0,0,95,'#9aa3ad',14);circ(0,108,20,null,'#9aa3ad',11);rr(-6,110,12,20,2,o.helmet?'#e8ecf2':'#2a2232');x.restore()}
   circ(0,165,21,SKIN,OUT,4);x.restore()};
- arm(-1,o.armL==null?-.15:o.armL,0);
+ arm(-1,(o.armL==null?-.15:o.armL)+Math.sin(TT*2.6+X*.01)*.07*sw,0);
  poly([[-78,-405],[78,-405],[88,-160],[-88,-160]],suit,OUT,7);rr(-46,-335,92,72,8,dk,OUT,4);line(-60,-405,-46,-335,'#e8b84a',6);line(60,-405,46,-335,'#e8b84a',6);
  if(o.helmet){circ(-40,-372,16,'#d8283a',OUT,3);txt('★',-40,-371,18,'#fff')}else{rr(-30,-318,60,10,3,'#e8b84a')}
  poly([[-36,-405],[0,-372],[36,-405]],'#f1e9d8',OUT,4);
- arm(1,o.armR==null?-.15:o.armR,!o.helmet&&!o.noTool);
- rr(-17,-430,34,32,6,SKIN);x.save();x.rotate(o.tilt||0);
+ arm(1,(o.armR==null?-.15:o.armR)+Math.sin(TT*2.6+X*.01+1.7)*.07*sw,!o.helmet&&!o.noTool);
+ rr(-17,-430,34,32,6,SKIN);x.save();x.translate(0,-420);x.rotate((o.tilt||0)+Math.sin(TT*1.9+X*.01)*.05*sw);x.translate(0,420);
  const hc=o.young?'#6a3a1a':'#dcdce2';
  if(!o.young){circ(0,-552,30,hc,OUT,5)}else{x.save();x.rotate(.5);rr(-18,-560,36,90,18,hc,OUT,5);x.restore()}
  circ(0,-482,62,SKIN,OUT,6);x.beginPath();x.arc(0,-488,64,Math.PI*1.02,Math.PI*1.98);x.closePath();x.fillStyle=hc;x.fill();x.strokeStyle=OUT;x.lineWidth=5;x.stroke();
  circ(-30,-462,11,'rgba(230,110,110,.35)');circ(30,-462,11,'rgba(230,110,110,.35)');
- circ(-22,-482,5,'#2a2a2e');circ(22,-482,5,'#2a2a2e');
+ if(BL(X*.001)&&sw){line(-28,-482,-16,-482,'#2a2a2e',4);line(16,-482,28,-482,'#2a2a2e',4)}else{circ(-22,-482,5,'#2a2a2e');circ(22,-482,5,'#2a2a2e')}
  if(!o.young){circ(-22,-482,17,null,'#2a2a2e',4);circ(22,-482,17,null,'#2a2a2e',4);line(-6,-484,6,-484,'#2a2a2e',4);line(-40,-494,-60,-500,'#2a2a2e',3);line(40,-494,60,-500,'#2a2a2e',3);
   line(-50,-505,-34,-509,'#b8a8a0',3);line(34,-509,50,-505,'#b8a8a0',3)}
  x.beginPath();x.arc(0,-456,o.sad?14:18,o.sad?1.15*Math.PI:.15*Math.PI,o.sad?1.85*Math.PI:.85*Math.PI);x.strokeStyle='#7a3a2a';x.lineWidth=5;x.stroke();
@@ -74,7 +74,7 @@ door(t,u){interior();const z=1+ease(seg(t,14.8,16.2))*.35;cam(z,W*.6,H*.6);lamp(
  if(d>.3)kluch(-W*.04+W*.16*ease(seg(t,13.2,14.4)),H*.88,.4,S.screen(t),{tilt:t>14.8?-.06:0})},
 photo(t,u){interior();cam(1+u*.05,W/2,H*.5);const sl=ease(seg(t,18,18.8));x.save();x.translate(W/2+(1-sl)*W,H*.58);x.scale(.9,.9);x.rotate(-.05+sl*.02);
  rr(-360,-430,720,860,10,'#f4eedf',OUT,8);x.save();x.beginPath();x.rect(-320,-390,640,640);x.clip();x.filter='sepia(1) saturate(1.4) contrast(.95)';
- x.fillStyle='#c8b090';x.fillRect(-320,-390,640,640);x.fillStyle='#9a8060';x.fillRect(-320,120,640,200);engine(-120,170,1.05,0);vera(150,240,.95,{young:1,armL:-1.1,noTool:1});x.filter='none';x.restore();
+ x.fillStyle='#c8b090';x.fillRect(-320,-390,640,640);x.fillStyle='#9a8060';x.fillRect(-320,120,640,200);engine(-120,170,1.05,0);vera(150,240,.95,{young:1,armL:-1.1,noTool:1,still:1});x.filter='none';x.restore();
  x.font='900 54px Rubik';x.textAlign='center';x.fillStyle='#5a4a3a';x.fillText('1991',0,330);x.restore();
  vera(W*.86,H*1.02,.9,{armR:-.3})},
 cond(t,u){cam(1+u*.06,W*.5,H*.7);world(1);tower(W*.04,H*.78,700,.3);lamp(W*.62,H*.3,1);const X=W*.42,Y=H*.88;rocketE(X,Y,1,{h:470});
@@ -83,7 +83,7 @@ cond(t,u){cam(1+u*.06,W*.5,H*.7);world(1);tower(W*.04,H*.78,700,.3);lamp(W*.62,H
   rocket(-40,100,.24,0);vera(55,100,.3,{helmet:1});x.restore()}},
 seryi(t,u){cam(1.05,W/2,H*.7);world();rocketE(W*.12,H*.74,.5);
  for(let i=0;i<12;i++)line(W*.25+i*70,H*.78,W*.25+i*70,H*.7,'#5a5e66',6);line(W*.22,H*.72,W*1.1,H*.72,'#5a5e66',6);line(W*.22,H*.76,W*1.1,H*.76,'#5a5e66',6);
- const sx=W*.68+(1-ease(seg(t,29,30.2)))*W*.5;seryi(sx,H*.92,.95);briefcase(sx-200,H*.92,.8,ease(seg(t,31.2,31.8)));
+ const sx=W*.68+(1-ease(seg(t,29,30.2)))*W*.5;seryi(sx,H*.92,.95,t<30.2);briefcase(sx-200,H*.92,.8,ease(seg(t,31.2,31.8)));
  vera(W*.28,H*.92,.8,{sad:t>31.2});kluch(W*.45,H*.92,.4,S.screen(t),{})},
 stamp(t,u){reset();x.fillStyle='#2a1e3a';x.fillRect(-W,-H,W*3,H*3);cam(1+u*.06,W/2,H*.5);
  rr(140,520,800,1000,16,'#f4eedf',OUT,8);txt('АГЕНТСТВО',540,620,64,'#2a2a3a');txt('ДОПУСК К ПОЛЁТУ',540,690,32,'#5a5a6a');
@@ -113,6 +113,6 @@ UI.init(document.getElementById('ov'),W,H);
 const AN=[[0,0],[2.5,3],[5,6],[7.5,9],[9.8,13],[13,18],[17,24],[20.5,29],[24,34],[28,40],[34.5,47],[37.5,51],[40.5,55]];const ip=(A,t,i,j)=>{if(t<=A[0][i])return A[0][j];for(let k=1;k<A.length;k++)if(t<=A[k][i]){const a=A[k-1],b=A[k];return b[i]===a[i]?b[j]:a[j]+(b[j]-a[j])*(t-a[i])/(b[i]-a[i])}return A[A.length-1][j]};
 const mapT=t=>AN.length?Math.min(S.END-.001,ip(AN,t,0,1)):t;
 window.SFXV=()=>AN.length?S.SFX.map(q=>[ip(AN,q[0],1,0),q[1],q[2]]):S.SFX;
-window.seek=to=>{const t=mapT(to);x.setTransform(1,0,0,1,0,0);x.clearRect(0,0,W,H);const sc=S.scene(t);OFF=(sc.id==='choice')?0:-300;try{SCN[sc.id](t,sc.u)}catch(e){console.error(e)}x.setTransform(1,0,0,1,0,0);UI.update(t,S)};
+window.seek=to=>{TT=to;const t=mapT(to);x.setTransform(1,0,0,1,0,0);x.clearRect(0,0,W,H);const sc=S.scene(t);OFF=(sc.id==='choice')?0:-300;try{SCN[sc.id](t,sc.u)}catch(e){console.error(e)}x.setTransform(1,0,0,1,0,0);UI.update(t,S)};
 window.END=AN.length?AN[AN.length-1][0]:S.END;Promise.all([document.fonts.load('900 40px Rubik'),document.fonts.load('700 40px Rubik')]).then(()=>{seek(0);window.READY=1});
 </script></body></html>
