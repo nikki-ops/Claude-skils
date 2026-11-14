@@ -1703,7 +1703,7 @@ const V3=new THREE.Vector3();let first=true;
 let LK='',LTM=0;draw=function(){const now=performance.now();{const k=[K.tx,K.tz,K.d,K.yaw,D,night,sel&&sel.i].join(',');if(k===LK&&!anim&&!P.size&&now-LTM<40&&!first)return;LK=k;LTM=now}if(anim){const u=Math.min(1,(now-anim.t0)/1200),e=u*u*(3-2*u);['tx','tz','d','yaw'].forEach(k=>K[k]=anim.f[k]+(anim.to[k]-anim.f[k])*e);if(u>=1)anim=null}
 const cp=Math.cos(K.p);cam.position.set(K.tx+Math.sin(K.yaw)*cp*K.d,Math.sin(K.p)*K.d,K.tz+Math.cos(K.yaw)*cp*K.d);cam.lookAt(K.tx,0,K.tz);cam.updateMatrixWorld();cam.matrixWorldInverse.copy(cam.matrixWorld).invert();
 const W=st.clientWidth,H=st.clientHeight,sr=st.getBoundingClientRect(),B=['mpTop','mpCtl','mpBot','mpCard'].map(id=>{const e=$m(id);if(!e||e.style.display==='none')return null;const r=e.getBoundingClientRect();return[r.left-sr.left-4,r.top-sr.top-4,r.right-sr.left+4,r.bottom-sr.top+4]}).filter(Boolean),C2=[];
-L.forEach(h=>{h.vis=false;V3.set(h.x,h.top+.6,h.z).project(cam);const dist=Math.hypot(h.x-K.tx,h.z-K.tz);h.sx=(V3.x*.5+.5)*W;h.sy=(-V3.y*.5+.5)*H;
+L.forEach(h=>{h.vis=false;V3.set(h.x,Math.min(h.top+.6,16),h.z).project(cam);const dist=Math.hypot(h.x-K.tx,h.z-K.tz);h.sx=(V3.x*.5+.5)*W;h.sy=(-V3.y*.5+.5)*H;
 const ok=!h.anon&&h.day<=D&&V3.z<1&&Math.abs(V3.x)<1&&Math.abs(V3.y)<1&&((K.d<95&&dist<K.d*1.1)||h===sel||window.MPALL);if(!ok){h.e.style.display='none';return}h.vis=true;C2.push(h)});
 C2.sort((a,b)=>(b===sel)-(a===sel)||Math.hypot(a.x-K.tx,a.z-K.tz)-Math.hypot(b.x-K.tx,b.z-K.tz));
 C2.forEach(h=>{h.e.classList.toggle('hl',h===sel);h.e.style.display='block';h.e.style.left=h.sx+'px';h.e.style.top=h.sy+'px'});
