@@ -113,8 +113,8 @@ final(t,u){SCN.choice(40.95,1);x.setTransform(1,0,0,1,0,0);const q=Math.sin(t*6)
 };
 UI.init(document.getElementById('ov'),W,H);
 // под голос: AN = [время голоса, время сцены] (заполнить после golos/k02-kosmodrom.mp3); пусто — 1:1
-// темп: [время в ролике, время сцены] — ночь и проходы ужаты, весь ролик ~41 с (под голос заменить)
-const AN=[[0,0],[2.5,3],[5,6],[7.5,9],[9.8,13],[13,18],[17,24],[20.5,29],[24,34],[28,40],[34.5,47],[36.2,49],[41.4,55],[46,60]];const ip=(A,t,i,j)=>{if(t<=A[0][i])return A[0][j];for(let k=1;k<A.length;k++)if(t<=A[k][i]){const a=A[k-1],b=A[k];return b[i]===a[i]?b[j]:a[j]+(b[j]-a[j])*(t-a[i])/(b[i]-a[i])}return A[A.length-1][j]};
+// темп: всё 1:1, ужата только ночь (Ключ идёт к складу за 2,3 с вместо 4); под голос заменить
+const AN=[[0,0],[9,9],[11.3,13],[58.3,60]];const ip=(A,t,i,j)=>{if(t<=A[0][i])return A[0][j];for(let k=1;k<A.length;k++)if(t<=A[k][i]){const a=A[k-1],b=A[k];return b[i]===a[i]?b[j]:a[j]+(b[j]-a[j])*(t-a[i])/(b[i]-a[i])}return A[A.length-1][j]};
 const mapT=t=>AN.length?Math.min(S.END-.001,ip(AN,t,0,1)):t;
 window.SFXV=()=>AN.length?S.SFX.map(q=>[ip(AN,q[0],1,0),q[1],q[2]]):S.SFX;
 window.seek=to=>{TT=to;const t=mapT(to);x.setTransform(1,0,0,1,0,0);x.clearRect(0,0,W,H);const sc=S.scene(t);OFF=(sc.id==='choice'||sc.id==='final')?0:-300;try{SCN[sc.id](t,sc.u)}catch(e){console.error(e)}x.setTransform(1,0,0,1,0,0);UI.update(t,S)};
