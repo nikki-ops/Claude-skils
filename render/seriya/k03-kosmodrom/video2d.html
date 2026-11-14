@@ -130,7 +130,7 @@ blind(t,u){interior();lamp(W*.5,H*.22,.8);const lt=t-30;if(lt<2){cam(1.2,W*.5,H*
  else{cam(2,W*.5,1200);const k=ease(seg(t,32,32.6));kluchX(W*.3,1412,.55,':)',{blind:1,armR:-1.6});x.save();x.translate(W*.3+150+k*120,1412-240);wrench(0,0,.7,-1.2,null);x.restore();
   x.save();x.translate(W*.82,1150);x.rotate(.3);rr(-170,-16,170,32,14,'#3a74c0',OUT,5);circ(-180,0,26,SKIN,OUT,4);x.restore();if(t>32.6)txt('✓',W*.62,1000,90,'#3aa04a',OUT)}},
 dawn(t,u){const lt=t-34;worldT('dawn');if(lt<2){cam(1+lt*.03,W*.5,H*.7);tower(W*.06,H*.78,700,0);const [X,Y]=standE(W*.62,H*.84,.62);trench(X,H*.84,.62);block(W*.22,H*.9,360,170);
-  if(VAR==='vera')vera(W*.16,H*.9-120,.55,{goggles:1});else kluch(W*.16,H*.9-110,.3,'...',{});kluch(W*.3,H*.9-110,.3,'...',{});vorona(X,H*.84-520,.5)}
+  if(VAR==='vera')vera(W*.16,H*.9-120,.55,{goggles:1});kluch(W*.3,H*.9-110,.3,'...',{});vorona(X,H*.84-520,.5)}
  else{cam(1.7,W*.4,H*.78);block(W*.4,H*.92,700,260);if(VAR==='vera'){vera(W*.28,H*.92-200,.7,{goggles:1,armR:-1});kluch(W*.55,H*.92-200,.4,'...',{tilt:.1})}else{kluch(W*.4,H*.92-200,.5,'...',{armR:-1.2})}}},
 count(t,u){const n=t<39.3?3:t<40.6?2:1,t0=n===3?38:n===2?39.3:40.6;bigDigit(n,t,t0);
  x.setTransform(1,0,0,1,0,0);const lx=W*.5,ly=H*.8;rr(lx-60,ly-120,120,140,10,'#5a5e66',OUT,6);const pull=n===1?seg(t,41.3,41.9):0;x.save();x.translate(lx,ly-110);x.rotate(-.5+pull*1);line(0,0,0,-180,'#9aa3ad',16);circ(0,-190,26,'#d8263a',OUT,5);x.restore();
