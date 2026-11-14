@@ -107,14 +107,14 @@ zoom(t,u){interior();cam(1+u*.1,W*.4,H*.7);lamp(W*.5,H*.22,1);kluch(W*.26,H*.94,
 twist(t,u){interior();const z=1+1.3*ease(seg(t,49.2,51.6)),PX=W/2-262*.9,PY=H*.58+75*.9;cam(z,PX,PY);x.save();x.translate(W/2,H*.58);x.scale(.9,.9);photo1991();
  if(t>52.6){const p=1+Math.sin(t*8)*.05;x.save();x.translate(-262,75);x.scale(p,p);circ(0,0,135,null,'#d8263a',10);x.restore()}x.restore();
  if(t>52.6){reset();x.setTransform(1,0,0,1,0,0);const k=ease(seg(t,52.6,53.4));x.globalAlpha=k;kluch(W*.84,H*.93,.45,S.screen(t),{red:1,tilt:-.1});x.globalAlpha=1}},
-final(t,u){SCN.choice(40.95,1);x.setTransform(1,0,0,1,0,0);const q=Math.sin(t*6)*.06;
+final(t,u){SCN.choice(t<56.3?40.95:t<59.3?41.5+(t-56.3)*.8:t<62.3?44.1+(t-59.3)*.9:47.5,1);x.setTransform(1,0,0,1,0,0);const q=Math.sin(t*6)*.06;
  x.save();x.translate(W*.14,H*.3);x.scale(1+q,1+q);rocket(0,110,.24,0);x.restore();x.save();x.translate(W*.14,H*.64);x.scale(1-q,1-q);bag(0,0,.9);x.restore();
- if(t>=59.2){const k=seg(t,59.2,59.6);x.fillStyle='rgba(0,0,0,'+(.45*k)+')';x.fillRect(0,0,W,H)}}
+ if(t>=63.5){const k=seg(t,63.5,63.9);x.fillStyle='rgba(0,0,0,'+(.45*k)+')';x.fillRect(0,0,W,H)}}
 };
 UI.init(document.getElementById('ov'),W,H);
 // под голос: AN = [время голоса, время сцены] (заполнить после golos/k02-kosmodrom.mp3); пусто — 1:1
-// темп: всё 1:1, ужата только ночь (Ключ идёт к складу за 2,3 с вместо 4); под голос заменить
-const AN=[[0,0],[9,9],[11.3,13],[58.3,60]];const ip=(A,t,i,j)=>{if(t<=A[0][i])return A[0][j];for(let k=1;k<A.length;k++)if(t<=A[k][i]){const a=A[k-1],b=A[k];return b[i]===a[i]?b[j]:a[j]+(b[j]-a[j])*(t-a[i])/(b[i]-a[i])}return A[A.length-1][j]};
+// темп: начало растянуто под голос, ночь ужата (Ключ идёт к складу 2,3 с), выбор в середине (сцена 40–47) вырезан; под голос заменить
+const AN=[[0,0],[4.5,3],[9,6],[13,9],[15.3,13],[42.3,40],[42.301,47],[59.8,64.5]];const ip=(A,t,i,j)=>{if(t<=A[0][i])return A[0][j];for(let k=1;k<A.length;k++)if(t<=A[k][i]){const a=A[k-1],b=A[k];return b[i]===a[i]?b[j]:a[j]+(b[j]-a[j])*(t-a[i])/(b[i]-a[i])}return A[A.length-1][j]};
 const mapT=t=>AN.length?Math.min(S.END-.001,ip(AN,t,0,1)):t;
 window.SFXV=()=>AN.length?S.SFX.map(q=>[ip(AN,q[0],1,0),q[1],q[2]]):S.SFX;
 window.seek=to=>{TT=to;const t=mapT(to);x.setTransform(1,0,0,1,0,0);x.clearRect(0,0,W,H);const sc=S.scene(t);OFF=(sc.id==='choice'||sc.id==='final')?0:-300;try{SCN[sc.id](t,sc.u)}catch(e){console.error(e)}x.setTransform(1,0,0,1,0,0);UI.update(t,S)};
