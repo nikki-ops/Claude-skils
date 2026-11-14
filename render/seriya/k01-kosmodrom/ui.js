@@ -19,5 +19,5 @@ window.UI=(function(){let R,W,H,s,E={};
    E.uSub.innerHTML=`<span style="display:inline-block;transform:scale(${.85+.15*k});font-weight:900;font-size:${70*s}px;line-height:1.1;color:${col};-webkit-text-stroke:${13*s}px #141829;paint-order:stroke fill;text-shadow:0 ${8*s}px 0 #141829">${sb.text}</span>`}else E.uSub.innerHTML='';
   // затемнение в конце и вспышки на ударах
   E.uFade.style.opacity=Math.max(0,Math.min(1,(t-(S.END-.6))/.6))+(t<.25?1-t/.25:0);
-  const fl=[.6,8,16.3,37.6,45].reduce((m,q)=>Math.max(m,t>=q&&t<q+.25?.5*(1-(t-q)/.25):0),0);E.uFlash.style.opacity=fl}
+  const fl=(S.FLASH||[.6,8,16.3,37.6,45]).reduce((m,q)=>Math.max(m,t>=q&&t<q+.25?.5*(1-(t-q)/.25):0),0);E.uFlash.style.opacity=fl}
  return{init,update}})();
