@@ -71,7 +71,7 @@ function safe(X,Y,open){rr(X-200,Y-380,400,380,24,'#6a5a4a',OUT,8);rr(X-170,Y-35
  for(let r=0;r<3;r++)for(let c=0;c<4;c++){rr(X-150+c*76,Y-320+r*95,66,80,6,'#3f9a4a',OUT,4);txt('$',X-117+c*76,Y-280+r*95,40,'#2a6a32')}
  const w=340*(1-open*.92);x.save();rr(X-170,Y-350,w,320,14,'#7a6a5a',OUT,6);if(w>60){circ(X-170+w/2,Y-190,50,'#9a8a7a',OUT,6);line(X-170+w/2-30,Y-190,X-170+w/2+30,Y-190,OUT,8)}x.restore()}
 function contract(t){rr(140,520,800,1000,16,'#f4eedf',OUT,8);txt('CONTRACT',540,620,64,'#2a2a3a');for(let i=0;i<9;i++)rr(220,720+i*60,i%3==2?420:640,14,6,'#bcb3a0');
- txt('"DAWN" SPACEPORT — $1',540,690,30,'#5a5a6a');const st=seg(t,8,8.25);if(st>0){x.save();x.translate(560,1260);x.rotate(-.18);x.scale(1.6-st*.6,1.6-st*.6);x.globalAlpha=Math.min(1,st*2);rr(-330,-80,660,160,14,null,'#d8263a',12);txt('$50,000,000 FINE',0,4,52,'#d8263a');x.restore()}}
+ txt('"DAWN" SPACEPORT — $1',540,690,30,'#5a5a6a');const st=seg(t,8,8.25);if(st>0){x.save();x.translate(560,1260);x.rotate(-.18);x.scale(1.6-st*.6,1.6-st*.6);x.globalAlpha=Math.min(1,st*2);rr(-330,-80,660,160,14,null,'#d8263a',12);txt('$5,000,000 FINE',0,4,52,'#d8263a');x.restore()}}
 function warehouse(X,Y,flick,sil){rr(X-220,Y-300,440,300,10,'#2a2430',OUT,6);poly([[X-240,Y-300],[X,Y-420],[X+240,Y-300]],'#1e1a24',OUT,6);rr(X-60,Y-160,120,160,6,'#141018',OUT,4);rr(X+80,Y-230,90,70,6,flick||sil?'#ffe89a':'#141018',OUT,4);if(sil){circ(X+125,Y-205,14,'#141018');rr(X+108,Y-192,34,32,8,'#141018')}if(flick){x.save();x.globalAlpha=.25;poly([[X+80,Y-160],[X-100,Y+60],[X+260,Y+60],[X+170,Y-160]],'#ffe89a');x.restore()}}
 // ---------- сцены ----------
 const SCN={
@@ -100,7 +100,7 @@ hatch(t,u){reset();sky(0,1);hills(H*.6,'#4a2448');ground(H*.66);cam(1.9+u*.1,W*.
  cam(1,W/2,H/2);reset();kluch(W*.2,H*.9,.7,S.screen(t),{red:t>=45,tilt:t>45&&t<46?Math.sin(t*30)*.06:0});
  if(t>=45){x.save();x.globalAlpha=1;rr(W*.42,H*.5,W*.5,H*.24,20,'#120e14',OUT,8);for(let i=0;i<6;i++){circ(W*.48+i*80,H*.53,10,'#7a7e86');line(W*.48+i*80,H*.53,W*.5+i*80,H*.56,'#5a5e66',5)}
   for(let i=0;i<5;i++)line(W*.5+i*90,H*.66,W*.52+i*90+30,H*.72,['#d8283a','#2f6fd0','#f2c230'][i%3],7);[[W*.55,H*.7],[W*.75,H*.69]].forEach(p=>{x.save();x.translate(p[0],p[1]);x.rotate(.3);rr(-20,-40,40,80,18,'#3a2a20');x.restore()});x.restore()}
- if(t>=48){txt('$20,000,000',W*.5,H*.42,90,'#ff5a6a',OUT);}},
+ if(t>=48){txt('$2,000,000',W*.5,H*.42,90,'#ff5a6a',OUT);}},
 choice(t,u){const a1=t<60||t>=66,a2=t<53||t>=60;
  x.save();reset();x.beginPath();x.rect(0,0,W,H/2);x.clip();cam(1.02,W/2,H/4);sky();hills(H*.32,'#5a2a5a');ground(H*.36,'#c08a52');scrap(W*.55,H*.46,10);const s1=ease(seg(t,51,51.5));engine(W*.55+(1-s1)*W,H*.44,.95,1);reset();if(!a1){x.fillStyle='rgba(10,8,20,.55)';x.fillRect(0,0,W,H/2)}x.restore();
  x.save();x.setTransform(1,0,0,1,0,0);x.beginPath();x.rect(0,H/2,W,H/2);x.clip();x.translate(0,H/2-230);const g=x.createLinearGradient(0,0,0,H*.3);g.addColorStop(0,'#c0607a');g.addColorStop(1,'#f8b06a');x.fillStyle=g;x.fillRect(0,0,W,H);
@@ -108,8 +108,8 @@ choice(t,u){const a1=t<60||t>=66,a2=t<53||t>=60;
  if(!a2){x.fillStyle='rgba(10,8,20,.55)';x.fillRect(0,0,W,H)}x.restore();reset();
  x.fillStyle='#fff';x.fillRect(0,H/2-6,W,12);const p1=1+(a1&&t<60?Math.sin(t*6)*.05:0),p2=1+(t>=60&&t<66?Math.sin(t*6)*.05:0);
  x.save();x.translate(W*.13,H*.31);x.scale(p1,p1);txt('1',0,0,170,'#f7c24a',OUT);x.restore();x.save();x.translate(W*.13,H*.6);x.scale(p2,p2);txt('2',0,0,170,'#4fd6e8',OUT);x.restore();
- if(t>=51.5){x.font='900 34px Rubik';rr(W*.12,H*.405,W*.76,64,16,'#1b2140','#fff',5);txt('OLD 1991 ENGINE · $3M',W/2,H*.405+34,34,'#fff')}
- if(t>=51.8){rr(W*.12,1310,W*.76,64,16,'#1b2140','#fff',5);txt('NEW ON CREDIT · $20M',W/2,1344,34,'#fff')}},
+ if(t>=51.5){x.font='900 34px Rubik';rr(W*.12,H*.405,W*.76,64,16,'#1b2140','#fff',5);txt('OLD 1991 ENGINE · $300K',W/2,H*.405+34,34,'#fff')}
+ if(t>=51.8){rr(W*.12,1310,W*.76,64,16,'#1b2140','#fff',5);txt('NEW ON CREDIT · $2M',W/2,1344,34,'#fff')}},
 name(t,u){reset();sky(0,1);cam(1+u*.04,W/2,H*.47);rr(W*.12,500,W*.76,800,40,'#f3f1ec',OUT,10);rr(W*.12,580,W*.76,50,4,'#d8283a',OUT,5);rr(W*.12,1180,W*.76,50,4,'#d8283a',OUT,5);
  [0,1,2].forEach(i=>circ(W*.3+i*W*.2,H*.42,40,'#4ab8e8',OUT,7));txt('?',W/2,960,170,'rgba(216,40,58,.22)');if(Math.floor(t*2.5)%2)rr(W/2-35,1060,70,14,4,'#d8283a');
  x.save();x.translate(W*.8,1120);x.rotate(-.5);rr(-20,0,40,220,10,'#6a4326',OUT,5);rr(-70,-60,140,70,14,'#d8283a',OUT,6);x.restore()},
