@@ -119,8 +119,8 @@ fuel(t,u){cam(1.15+u*.1,W*.5,H*.7);world(1);rocketE(W*.25,H*.84,.8,{dark:1});
 };
 UI.init(document.getElementById('ov'),W,H);
 // под голос: AN = [время голоса, время сцены] (заполнить после golos/k02-kosmodrom.mp3); пусто — 1:1
-// темп: начало растянуто под голос, ночь ужата (Ключ идёт к складу 2,3 с), выбор в середине (сцена 40–47) вырезан; под голос заменить
-const AN=[[0,0],[4.5,3],[9,6],[13,9],[15.3,13],[42.3,39.99],[42.301,47],[54.8,59.5]];const ip=(A,t,i,j)=>{if(t<=A[0][i])return A[0][j];for(let k=1;k<A.length;k++)if(t<=A[k][i]){const a=A[k-1],b=A[k];return b[i]===a[i]?b[j]:a[j]+(b[j]-a[j])*(t-a[i])/(b[i]-a[i])}return A[A.length-1][j]};
+// под голос golos/k02-kosmodrom.mp3: [время голоса, время сцены] (паузы — silencedetect, 27 фраз)
+const AN=[[0,0],[2.45,1.5],[4.11,3],[6.45,6],[7.67,7.2],[9.29,9],[11.81,13],[13.63,14.8],[16.14,18],[17.56,19.5],[19.8,22.2],[22.47,24],[24.24,26.3],[26.6,29],[28.29,31.2],[30.2,34],[32.49,36.6],[34.2,38.4],[35.94,39.99],[35.941,47],[37.4,48],[39.32,49.5],[40.94,51],[43.02,52.6],[44.55,54.5],[45.66,55.7],[47.36,57.1],[49.6,59.5]];const ip=(A,t,i,j)=>{if(t<=A[0][i])return A[0][j];for(let k=1;k<A.length;k++)if(t<=A[k][i]){const a=A[k-1],b=A[k];return b[i]===a[i]?b[j]:a[j]+(b[j]-a[j])*(t-a[i])/(b[i]-a[i])}return A[A.length-1][j]};
 const mapT=t=>AN.length?Math.min(S.END-.001,ip(AN,t,0,1)):t;
 window.SFXV=()=>AN.length?S.SFX.map(q=>[ip(AN,q[0],1,0),q[1],q[2]]):S.SFX;
 window.seek=to=>{TT=to;const t=mapT(to);x.setTransform(1,0,0,1,0,0);x.clearRect(0,0,W,H);const sc=S.scene(t);OFF=(sc.id==='choice'||sc.id==='final')?0:-300;try{SCN[sc.id](t,sc.u)}catch(e){console.error(e)}x.setTransform(1,0,0,1,0,0);UI.update(t,S)};
