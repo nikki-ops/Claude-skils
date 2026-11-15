@@ -1,0 +1,96 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><title>Один на Марсе — проба: день 82</title>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@700;900&display=swap" rel="stylesheet">
+<style>html,body{margin:0;overflow:hidden;background:#000}canvas{display:block}</style></head><body>
+<canvas id="c"></canvas>
+<script>window.SER={W:1920,H:1080,ease:u=>u<0?0:u>1?1:u*u*(3-2*u),seg:(t,a,b)=>Math.max(0,Math.min(1,(t-a)/(b-a)))};</script>
+<script src="../k02-kosmodrom/prim.js"></script><script src="mir.js"></script><script src="rig.js"></script><script src="timing.js"></script>
+<script>
+// ПРОБА нового качества: день 82 (фразы 183–188). Подробный интерьер + риги + передача кружки.
+const T0=561.6,T1=590.4;
+function camZ(z,cx,cy){x.setTransform(z,0,0,z,W/2-cx*z+Math.sin(TT*.6)*5,H/2-cy*z+Math.cos(TT*.45)*4)}
+// ---------- ИНТЕРЬЕР: кают-компания ----------
+function lounge(sunK,o){o=o||{};
+ // стена
+ const gw=x.createLinearGradient(0,0,0,820);gw.addColorStop(0,'#2e3a4c');gw.addColorStop(1,'#3e4c60');x.fillStyle=gw;x.fillRect(-400,-200,2720,1020);
+ for(let i=-2;i<16;i++){line(i*150,40,i*150,820,'#2a3546',4);for(let j=0;j<6;j++)circ(i*150+12,90+j*130,3,'#5a6a80')}
+ rr(-400,600,2720,14,0,'#2a3546');rr(-400,330,2720,8,0,'#36445a');
+ // потолок, трубы, вентилятор
+ x.fillStyle='#1e2632';x.fillRect(-400,-200,2720,240);rr(-400,40,2720,26,6,'#5a6a7c',OL,4);rr(-400,74,2720,14,4,'#8a5a3a',OL,3);for(let i=0;i<14;i++)rr(-300+i*190,30,20,60,4,'#3a4656',OL,3);
+ x.save();x.translate(1760,170);circ(0,0,62,'#1a2028',OL,5);x.rotate(TT*6);for(let i=0;i<4;i++){x.rotate(Math.PI/2);poly([[0,0],[14,-50],[-14,-50]],'#5a6a7c')}x.restore();
+ // лампы
+ [[300,96],[1500,96]].forEach(([lx,ly])=>{rr(lx-60,ly,120,22,8,'#9aa3ad',OL,4);x.save();x.globalAlpha=.12;poly([[lx-60,ly+22],[lx+60,ly+22],[lx+260,820],[lx-260,820]],'#ffe8b0');x.restore();rr(lx-50,ly+16,100,8,4,'#fff3c0')});
+ // окно-иллюминатор
+ const WX=700,WY=410,RW=380,RH=230;x.save();x.beginPath();x.ellipse(WX,WY,RW,RH,0,0,7);x.clip();
+ const sg=x.createLinearGradient(0,WY-RH,0,WY+RH);sg.addColorStop(0,'#2a2050');sg.addColorStop(.5,'#b8507a');sg.addColorStop(1,'#f8a050');x.fillStyle=sg;x.fillRect(WX-RW,WY-RH,RW*2,RH*2);
+ for(let i=0;i<30;i++)circ(WX-RW+(i*157)%(RW*2),WY-RH+(i*89)%(RH*.8),1.6,`rgba(255,255,255,${.3+(i%3)*.2})`);circ(WX-220,WY-120,16,'#e8e0d0');
+ const sy=WY-40+sunK*170;circ(WX+60,sy,52,'#fff4d8');circ(WX+60,sy,96,'rgba(255,230,180,.3)');circ(WX+60,sy,160,'rgba(255,200,140,.15)');
+ x.fillStyle='#6a2a3a';x.beginPath();x.moveTo(WX-RW,WY+RH);for(let i=0;i<=12;i++)x.lineTo(WX-RW+i*RW/6,WY+60-Math.sin(i*1.4)*40-Math.cos(i*.7)*20);x.lineTo(WX+RW,WY+RH);x.fill();
+ x.fillStyle='#4a1e2a';x.beginPath();x.moveTo(WX-RW,WY+RH);for(let i=0;i<=10;i++)x.lineTo(WX-RW+i*RW/5,WY+130-Math.sin(i*2.1+1)*22);x.lineTo(WX+RW,WY+RH);x.fill();
+ for(let i=0;i<8;i++){const q=(TT*.05+i/8)%1;circ(WX-RW+q*RW*2,WY+100+(i%3)*20,30+i%3*14,'rgba(240,150,90,.12)')}x.restore();
+ x.beginPath();x.ellipse(WX,WY,RW+30,RH+30,0,0,7);x.lineWidth=40;x.strokeStyle='#8a96a6';x.stroke();x.lineWidth=6;x.strokeStyle=OL;x.beginPath();x.ellipse(WX,WY,RW+50,RH+50,0,0,7);x.stroke();x.beginPath();x.ellipse(WX,WY,RW+10,RH+10,0,0,7);x.stroke();
+ for(let i=0;i<16;i++){const a=i/16*6.283;circ(WX+Math.cos(a)*(RW+30),WY+Math.sin(a)*(RH+30),7,'#5a6476',OL,2)}
+ x.save();x.globalAlpha=.18;x.beginPath();x.ellipse(WX-150,WY-90,120,50,-.4,0,7);x.fillStyle='#fff';x.fill();x.restore();
+ // скамья под окном
+ rr(380,700,640,40,10,'#5a4a3e',OL,5);rr(392,676,616,34,14,'#a8463a',OL,5);rr(400,740,30,90,6,'#3a3036',OL,4);rr(970,740,30,90,6,'#3a3036',OL,4);
+ // стена слева: доска со счётом, огнетушитель, кабели
+ rr(-60,170,300,330,10,'#3e4e60',OL,6);for(let i=0;i<(o.marks||82);i++){const c=i%5,r=Math.floor(i/5),cx=-36+(r%5)*56,cy=196+Math.floor(r/5)*80;if(c<4)line(cx+c*9,cy,cx+c*9,cy+40,'rgba(255,255,255,.85)',5);else line(cx-4,cy+28,cx+40,cy+10,'#ff6a5a',5)}
+ rr(280,560,46,110,16,'#d8263a',OL,5);rr(292,540,22,26,4,'#2a2a2e',OL,3);x.beginPath();x.moveTo(-100,90);x.bezierCurveTo(100,240,60,420,240,560);x.strokeStyle='#1a1f28';x.lineWidth=10;x.stroke();
+ // справа: стеллаж с ящиками и горшок с картошкой
+ rr(1260,200,560,22,4,'#6a5a4a',OL,4);rr(1260,360,560,22,4,'#6a5a4a',OL,4);rr(1270,222,20,380,4,'#5a4a3e',OL,3);rr(1790,222,20,380,4,'#5a4a3e',OL,3);
+ [['ВОДА','#4ab8e8',1290],['ЕДА','#f7c24a',1420],['O₂','#5dff8a',1550]].forEach(([l,c,bx])=>{rr(bx,240,116,118,10,'#5a6a7c',OL,5);rr(bx+10,286,96,30,6,c);txt(l,bx+58,302,22,OL)});
+ x.save();x.translate(1720,358);rr(-46,-70,92,70,10,'#a8663a',OL,5);for(let i=0;i<7;i++){const a=-1.2+i*.4;x.beginPath();x.ellipse(Math.cos(a-1.57)*40,-90+Math.sin(a-1.57)*30,22,12,a,0,7);x.fillStyle=i%2?'#3aa04a':'#4ac85a';x.fill();x.strokeStyle=OL;x.lineWidth=3;x.stroke()}x.restore();
+ [[1300,382],[1380,382],[1460,382]].forEach(([jx,jy],i)=>{rr(jx,jy,60,70,12,'rgba(200,230,255,.5)',OL,4);rr(jx+6,jy+30,48,34,8,['#c8a060','#f7c24a','#9fdcff'][i])});
+ // пол
+ x.fillStyle='#232c38';x.fillRect(-400,820,2720,500);for(let i=-8;i<26;i++)line(960+(i-9)*120,820,960+(i-9)*220,1300,'#1c2430',4);for(let j=0;j<4;j++)line(-400,850+j*j*40,2320,850+j*j*40,'#1c2430',3);
+ // свет из окна на полу
+ x.save();x.globalCompositeOperation='lighter';x.globalAlpha=.14+.04*Math.sin(TT*.5);poly([[WX-300,WY+180],[WX+300,WY+180],[WX+520,1080],[WX-380,1080]],'#ff9a5a');x.restore()}
+function table(){rr(1220,690,520,34,8,'#7a6050',OL,5);rr(1236,724,488,90,6,'#5a4638',OL,4);rr(1250,724,26,100,6,'#4a3a32',OL,4);rr(1690,724,26,100,6,'#4a3a32',OL,4)}
+function shadowAt(X,Y,w){x.save();x.beginPath();x.ellipse(X,Y,w,w*.18,0,0,7);x.fillStyle='rgba(0,0,0,.35)';x.fill();x.restore()}
+function stool(X,Y){rr(X-60,Y-24,120,24,8,'#5a6a7c',OL,4);rr(X-8,Y,16,100,4,'#3a4656',OL,3);rr(X-50,Y+92,100,12,4,'#3a4656',OL,3)}
+function grade(c,a){x.save();x.setTransform(1,0,0,1,0,0);x.globalCompositeOperation='multiply';x.fillStyle=c;x.globalAlpha=a;x.fillRect(0,0,W,H);x.restore();x.save();x.setTransform(1,0,0,1,0,0);const g=x.createRadialGradient(W/2,H/2,H*.4,W/2,H/2,H*1.1);g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(1,'rgba(0,0,0,.45)');x.fillStyle=g;x.fillRect(0,0,W,H);x.restore()}
+// ---------- сцена ----------
+const SN=TM.s,ST=i=>SN[i].t0;
+function scene(t){const L=t-T0;// локальное время
+ const sunK=Math.min(1,Math.max(0,(t-ST(186))/((ST(189))-ST(186))));
+ // ---- кадр 1: за столом, считает запасы ----
+ if(t<ST(185)){camZ(1.55,1460,660);lounge(0);stool(1450,770);
+  const tap=Math.sin(TT*7)*.12,scr=t>ST(184)+4&&t<ST(184)+7;shadowAt(1450,830,120);
+  heroRig({x:1450,y:700,s:.9,sit:1,hipL:.5,knL:-.5,hipR:-.5,knR:.5,shR:-.6+tap,elR:-1.3,shL:scr?-2.6:.4,elL:scr?-1.8:1.1,head:scr?.08:-.12,look:.6,brow:-.7,mouth:scr?'flat':'sad',eye:.9});
+  table();tablet(1560,700,1.1,[['ВОДА  66 л','#5dff8a'],['ЕДА   66','#5dff8a'],['ВОЗД  31 дн','#5dff8a'],['ЭНЕР  90 %','#5dff8a']]);
+  grade('#ffd8b0',.12);return}
+ // ---- кадр 2: Ключ приносит кружку, передача, садится рядом ----
+ if(t<ST(186)){camZ(1.12,1180,600);lounge(0);stool(1450,770);
+  const a=ST(185),k=(t-a);// ~4.5 с
+  const kx=k<1.6?-150+1250*ez(k/1.6):1100+ez((k-3)/1.2)*80,drive=k<1.6?k*2:0;
+  const give=Math.min(1,Math.max(0,(k-1.6)/.8)),take=Math.min(1,Math.max(0,(k-2.0)/.6)),passed=k>2.4,back=Math.min(1,Math.max(0,(k-2.6)/.8));
+  shadowAt(kx,830,150);shadowAt(1450,830,120);
+  const G=kluchRig({x:kx,y:830,s:.62,drive,lean:k<1.6?.06:0,low:k>3?ez((k-3)/1):0,shR:-.9-give*.7+back*1.2,elR:-.6+give*.4,shL:.4,elL:.5,grip:passed?.9:.3,face:passed?'smile':'calm',look:.8});
+  const Hh=heroRig({x:1450,y:700,s:.9,sit:1,hipL:.5,knL:-.5,hipR:-.5,knR:.5,shL:-.2-take*1.0+(passed?back*.9:0),elL:.9-take*.6+(passed?back*1.6:0),shR:-.4,elR:-1.1,head:-.06-take*.12,look:-1,brow:-.2+take*.4,mouth:passed?'smile':'o',eye:1});
+  const mp=passed?Hh.hL:G.gR;mug(mp[0],mp[1]+22,.95,1);
+  table();tablet(1560,700,1.1,[['ВОДА  66 л','#5dff8a'],['ЕДА   66','#5dff8a']]);grade('#ffd8b0',.12);return}
+ // ---- кадр 3: со спины у окна, солнце садится ----
+ if(t<ST(187)){const u=(t-ST(186))/(ST(187)-ST(186));camZ(1.3+u*.12,700,470);lounge(sunK);
+  heroBack({x:620,y:760,s:.75,head:-.08+Math.sin(TT*.5)*.02,armOut:.5,elb:.9});
+  const G=kluchRig({x:820,y:760,s:.42,low:1,face:'blank',shL:.4,shR:-.3});
+  x.save();x.setTransform(1,0,0,1,0,0);x.globalCompositeOperation='lighter';x.globalAlpha=.25;const g=x.createRadialGradient(W*.55,H*.35,40,W*.55,H*.35,700);g.addColorStop(0,'#ffb070');g.addColorStop(1,'rgba(0,0,0,0)');x.fillStyle=g;x.fillRect(0,0,W,H);x.restore();
+  grade('#ffb890',.18);return}
+ // ---- кадр 4: планшет — всё на месте ----
+ if(t<ST(188)){camZ(2.6,1560,650);lounge(sunK);const rows=[['ВОДА  66 л',0],['ЕДА   66',1],['ВОЗД  31 дн',2],['ЭНЕР  90 %',3]];const k=(t-ST(187))/(ST(188)-ST(187));
+  table();tablet(1560,700,1.1,rows.map(r=>[r[0]+(k>r[1]*.22+.05?'  ✓':''),k>r[1]*.22+.05?'#5dff8a':'#3a6a5a']));
+  // руки держат планшет снизу
+  circ(1480,712,18,RSK,OL,4);circ(1640,712,18,RSK,OL,4);grade('#ffd8b0',.1);return}
+ // ---- кадр 5: на скамье лицом к нам, закат за спиной ----
+ {const u=(t-ST(188))/(T1-ST(188));camZ(1.2+u*.2,700,600);lounge(sunK);shadowAt(620,830,120);shadowAt(840,830,120);
+  const sip=Math.sin(TT*.8)>.6;heroRig({x:620,y:712,s:.82,sit:1,hipL:.4,knL:-.4,hipR:-.4,knR:.4,shL:-.3,elL:2.2,shR:.3,elR:-2.2,head:.08+Math.sin(TT*.5)*.03,eye:.15,brow:.3,mouth:sip?'sip':'smile'});
+  mug(620,575,.85,1);
+  kluchRig({x:860,y:830,s:.5,low:1,face:'calm',shL:.5,elL:.6,shR:-.2,elR:-.4,look:-.6,lean:-.05});
+  x.save();x.setTransform(1,0,0,1,0,0);x.globalCompositeOperation='lighter';x.globalAlpha=.18;const g=x.createRadialGradient(W*.5,H*.25,40,W*.5,H*.25,800);g.addColorStop(0,'#ffa060');g.addColorStop(1,'rgba(0,0,0,0)');x.fillStyle=g;x.fillRect(0,0,W,H);x.restore();grade('#ffb890',.2)}}
+// субтитры по словам (как в v2)
+function subs(t){let i=0;for(let k=0;k<SN.length;k++)if(SN[k].t0<=t)i=k;const o=SN[i],ws=o.s.split(/\s+/).filter(Boolean),wt=o.w;const ch=[];let cur=[];ws.forEach((w,k)=>{cur.push(k);const len=cur.map(j=>ws[j]).join(' ').length;if(cur.length>=6||len>34||/[.,!?:…—»]$/.test(w)&&cur.length>=3){ch.push(cur);cur=[]}});if(cur.length)ch.push(cur);
+ const tt=t+.12;let kc=0;for(let c=0;c<ch.length;c++)if(wt[ch[c][0]]<=tt)kc=c;const C=ch[kc];x.save();x.setTransform(1,0,0,1,0,0);const g=x.createLinearGradient(0,H*.74,0,H);g.addColorStop(0,'rgba(8,8,16,0)');g.addColorStop(1,'rgba(8,8,16,.7)');x.fillStyle=g;x.fillRect(0,H*.74,W,H*.26);
+ x.font="900 60px Rubik";x.textBaseline='middle';x.lineJoin='round';const parts=C.map(j=>ws[j]);const tw=parts.reduce((a,w)=>a+x.measureText(w).width+22,-22);let px=W/2-tw/2;parts.forEach((w,q)=>{const said=wt[C[q]]<=tt;const mw=x.measureText(w).width;x.textAlign='left';x.strokeStyle='#0a0a14';x.lineWidth=12;x.strokeText(w,px,H*.9);x.fillStyle=said?'#ffd860':'#fff';x.fillText(w,px,H*.9);px+=mw+22});x.restore()}
+window.seek=t=>{TT=t;OFF=0;x.setTransform(1,0,0,1,0,0);x.clearRect(0,0,W,H);try{scene(t)}catch(e){console.error(e)}x.setTransform(1,0,0,1,0,0);
+ tablo({day:82,water:66,food:66,air:31,energy:90});if(t>=ST(184)-.1)subs(t);motes(26);
+ if(t<ST(184)+1.4){const a=Math.min(1,(t-T0)/.2,(ST(184)+1.4-t)/.3);dayCard(82,Math.max(0,a))}const f=Math.min(1,(t-T0)/.4,(T1-t)/.6);if(f<1){x.fillStyle=`rgba(0,0,0,${1-f})`;x.fillRect(0,0,W,H)}};
+window.T0=T0;window.T1=T1;Promise.all([document.fonts.load('900 40px Rubik','АаЯяAa0123456789%→№'),document.fonts.load('700 40px Rubik','АаЯяAa0123456789')]).then(()=>new Promise(r=>setTimeout(r,400))).then(()=>{seek(T0+3);window.READY=1});
+</script></body></html>
