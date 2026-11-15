@@ -3,7 +3,7 @@ import http from 'node:http';import fs from 'node:fs';import path from 'node:pat
 import {createRequire} from 'node:module';const require=createRequire(import.meta.url);
 let chromium;try{({chromium}=await import('playwright'))}catch{({chromium}=require('playwright'))}
 const HERE=path.dirname(fileURLToPath(import.meta.url)),ROOT=path.resolve(HERE,'../../..');
-const arg=(k,d)=>{const i=process.argv.indexOf('--'+k);return i>0?process.argv[i+1]:d};const NN=arg('n','1'),KADRY=arg('kadry',null),FPS=30,OUT=path.join(ROOT,`gotovo/d04-mars-trailer-${NN}.mp4`);
+const arg=(k,d)=>{const i=process.argv.indexOf('--'+k);return i>0?process.argv[i+1]:d};const NN=arg('n','1'),KADRY=arg('kadry',null),FPS=30,OUT=path.join(ROOT,`gotovo/d04-mars-trailer-${NN}${arg('suf','')}.mp4`);
 const MIME={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8'};
 const srv=http.createServer((q,r)=>{const f=path.join(ROOT,decodeURIComponent(q.url.split('?')[0]));if(!fs.existsSync(f)||fs.statSync(f).isDirectory()){r.writeHead(404);return r.end()}r.writeHead(200,{'content-type':MIME[path.extname(f)]||'application/octet-stream'});fs.createReadStream(f).pipe(r)}).listen(0);
 const b=await chromium.launch();const p=await b.newPage({viewport:{width:1080,height:1920}});p.on('pageerror',e=>console.log('Ошибка:',e.message));p.on('console',m=>{if(m.type()==='error')console.log('console:',m.text())});
