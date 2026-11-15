@@ -66,7 +66,7 @@ function hero(X,Y,s,o){o=o||{};x.save();x.translate(X,Y);x.scale((o.flip?-1:1)*s
  if(o.helmet&&!o.flip)rr(-100,-340,40,150,14,'#d0d4dc',OUT,5);
  arm(1,(o.armR==null?.12:o.armR)-Math.sin(TT*2.2)*.05);
  // голова
- x.save();x.translate(0,-350);x.rotate((o.tilt||0));circ(0,-70,66,SK,OUT,6);
+ x.save();x.translate(0,-350);x.rotate((o.tilt||0)+Math.sin(TT*.8+X*.013)*.035);circ(0,-70,66,SK,OUT,6);
  x.beginPath();x.arc(0,-82,68,Math.PI*1.05,Math.PI*1.95);x.closePath();x.fillStyle='#3a2418';x.fill();x.strokeStyle=OUT;x.lineWidth=5;x.stroke();
  const e=o.eyes||'',ey=-70;if(e==='closed'||BL(X*.001)&&!e){line(-34,ey,-14,ey,'#1a1a1e',5);line(14,ey,34,ey,'#1a1a1e',5)}else{const r=e==='wide'?11:7;circ(-24,ey,r+5,'#fff',OUT,3);circ(24,ey,r+5,'#fff',OUT,3);circ(-24+(o.look||0)*4,ey+1,r*.7,'#1a1a1e');circ(24+(o.look||0)*4,ey+1,r*.7,'#1a1a1e')}
  if(o.sad){line(-36,ey-22,-14,ey-30,'#3a2418',5);line(36,ey-22,14,ey-30,'#3a2418',5)}
@@ -94,3 +94,29 @@ function sub(t){x.save();x.setTransform(1,0,0,1,0,0);const g=x.createLinearGradi
 function dayCard(n,a){// большая плашка «ДЕНЬ N» по центру (переходы)
  x.save();x.setTransform(1,0,0,1,0,0);x.globalAlpha=a==null?1:a;rr(W/2-260,H*.42-80,520,160,30,'rgba(10,14,26,.9)','#ff4a4a',6);x.font="900 110px 'Courier New',monospace";x.textAlign='center';x.textBaseline='middle';x.fillStyle='#ff4a4a';x.fillText('ДЕНЬ '+n,W/2,H*.42+4);x.restore()}
 function storm(t,amt){x.save();x.setTransform(1,0,0,1,0,0);x.fillStyle=`rgba(200,110,50,${.55*amt})`;x.fillRect(0,0,W,H);for(let i=0;i<160;i++){const q=((t*1.6)+i*.0137)%1,y=(i*67)%H;line(W*(1.1-q*1.3),y,W*(1.1-q*1.3)-60-(i%4)*30,y+8,`rgba(255,200,140,${.5*amt})`,3)}x.restore()}
+// ---------- v2: живость ----------
+// командир — отдельный персонаж: старше, седая борода, белый скафандр с синими полосами, нашивка
+function captain(X,Y,s,o){o=o||{};x.save();x.translate(X,Y);x.scale((o.flip?-1:1)*s,s);x.scale(1,1+Math.sin(TT*2.1+X*.01)*.012);
+ const suit='#eef1f5',stripe='#2a5ab8';rr(-50,-150,44,150,14,'#c8ccd4',OUT,5);rr(6,-150,44,150,14,'#c8ccd4',OUT,5);rr(-56,-14,56,26,10,'#2a2c34',OUT,4);rr(0,-14,56,26,10,'#2a2c34',OUT,4);
+ const arm=(sx,a)=>{x.save();x.translate(sx*72,-340);x.rotate(sx*a);rr(-20,0,40,160,18,suit,OUT,5);rr(-20,60,40,14,0,stripe);circ(0,168,22,'#e8ecf0',OUT,4);x.restore()};
+ arm(-1,(o.armL==null?.1:o.armL)+Math.sin(TT*2)*.04);rr(-76,-362,152,222,44,suit,OUT,6);rr(-76,-290,152,22,0,stripe);rr(-76,-250,152,10,0,stripe);
+ circ(-38,-320,20,'#d8283a',OUT,3);txt('★',-38,-319,22,'#fff');rr(14,-336,46,26,4,'#2a5ab8',OUT,3);arm(1,(o.armR==null?.1:o.armR)-Math.sin(TT*2)*.04);
+ x.save();x.translate(0,-362);x.rotate(o.tilt||0);const SKC='#e8b896';circ(0,-74,70,SKC,OUT,6);
+ x.beginPath();x.arc(0,-86,72,Math.PI*1.08,Math.PI*1.92);x.closePath();x.fillStyle='#b8bcc4';x.fill();x.strokeStyle=OUT;x.lineWidth=5;x.stroke();// седина
+ x.beginPath();x.moveTo(-58,-60);x.quadraticCurveTo(-60,10,0,18);x.quadraticCurveTo(60,10,58,-60);x.quadraticCurveTo(30,-30,0,-34);x.quadraticCurveTo(-30,-30,-58,-60);x.fillStyle='#c8ccd2';x.fill();x.strokeStyle=OUT;x.lineWidth=4;x.stroke();// борода
+ line(-40,-104,-12,-100,'#8a8e96',7);line(40,-104,12,-100,'#8a8e96',7);// брови
+ if(BL(X*.002+.5)){line(-32,-84,-14,-84,'#1a1a1e',5);line(14,-84,32,-84,'#1a1a1e',5)}else{circ(-23,-84,7,'#1a1a1e');circ(23,-84,7,'#1a1a1e')}
+ line(-34,-74,-26,-70,'rgba(120,70,50,.6)',3);line(34,-74,26,-70,'rgba(120,70,50,.6)',3);// морщины
+ const m=o.talk?Math.abs(Math.sin(TT*13))*12+3:3;x.beginPath();x.ellipse(0,-40,16,m,0,0,7);x.fillStyle='#5a1a1a';x.fill();
+ if(o.helmet){circ(0,-74,108,'rgba(190,225,255,.22)',OUT,8)}x.restore();
+ if(o.helmetHand){x.save();x.translate(110,-220);circ(0,0,70,'rgba(190,225,255,.35)',OUT,6);x.restore()}x.restore()}
+// Ключ говорит: рот-экран открывается по слогам
+function kluchTalk(X,Y,s,o){o=o||{};kluchM(X,Y,s,'',Object.assign({off:1},o));x.save();x.translate(X,Y);x.scale(s,s);x.translate(0,Math.sin(TT*5+X*.01)*5);x.translate(0,-300);x.rotate((o.tilt||0)+Math.sin(TT*2.2+X*.01)*.04);x.translate(0,300);
+ const g=x.createRadialGradient(0,-385,10,0,-385,140);g.addColorStop(0,'#8ff6ff');g.addColorStop(1,'#1a8fd0');rr(-100,-452,200,140,14,g);
+ circ(-38,-405,13,'#0b2a44');circ(38,-405,13,'#0b2a44');const m=o.talk?6+Math.abs(Math.sin(TT*14))*20:6;x.beginPath();x.ellipse(0,-360,32,m,0,0,7);x.fillStyle='#0b2a44';x.fill();
+ x.save();x.globalAlpha=.9;poly([[20,-452],[100,-452],[100,-330],[60,-380],[30,-420]],'#1a2230');line(20,-452,60,-380,'#9fd4ff',4);x.restore();x.restore()}
+// крупный план лица героя (эмоции)
+function heroFace(mode,o){interior(mode);x.save();x.translate(W*.5,H*.5);const s=3.1+Math.sin(TT*.4)*.03;x.scale(s,s);hero(0,420,1,Object.assign({tshirt:1},o));x.restore()}
+// пыль в воздухе
+function motes(n,col){x.save();x.setTransform(1,0,0,1,0,0);for(let i=0;i<n;i++){const px=((i*421)+TT*(8+i%5*3))%W,py=((i*277)+Math.sin(TT*.5+i)*30)%H;x.globalAlpha=.25+.2*Math.sin(TT*2+i);circ(px,py,1.5+(i%3),col||'#fff')}x.restore()}
+function leds(){x.save();x.setTransform(1,0,0,1,0,0);for(let i=0;i<9;i++){const on=Math.sin(TT*(1.3+i*.37)+i)>0;circ(110+i*210,H*.16,6,on?(i%3?'#5dff8a':'#ff6a4a'):'#2a3440')}x.restore()}

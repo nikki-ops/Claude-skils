@@ -22,6 +22,11 @@ const tw=OW.map((o,k)=>al[k]!=null?WS[al[k]].t:null);
 for(let k=0;k<tw.length;k++)if(tw[k]==null){let a=k-1;while(a>=0&&tw[a]==null)a--;let b=k+1;while(b<tw.length&&tw[b]==null)b++;const ta=a>=0?tw[a]:0,tb=b<tw.length?tw[b]:DUR;tw[k]=ta+(tb-ta)*(k-a)/(b-a)}
 const T=S.map((_,si)=>tw[OW.findIndex(o=>o.si===si)]);
 for(let k=0;k<T.length;k++){let best=null,bd=1e9;for(const e of ends){const d=Math.abs(e-T[k]);if(d<bd){bd=d;best=e}}if(bd<.7)T[k]=best;if(k&&T[k]<=T[k-1]+.3)T[k]=T[k-1]+.3}T[0]=0;
-const out=S.map((s,k)=>({i:k,t0:+T[k].toFixed(2),t1:+(k<S.length-1?T[k+1]:DUR).toFixed(2),s}));
+// время слов внутри фразы: от T[si] до T[si+1], по выравниванию (монотонно) с поправкой на начало фразы
+const words=S.map((s,si)=>{const ws=s.split(/\s+/).filter(Boolean);const idx=[];OW.forEach((o,k)=>{if(o.si===si)idx.push(k)});const a=T[si],b=si<S.length-1?T[si+1]:DUR;const raw=idx.map(k=>tw[k]);const r0=raw[0];
+ // пропорционально длине слов (речь занимает ~85% фразы), выравнивание Whisper — только как поправка ±0.6 с
+ const L=ws.map(w=>w.replace(/[^А-Яа-яЁёA-Za-z0-9]/g,'').length+1+(/\.\.\.|[.,!?—:]$/.test(w)?3:0)),tot=L.reduce((x,y)=>x+y,0);let acc=0;const span=(b-a)*.88;
+ let prev=a;return ws.map((w,q)=>{const pr=a+span*acc/tot;acc+=L[q];let t=pr;if(raw[q]!=null){const al=a+(raw[q]-r0);if(Math.abs(al-pr)<.6)t=(al+pr)/2}t=Math.max(prev,Math.min(b-.05,t));prev=t;return +t.toFixed(2)})});
+const out=S.map((s,k)=>({i:k,t0:+T[k].toFixed(2),t1:+(k<S.length-1?T[k+1]:DUR).toFixed(2),s,w:words[k]}));
 fs.writeFileSync(path.join(HERE,'timing.js'),'// автогенерация timing-whisper.mjs — не править руками\nwindow.TM='+JSON.stringify({dur:DUR,s:out})+';\n');
 console.log('слов сценария',n,'выровнено',al.filter(v=>v!=null).length);[0,7,13,30,44,74,106,139,168,194,204,210,221,227,233,236,238].forEach(k=>console.log(String(out[k].t0).padStart(7),k,out[k].s.slice(0,55)));
