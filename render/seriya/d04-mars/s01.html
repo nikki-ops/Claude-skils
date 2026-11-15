@@ -14,7 +14,7 @@ const TEXT=`Тебя забыли на Марсе... Корабль улетел
 // оценочный тайминг: 14 симв/с (скорость 1.05) + 0.45 с на «...» + 0.25 с между фразами
 const SS=TEXT.split(/(?<=[.!?…»])\s+(?=[А-ЯЁ«])/).map(s=>s.trim());
 let SN;if(window.S01T)SN=S01T.s;else{let t=.15;SN=SS.map((s,i)=>{const ws=s.split(/\s+/);const L=ws.map(w=>w.length+1+(/\.\.\.$/.test(w)?6:0));const tot=L.reduce((a,b)=>a+b,0);const dur=s.length/14+(s.match(/\.\.\./g)||[]).length*.45;let acc=0;const w=ws.map((_,k)=>{const r=t+dur*acc/tot;acc+=L[k];return r});const o={i,t0:t,t1:t+dur,s,w};t+=dur+.25;return o})}
-const ST=i=>SN[i].t0,DUR=SN[SN.length-1].t1+.05;// конец = обрыв на «него» → сразу кадр 0
+const ST=i=>SN[i].t0,DUR=window.S01T?72.56:SN[SN.length-1].t1+.05;// конец = обрыв на «него» → сразу кадр 0
 const sentAt=t=>{let i=0;for(let k=0;k<SN.length;k++)if(SN[k].t0<=t+.02)i=k;return i};
 const P=(t,i,d)=>Math.max(0,Math.min(1,(t-ST(i))/(d||((SN[i].t1-SN[i].t0)||1))));
 const DAY=i=>i<12?1:i<15?31:i<17?67:99;
@@ -59,5 +59,5 @@ function subsV(t){const i=sentAt(t),o=SN[i],ws=o.s.split(/\s+/).filter(Boolean),
  x.textBaseline='middle';x.lineJoin='round';let px=VW/2-W0()/2;const y=VH*.74;parts.forEach((w,q)=>{const said=wt[C[q]]<=tt,mw=x.measureText(w).width,pop=said&&tt-wt[C[q]]<.12?1.07:1;x.save();x.translate(px+mw/2,y);x.scale(pop,pop);x.textAlign='center';x.strokeStyle='#0a0a14';x.lineWidth=16;x.strokeText(w,0,0);x.fillStyle=said?'#ffd860':'#fff';x.fillText(w,0,0);x.restore();px+=mw+24})}
 function header(i){_st(1,0,0,1,0,0);const d=DAY(i);rr(VW/2-190,130,380,110,26,'rgba(10,14,26,.9)','#ff4a4a',6);x.font="900 76px 'Courier New',monospace";x.textAlign='center';x.textBaseline='middle';x.fillStyle='#ff4a4a';x.fillText('ДЕНЬ '+d,VW/2,188)}
 window.seek=tl=>{TT=tl;_st(1,0,0,1,0,0);x.clearRect(0,0,VW,VH);const t=Math.min(tl,DUR-.001);const i=sentAt(t);CZ=1;try{scene(t,i)}catch(e){console.error(e)}motes(16);if(window.SUBS!==false)subsV(t);header(i)};
-window.DUR=DUR;window.SN=SN;Promise.all([document.fonts.load('900 40px Rubik','АаЯяAa0123456789%→№≠'),document.fonts.load('700 40px Rubik','АаЯяAa0123456789')]).then(()=>new Promise(r=>setTimeout(r,400))).then(()=>{seek(1);window.READY=1});
+window.DUR=DUR;window.SN=SN;const WT=(i,k)=>SN[i].w[Math.min(k,SN[i].w.length-1)];window.SFX=[[.05,'whoosh2',.6],[WT(1,5),'thump',.9],[ST(2),'pop',.6],[ST(3),'pop',.6],[SN[4].t1-.3,'thump',.9],[ST(5)+.8,'pop',.5],[ST(5)+1.6,'pop',.5],[ST(6),'chime',.7],[ST(7)+.6,'pop',.6],[SN[8].t1-1.2,'shimmer',.7],[ST(9),'swish',.5],[ST(11)+.5,'thump',.7],[ST(12),'wall',.8],[ST(13),'siren',.35],[ST(14),'whoosh2',.5],[ST(15),'siren',.5],[ST(15)+.1,'thump',.9],[ST(17),'heartbeat',.8],[SN[18].t1-1,'thump',.8],[ST(19)+.6,'boom',.55],[ST(20),'heartbeat',.7]];Promise.all([document.fonts.load('900 40px Rubik','АаЯяAa0123456789%→№≠'),document.fonts.load('700 40px Rubik','АаЯяAa0123456789')]).then(()=>new Promise(r=>setTimeout(r,400))).then(()=>{seek(1);window.READY=1});
 </script></body></html>
