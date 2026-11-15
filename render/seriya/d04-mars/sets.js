@@ -43,7 +43,7 @@ function terminal(X,Y,s,txt1,txt2){x.save();x.translate(X,Y);x.scale(s,s);rr(-15
 function nightGrade(){x.save();x.setTransform(1,0,0,1,0,0);x.globalCompositeOperation='multiply';x.fillStyle='#4a5a9a';x.globalAlpha=.75;x.fillRect(0,0,W,H);x.restore()}
 // СНАРУЖИ: база подробно
 function baseExt(mode,o){o=o||{};marsSky(mode);marsGround(H*.72,mode);
- const M=(X,Y,w,h,win)=>{rr(X-w/2,Y-h,w,h,h*.45,'#e8ecf0',OL,6);rr(X-w/2,Y-h*.4,w,h*.12,0,'#ea7a2c');for(let i=0;i<win;i++)circ(X-w/2+w*(i+1)/(win+1),Y-h*.65,h*.12,o.lit?'#ffd88a':'#2a3a5a',OL,4);for(let i=0;i<4;i++)rr(X-w/2+20+i*(w-40)/3,Y-14,20,14,3,'#9aa3ad',OL,2)};
+ const M=(X,Y,w,h,win)=>{rr(X-w/2,Y-h,w,h,h*.45,'#e8ecf0',OL,6);rr(X-w/2,Y-h*.4,w,h*.12,0,'#ea7a2c');for(let i=0;i<win;i++)rr(X-w/2+w*(i+1)/(win+1)-h*.14,Y-h*.78,h*.28,h*.2,6,o.lit?'#ffd88a':'#2a3a5a',OL,4);for(let i=0;i<4;i++)rr(X-w/2+20+i*(w-40)/3,Y-14,20,14,3,'#9aa3ad',OL,2)};
  M(560,800,360,210,3);M(960,800,320,240,2);dome(1260,800,140,{green:1});rr(760,760,80,60,8,'#c8ccd4',OL,5);rr(1100,770,60,40,8,'#c8ccd4',OL,4);
  line(300,740,820,740,'#9aa3ad',6);antenna(1420,640,.7,o.ant,TT);
  for(let i=0;i<4;i++)panel(160+i*170,880,1.1,o.dust||0);for(let i=0;i<3;i++)panel(1560+i*150,880,1,o.dust||0)}
