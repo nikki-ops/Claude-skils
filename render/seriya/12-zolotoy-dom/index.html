@@ -1,0 +1,26 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><title>Серия 12 · Золотой дом</title>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@700;900&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#141829;--gold:#ffd860;--red:#ff5a6a;--tq:#4fd6e8}
+html,body{margin:0;width:1080px;height:1920px;overflow:hidden;background:#0b0a10;font-family:Rubik,sans-serif}
+#map{position:absolute;inset:0;width:1080px;height:1920px;border:0}
+.o{position:absolute;left:0;right:0;text-align:center;pointer-events:none;will-change:transform}
+#vg{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at center,rgba(20,8,4,0) 45%,rgba(20,8,4,.42) 100%)}
+#flash{position:absolute;inset:0;background:#fff3d0;opacity:0;pointer-events:none}
+#gold{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 35%,rgba(255,216,96,.45),rgba(255,216,96,0) 60%);opacity:0}
+#sub{top:1250px;font-weight:900;font-size:118px;line-height:1.05;color:#fff;text-transform:lowercase;-webkit-text-stroke:18px var(--ink);paint-order:stroke fill;text-shadow:0 12px 0 var(--ink),0 0 30px rgba(20,24,41,.6)}
+#sub.gold{color:var(--gold)}#sub.red{color:var(--red)}#sub.tq{color:var(--tq)}
+#plq{top:300px}#plq span{display:inline-block;color:#fff;font-weight:900;font-size:66px;line-height:1.15;padding:16px 44px;border-radius:22px;border:5px solid #fff;background:linear-gradient(#222845,#141829);max-width:940px}
+#plq.red span{background:#d8263a}#plq.gold span{background:#f7c24a;color:#1a1410}#plq b{color:var(--gold)}
+#cnt{top:520px}#cnt span{display:inline-block;background:linear-gradient(#222845,#141829);color:#fff;font-weight:900;font-size:190px;line-height:1;padding:20px 60px;border-radius:40px;border:8px solid #f7c24a;box-shadow:0 16px 0 rgba(0,0,0,.3)}#cnt b{color:var(--gold)}#cnt small{display:block;font-size:44px;color:#cfd6f0;margin-top:6px}
+#nick{left:0;top:0;right:auto;width:auto}#nick span{display:inline-block;white-space:nowrap;background:linear-gradient(#ffe58a,#f7c24a);color:#1a1410;font-weight:900;font-size:84px;padding:14px 48px;border-radius:70px;border:7px solid #fff;box-shadow:0 0 60px 18px rgba(247,194,74,.9),0 14px 0 rgba(0,0,0,.25)}
+#conf{position:absolute;inset:0;pointer-events:none}
+</style></head><body>
+<iframe id="map" src="../../karta/index.html?video"></iframe>
+<div id="vg"></div><div id="gold"></div><div id="flash"></div><canvas id="conf" width="1080" height="1920"></canvas>
+<div class="o" id="plq"><span></span></div>
+<div class="o" id="cnt"><span></span></div>
+<div class="o" id="nick"><span></span></div>
+<div class="o" id="sub"></div>
+<script src="seriya.js"></script>
+</body></html>
