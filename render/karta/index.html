@@ -1613,6 +1613,65 @@ try{// ===== ЗОЛОТАЯ БАШНЯ (серия 12, 1000 подписчико
  g.position.set(TP.x,0,TP.z);g.userData.top=4+N*FH+15;g.userData.dyn=1;sc.add(g);
  MLIST.push({n:'БалгинДоканова 🏆',g,x:TP.x,z:TP.z,top:g.userData.top,bld:1,kind:'Золотая башня, 100 этажей (1000 подписчиков). Верхний этаж — @БалгинДоканова (розыгрыш среди 825 комментаторов). Остальные 99 этажей свободны',day:12,district:'Сити'});
  window.ZTOWER=g})()}catch(e){console.warn("tower",e)}
+try{// ===== ЗООПАРК МАРСА (23.11): звери, придуманные подписчиками, — каждый в своём вольере с табличкой «@ник · зверь» =====
+(function(){const ZOO=[["Serzho228_Official","Зебревка","zebra"],["svetoch222","Котопёс","cat"],["99n-00bz","Электро","electro"],["99n-00bz","Дождорог","rain"],["кристинадианова-е9я","Гуся-алмаз","goose"],["A-120-i7e","Муравей-помидор","ant"],["ElvinIlsariv","Котозавр","dino"],["Alienmation-c7s","Мишка Фреде","bear"],["kiilek9p","Пыльный медведь","bear"],["иматок","Каменный зубр","bison"],["Login_G2V3","Пауко-сороконог","spider"],["67алдон67","Бульбакот","potato"],["Александр-69ы8v","Белый медведь","polar"],["o13sova","Тыквоголовый монстр","pumpkin"],["рэйки-б2к","Колист","lizard"],["chicken88K_OFFICIAL","Деревянная курица","chicken"],["Mr.blinker-x9h","Кот-клубника","berry"],["WikaWorld","Косма-лисичка","fox"],["Даниил-л7х8р","Черепаха-ПВО","turtle"],["иззоП228","Аквапаркский кот","aqua"],["Эзур2.0","Кругливан","ball"],["Талгат-ы1т","Дракон","dragon"],["fYfelz","Утконос Перри","platypus"],["aidamiraidarbekov","Лев с кольцами Сатурна","lion"],["КатяСотникова-м6м","B-REk","dino"],["Сигма_Вии","Утюк-Утюг","iron"],["Kipiл-p9ъ","Кар карич","bird"],["МухаммадаминМухаммадамин-ь6у","Джунджулик","hamster"],["BilolSharofov-s9s","Марсолев","lion"],["АрсенийЮдин-ш3щ","Ядерный единорог","unicorn"],["АнастасияКазанлиева-з1о","Котость","bigcat"],["ОксанаМиколаївна-е5г","Сальто-зверь","generic"],["ОксанаМиколаївна-е5г","Жёлтый монстр с улыбкой","yellow"],["Раиля-щ8л","Котопёс","cat"],["кот-пельмень","Котасова","owl"],["РусланБайсакалов-ы6о","Макчунг","monkey"],["Ачепуп","Чубакчич","generic"],["SAMNR-f6b","Гердан","gorilla"],["ольгатрандафир-ф7р","Танкокот","tank"],["борис-э1ъ","Илон Маск на ракете","rocket"],["симп-и4п","Тыквлап","pumpkin"],["Alim-z2c","Кетцалькоатль","ptero"],["anime_vse_7","Джунгарский хомяк IQ 250","hamster"],["саввинвладик","Зебра наизнанку","zebra2"],["AlexanderBlueStacks","Wi-Fi тигр","tiger"],["Werter-t8p","Крысазавр","rat"],["ДинараГабитова-в4ф","Розеткасвинки","pig"],["П-р-и-в-е-т","Кларелок","generic"],["sergeyl2810","Сырка","cheese"],["Aisultan-s3c","Яцыпат","chicken"],["Hitman-47-i3s","Кратерные звёзды","stars"],["Максимность-р2э2и-телифон","Крипер","creeper"],["ProbationKyrgyzstan","Лавовая акула","shark"],["НадеждаСазанович-и6к","Водяной тюлень","seal"],["danka191","Тигровый морж","walrus"],["Richard-y2i","Самолётный километр","plane"],["Леон-н9ь","Яввекораншан","generic"],["АДД0000","Запятой Казбек","generic"],["AbylaiKairat","Мдж-камень","rock"]];
+ const X0=648,Z0=116,CS=12.6,GAP=8,root=new THREE.Group(),S=(r,c,x,y,z,g,w,h)=>msh(g,new THREE.SphereGeometry(r,12,9),c,x,y,z);
+ const C={cat:0xf28a3a,bigcat:0xe07a2a,aqua:0x3ab0e8,dino:0x4aa04a,bear:0x8a5a3a,polar:0xf4f4f4,bison:0x7a7a82,spider:0x3a2a3a,potato:0xc9a060,pumpkin:0xf27a1a,lizard:0x4a7a5a,chicken:0xc08a4a,berry:0xe8283a,fox:0x8a5ae8,turtle:0x5a8a3a,ball:0xa0805a,dragon:0x2a9a5a,platypus:0x2aa88a,lion:0xe0b050,iron:0x9aa3ad,bird:0x2a2a2a,hamster:0xb0b0b8,unicorn:0xf8f0ff,yellow:0xf2d24a,owl:0xa07850,monkey:0x8a6a4a,gorilla:0x3a3a3e,tank:0x5a6a3a,rocket:0xd8dce4,ptero:0x3aa0a0,zebra:0xf4f4f4,zebra2:0x1a1a1a,tiger:0xf28a1a,rat:0x8a8a90,pig:0xf2a0b0,cheese:0xf2d24a,stars:0x2a2a4a,creeper:0x4aae4a,shark:0xd84a1a,seal:0x5a7a9a,walrus:0xa07a5a,plane:0xc0c8d0,rock:0x7a6a5a,electro:0xf2e84a,rain:0x5a8ad8,goose:0xbfeaff,ant:0xe0402a,generic:0x9a6ad8};
+ function animal(k){const g=new THREE.Group(),c=C[k]||C.generic;
+  if(k==='rocket'){msh(g,new THREE.CylinderGeometry(.8,.8,4,12),c,0,2.6,0);msh(g,new THREE.ConeGeometry(.8,1.4,12),0xd8283a,0,5.3,0);S(.45,0xf2c090,0,3.2,.85,g);return g}
+  if(k==='stars'){for(let i=0;i<6;i++)msh(g,new THREE.OctahedronGeometry(.5),new THREE.MeshBasicMaterial({color:0xfff27a}),Math.cos(i)*2,1+i*.5,Math.sin(i*2)*2);return g}
+  if(k==='rock'){msh(g,new THREE.DodecahedronGeometry(1.6),c,0,1.4,0);[-.5,.5].forEach(x=>box(g,.3,.3,.1,0xffffff,x,1.9,1.45));return g}
+  if(k==='plane'){box(g,4.6,.9,.9,c,0,2.2,0);box(g,1,.15,5,c,0,2.3,0);box(g,.8,1,.15,c,-2.1,2.9,0);return g}
+  if(k==='iron'){box(g,3,.6,1.8,c,0,.9,0);msh(g,new THREE.ConeGeometry(.9,1,4),c,1.6,.9,0).rotation.z=-Math.PI/2;box(g,1.6,.9,.3,0x2a2a2a,-.2,1.6,0);S(.18,0x1a1a1a,.6,1.3,.92,g);return g}
+  if(k==='tank'){box(g,3.4,1,2.2,c,0,.8,0);box(g,1.8,.9,1.6,c,0,1.7,0);box(g,1.6,.25,.25,0x3a3a3a,1.4,1.8,0);[-.9,.9].forEach(z=>box(g,3.6,.6,.4,0x2a2a2a,0,.3,z));msh(g,new THREE.ConeGeometry(.35,.6,4),c,-.5,2.4,.5);msh(g,new THREE.ConeGeometry(.35,.6,4),c,-.5,2.4,-.5);return g}
+  if(k==='cheese'){msh(g,new THREE.CylinderGeometry(1.8,1.8,1.4,3),c,0,.7,0);[[.3,.8],[-.6,.2]].forEach(a=>S(.3,0xd0a830,a[0],1.1,a[1],g));return g}
+  if(k==='ball'||k==='turtle'){S(1.5,c,0,1.4,0,g).scale.y=k==='turtle'?.6:1;S(.5,0x8ab06a,1.6,1,0,g);if(k==='turtle'){box(g,.3,1.6,.3,0x3a3a3a,0,2.4,0);box(g,.9,.3,.3,0x3a3a3a,.3,3.1,0)}return g}
+  if(k==='spider'||k==='ant'){S(.9,c,-.8,1,0,g);S(.7,k==='ant'?0xd8b48a:c,.6,1,0,g);for(let i=0;i<6;i++){const l=box(g,.12,.12,2.2,0x1a1a1a,-.3+(i%3)*.5,.7,0);l.rotation.y=(i<3?.3:-.3)}return g}
+  if(k==='shark'){S(1.2,c,0,1.2,0,g).scale.set(2.2,.8,.9);msh(g,new THREE.ConeGeometry(.5,1.2,4),c,0,2.3,0);msh(g,new THREE.ConeGeometry(.6,1.2,4),c,-2.6,1.2,0).rotation.z=Math.PI/2;
+   const lv=new THREE.Mesh(new THREE.CircleGeometry(4,16),new THREE.MeshBasicMaterial({color:0xff5a1a}));lv.rotation.x=-Math.PI/2;lv.position.y=.1;g.add(lv);return g}
+  if(k==='seal'||k==='walrus'||k==='aqua'||k==='goose'){const w=new THREE.Mesh(new THREE.CircleGeometry(3.6,16),new THREE.MeshLambertMaterial({color:0x3a9ad8}));w.rotation.x=-Math.PI/2;w.position.y=.12;g.add(w)}
+  if(k==='bird'||k==='chicken'||k==='goose'||k==='ptero'||k==='owl'){S(.9,c,0,1.4,0,g);S(.55,c,.7,2.3,0,g);msh(g,new THREE.ConeGeometry(.2,.6,6),0xf2a020,1.3,2.3,0).rotation.z=-Math.PI/2;
+   if(k==='ptero'){[-1,1].forEach(z=>box(g,1.4,.1,2.6,c,0,1.8,z*1.4))}else[-1,1].forEach(z=>box(g,1,.5,.15,c,-.1,1.5,z*.9));S(.1,0x111111,.95,2.5,.3,g);S(.1,0x111111,.95,2.5,-.3,g);
+   if(k==='goose')msh(g,new THREE.OctahedronGeometry(.5),new THREE.MeshPhongMaterial({color:0x9ff4ff,shininess:120}),-1.2,.5,.6);return g}
+  // четвероногий зверь
+  const bw=k==='dino'||k==='bigcat'||k==='bison'||k==='bear'||k==='polar'||k==='gorilla'?1.5:1;
+  const body=box(g,2.6*bw,1.3*bw,1.4*bw,c,0,1.4*bw,0);[[-1,-.5],[-1,.5],[1,-.5],[1,.5]].forEach(a=>box(g,.35*bw,1*bw,.35*bw,c,a[0]*bw,.5*bw,a[1]*bw));
+  const hx=1.6*bw,hy=2.3*bw;box(g,1.1*bw,1*bw,1*bw,k==='potato'?0xf28a3a:k==='pumpkin'?0xf27a1a:c,hx,hy,0);[-.25,.25].forEach(z=>box(g,.15,.18,.12,0x111111,hx+.56*bw,hy+.15,z*bw));
+  if(/cat|bigcat|aqua|potato|berry|tank|fox|tiger/.test(k))[-.3,.3].forEach(z=>msh(g,new THREE.ConeGeometry(.22*bw,.5*bw,4),c,hx,hy+.7*bw,z*bw));
+  if(k==='unicorn')msh(g,new THREE.ConeGeometry(.15,1.2,8),0xffd23a,hx+.3,hy+.9,0).rotation.z=-.5;
+  if(k==='unicorn'){const n=S(.35,0x5fff3a,0,2.4*bw,0,g);n.material=new THREE.MeshBasicMaterial({color:0x5fff3a})}
+  if(k==='lion')[0].forEach(()=>{const m=msh(g,new THREE.TorusGeometry(.8*bw,.3,6,14),0xb0702a,hx-.1,hy,0);m.rotation.y=Math.PI/2;if(true){const r=msh(g,new THREE.TorusGeometry(2.2,.12,4,28),0xd8b878,0,1.8,0);r.rotation.x=Math.PI/2.3}});
+  if(k==='dragon'||k==='dino')for(let i=0;i<4;i++)msh(g,new THREE.ConeGeometry(.25,.6,4),0xd8a020,-.9*bw+i*.6*bw,2.2*bw,0);
+  if(k==='dragon')[-1,1].forEach(z=>box(g,1.4,.1,1.6,0x1a7a4a,0,2.3,z*1.4));
+  if(k==='bison')[-.45,.45].forEach(z=>msh(g,new THREE.ConeGeometry(.15,.6,6),0xeeeeee,hx,hy+.6,z*bw));
+  if(k==='tiger'){for(let i=0;i<4;i++)box(g,.2,1.32,1.42,0x1a1a1a,-.9+i*.6,1.4,0);[-.3,.3].forEach(z=>box(g,.08,1.4,.08,0x3a3a3a,-1.4,2.2,z))}
+  if(k==='zebra'||k==='zebra2'){const st=k==='zebra'?0x1a1a1a:0xf4f4f4;for(let i=0;i<5;i++)box(g,.18,1.32,1.42,st,-1+i*.5,1.4,0)}
+  if(k==='pig'){box(g,.2,.4,.6,0xf4f4f4,hx+.6,hy-.1,0);box(g,.06,.12,.06,0x1a1a1a,hx+.71,hy,.12)}
+  if(k==='electro'){const b=msh(g,new THREE.OctahedronGeometry(.5),new THREE.MeshBasicMaterial({color:0xfff23a}),0,2.6,0);b.scale.y=1.8}
+  if(k==='rain'){box(g,3.4,.8,2.4,0x9aa8c0,0,4.6,0);for(let i=0;i<8;i++)box(g,.05,.6,.05,0x5a8ad8,-1.4+i*.4,3.6,(i%3-1)*.6)}
+  if(k==='fox')for(let i=0;i<5;i++)msh(g,new THREE.OctahedronGeometry(.22),new THREE.MeshBasicMaterial({color:0xfff27a}),-1+i*.5,3.6+Math.sin(i)*.4,0);
+  if(k==='platypus')msh(g,new THREE.CylinderGeometry(.5,.6,.5,10),0x5a3a20,hx,hy+.7,0);
+  if(k==='creeper'){box(g,.3,.3,.1,0x111111,hx+.56,hy+.2,.25);box(g,.3,.3,.1,0x111111,hx+.56,hy+.2,-.25)}
+  if(k==='berry')for(let i=0;i<5;i++)S(.15,0xfff27a,-1+i*.5,2.1,(i%2?.5:-.5),g);
+  if(k==='bear'&&true)box(g,.9,.2,.1,0x1a1a1a,hx+.56,hy+.25,0);
+  return g}
+ // земля, дорожки, забор, арка
+ const W=8*CS+GAP+6,D=8*CS+20,cx=X0+W/2-3,cz=Z0+D/2-3;
+ box(root,W,.12,D,0xd8b884,cx,.16,cz);box(root,GAP-2,.14,8*CS,0xe0c89a,X0+4*CS+GAP/2,.08,Z0+4*CS-CS/2);
+ [[W,1.4,.3,cx,.7,Z0-3],[.3,1.4,D,X0-3,.7,cz],[.3,1.4,D,X0+W-3,.7,cz]].forEach(a=>box(root,a[0],a[1],a[2],0x5a4a3a,a[3],a[4],a[5]));
+ const ez=Z0+D-3;[-1,1].forEach(sd=>box(root,(W-14)/2,1.4,.3,0x5a4a3a,cx+sd*(W/4+3.5),.7,ez));
+ [-5,5].forEach(x=>box(root,1.2,7,1.2,0x3a9a4a,cx+x,3.5,ez));box(root,12,1.6,1.2,0x3a9a4a,cx,7.6,ez);
+ lab(root,'ЗООПАРК МАРСА',11,1.5,'#1d4a2a','#fff27a',cx,7.6,ez+.65);const bk=lab(root,'ЗООПАРК МАРСА',11,1.5,'#1d4a2a','#fff27a',cx,7.6,ez-.65);bk.rotation.y=Math.PI;
+ ZOO.forEach((q,i)=>{const c=i%8,r=Math.floor(i/8),x=X0+c*CS+(c>=4?GAP:0)+CS/2,z=Z0+r*CS+CS/2,e=new THREE.Group();
+  box(e,CS-1.4,.1,CS-1.4,[0xd8b48a,0x9ac06a,0xc8a070][i%3],0,.2,0);
+  [[CS-1,.1,0,-(CS-1)/2],[CS-1,.1,0,(CS-1)/2]].forEach(a=>box(e,a[0],1.6,a[1]+.12,0x8a8d92,a[2],.9,a[3]));[-1,1].forEach(sd=>box(e,.12,1.6,CS-1,0x8a8d92,sd*(CS-1)/2,.9,0));
+  const a=animal(q[2]);a.scale.setScalar(1.7);a.position.set(0,.2,-.8);a.rotation.y=-Math.PI/2+((i*37)%7-3)*.12;e.add(a);
+  const sx=c<4?(CS-1)/2+.1:-(CS-1)/2-.1;const p=new THREE.Group();box(p,.15,1.8,.15,0x3a2414,0,.9,0);lab(p,'@'+q[0],5.2,.8,'#1d2a44','#fff',0,2.3,.1);lab(p,q[1],5.2,.8,'#f7c24a','#1d2a44',0,1.45,.1);
+  p.position.set(0,0,(CS-1)/2+.05);e.add(p);
+  e.position.set(x,0,z);root.add(e);
+  const bb=new THREE.Box3().setFromObject(a);MLIST.push({n:q[0],g:null,x,z,top:Math.max(3,bb.max.y)+.5,bld:1,zoo:1,kind:'Зоопарк Марса · '+q[1],day:13,district:'Зоопарк Марса'})});
+ sc.add(root);MLIST.push({n:'Зоопарк Марса 🦁',g:root,x:cx,z:cz,top:9,bld:1,zoo:1,kind:'Зоопарк Марса: '+ZOO.length+' зверей, придуманных подписчиками (ролик «Зоопарк животных, которых НЕ СУЩЕСТВУЕТ»)',day:13,district:'Зоопарк Марса'});
+ window.ZOOM=root})()}catch(e){console.warn("zoo",e)}
 MLIST.forEach(h=>{if(h.district==='Квартал 10 ноября')h.district='Район YouTube'});
 try{// ===== ОПТИМИЗАЦИЯ: склеиваем мелкие детали (десятки тысяч → сотни объектов) =====
 (function(){if(typeof PCAR!=='undefined')PCAR.userData.dyn=1;if(typeof FTR!=='undefined')FTR.userData.dyn=1;
@@ -1639,7 +1698,7 @@ new Set(MLIST.map(h=>h.g).filter(g=>g&&g.parent&&!g.userData.dyn)).forEach(g=>{c
 })();
 }catch(e){console.warn("merge",e)}
 const MAPCFG={title:'MARS CITY',list:MLIST,center:[162,-64],radius:600,maxD:900,goal:1000,fog:0xdba383,tg:'https://t.me/',
-tabs:[{name:'▶️ YouTube',fly:ZC.yt},{name:'🎵 TikTok',fly:ZC.tt},{name:'⭐ Центр',fly:ZC.c},{name:'🏙 Сити',fly:ZC.city},{name:'✨ Аллея желаний',fly:ZC.al},{name:'🏗 Промзона',fly:ZC.pz},{name:'🎡 Отдых',fly:ZC.fun},{name:'🚀 Космодром',fly:ZC.cos},{name:'🏳 Страна Imen',fly:ZC.im},{name:'🛡 Сопротивление',fly:ZC.res},{name:'☣ Заражение',fly:ZC.inf}],
+tabs:[{name:'▶️ YouTube',fly:ZC.yt},{name:'🎵 TikTok',fly:ZC.tt},{name:'⭐ Центр',fly:ZC.c},{name:'🏙 Сити',fly:ZC.city},{name:'✨ Аллея желаний',fly:ZC.al},{name:'🏗 Промзона',fly:ZC.pz},{name:'🎡 Отдых',fly:ZC.fun},{name:'🦁 Зоопарк',fly:[702,176,150]},{name:'🚀 Космодром',fly:ZC.cos},{name:'🏳 Страна Imen',fly:ZC.im},{name:'🛡 Сопротивление',fly:ZC.res},{name:'☣ Заражение',fly:ZC.inf}],
 days:{max:13,label:d=>d===1?'основатель · выпуск 1':'выпуск '+d},
 tour:['Космодром «Марс-1»','тгк: qwuufh','nyaaan.mp3','Дон-х9щ','ANTI_COPUSTA','DwYoP69','Bloodyking-123','Нормис-л6х','$$+BB','BETA_deta','Маргошкинс💋','Юля-л4х1н','Urbanofix🛠','NEZ_Rbx_Z','Обурмолдить-❤️','ZXC_TEFTELI','KAPAOKE_KOT','GorodKotikov'],
 tick:t=>{dlab();MT.forEach(f=>{try{f(t)}catch(_){}});if(typeof up4==='function')up4(t);SM.forEach(q=>{const k=(t*.7+q.i*.33)%1;q.m.position.y=q.y0+k*3;q.m.material.opacity=.7*(1-k);q.m.scale.setScalar(.6+k*.9)});(M3.fly||[]).forEach((p,k)=>p.position.y=5+Math.sin(t*1.6+k)*.4);(M3.dia||[]).forEach(d=>d.rotation.y=t*.8)}};
@@ -1655,7 +1714,7 @@ const pc=document.createElement('div');pc.className='o';pc.style.cssText='inset:
 L.forEach((h,i)=>{h.i=i;const e=document.createElement('div');e.className='o bub pn mpn';e.textContent='@'+h.n;e.style.fontSize='2.6em';pc.appendChild(e);h.e=e});
 C.prep&&C.prep();
 let D=C.days.max;function setDay(d){D=d;L.forEach(h=>{if(h.g){h.g.visible=h.day<=D;h.g.position.y=0;h.g.scale.set(1,1,1)}});(C.onDay||(()=>{}))(D)}setDay(D);
-const nb=L.filter(h=>h.biz).length,NR=L.filter(h=>!h.site&&!h.bld).length,NS=L.length-NR;
+const nb=L.filter(h=>h.biz).length,NR=L.filter(h=>!h.site&&!h.bld).length,NS=L.length-NR-L.filter(h=>h.zoo).length;
 $m('mpTabs').onclick=e=>{const a=e.target.closest('[data-t]');if(!a)return;stopTour();const f=C.tabs[+a.dataset.t].fly;fly(f[0],f[1],f[2],.5)};
 $m('mpS1').innerHTML='Жителей: <b>'+NR.toLocaleString('ru')+'</b> · Бизнесов: <b>'+nb+'</b>'+(NS?' · Стройка: <b>'+NS+'</b>':'')+' · День <b>'+C.days.max+'</b>';
 $m('mpS2').textContent='До '+C.goal.toLocaleString('ru')+' жителей осталось '+(C.goal-NR).toLocaleString('ru');$m('mpBar').firstChild.style.width=Math.min(100,NR/C.goal*100)+'%';
