@@ -20,10 +20,9 @@ await p.evaluate(t=>{seek(t);
  <div style="position:absolute;left:50%;top:250px;transform:translateX(-50%) rotate(-3deg);background:#1f1f1f;border-radius:36px;padding:28px 40px;display:flex;gap:22px;align-items:center;box-shadow:0 20px 50px rgba(0,0,0,.6);white-space:nowrap;font-family:Rubik,Arial,sans-serif">
   <div style="width:120px;height:120px;border-radius:50%;background:#e8503a;color:#fff;font-size:64px;display:flex;align-items:center;justify-content:center;font-weight:700">Г</div>
   <div><div style="color:#aaa;font-size:36px;font-weight:500">@Глбушек</div><div style="color:#fff;font-size:76px;font-weight:700">А где я? 😢</div></div></div>
- <div style="position:absolute;left:0;right:0;top:640px;text-align:center;line-height:.95">
-  <div style="font-size:150px;color:#fff;-webkit-text-stroke:18px #000;paint-order:stroke fill">ВСЕ</div>
-  <div style="font-size:300px;color:#ffd23a;-webkit-text-stroke:24px #000;paint-order:stroke fill;letter-spacing:-6px">1 434</div>
-  <div style="font-size:116px;color:#fff;-webkit-text-stroke:16px #000;paint-order:stroke fill;margin-top:6px">НИКА ТУТ</div></div>
- <div style="position:absolute;left:50%;top:1320px;transform:translateX(-50%) rotate(2deg);background:#ff2d55;color:#fff;font-size:72px;padding:12px 44px;border-radius:30px;border:7px solid #fff;white-space:nowrap;box-shadow:0 12px 30px rgba(0,0,0,.5)">НАЙДИ СЕБЯ ⏸</div>`;
+ <div style="position:absolute;left:0;right:0;top:700px;text-align:center;line-height:.95">
+  <div style="font-size:250px;color:#ffd23a;-webkit-text-stroke:22px #000;paint-order:stroke fill">ТВОЙ</div>
+  <div style="font-size:250px;color:#ffd23a;-webkit-text-stroke:22px #000;paint-order:stroke fill">НИК</div>
+  <div style="font-size:190px;color:#fff;-webkit-text-stroke:20px #000;paint-order:stroke fill;margin-top:10px">ТУТ 👇</div></div>`;
  st.appendChild(o)},T);
 await p.waitForTimeout(600);await p.screenshot({path:OUT});await b.close();srv.close();console.log('Обложка:',OUT);
