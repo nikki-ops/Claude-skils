@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8">
+<title>Одна дома: 40 км до мамы</title>
+<meta name="viewport" content="width=1080">
+<style>
+html,body{margin:0;background:#05080b;overflow:hidden}
+#stage{position:relative;width:1080px;height:1920px;overflow:hidden;background:#05080b}
+#gl{position:absolute;inset:0;width:1080px;height:1920px}
+#grain{position:absolute;inset:0;width:1080px;height:1920px;mix-blend-mode:overlay;opacity:.22;pointer-events:none}
+#vig{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 48%,rgba(0,0,0,0) 45%,rgba(0,0,0,.55) 85%,rgba(0,0,0,.85) 100%)}
+#bars{position:absolute;inset:0;pointer-events:none}
+.tx{position:absolute;left:0;right:0;text-align:center;font-family:"DejaVu Sans Condensed","Arial Narrow",Arial,sans-serif;font-weight:700;color:#f1f1ea;letter-spacing:.06em;text-transform:uppercase;text-shadow:0 4px 18px rgba(0,0,0,.9),0 0 2px #000;display:none}
+#t1{top:300px;font-size:84px}
+#sub{position:absolute;left:70px;right:70px;top:1330px;text-align:center;font-family:"DejaVu Sans",Arial,sans-serif;font-weight:700;font-size:54px;line-height:1.18;color:#fff;text-shadow:0 3px 12px #000,0 0 3px #000;display:none}
+#sub y{color:#f2c230}
+</style></head><body>
+<div id="stage"><canvas id="gl"></canvas><canvas id="grain" width="540" height="960"></canvas><div id="vig"></div>
+<div class="tx" id="t1"></div><div id="sub"></div></div>
+<script type="importmap">{"imports":{"three":"/render/_istochniki/three/build/three.module.js","three/addons/":"/render/_istochniki/three/examples/jsm/"}}</script>
+<script type="module">
+import * as THREE from 'three';
+import {EffectComposer} from 'three/addons/postprocessing/EffectComposer.js';
+import {RenderPass} from 'three/addons/postprocessing/RenderPass.js';
+import {UnrealBloomPass} from 'three/addons/postprocessing/UnrealBloomPass.js';
+import {OutputPass} from 'three/addons/postprocessing/OutputPass.js';
+try{
+const W=1080,H=1920;
+// ---------- детерминированный случай ----------
+let SEED=12345;const rnd=()=>{SEED=(SEED*16807)%2147483647;return (SEED-1)/2147483646};
+const lerp=(a,b,k)=>a+(b-a)*k,cl=(x,a,b)=>Math.max(a,Math.min(b,x)),ease=k=>k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2,sm=(a,b,x)=>{const k=cl((x-a)/(b-a),0,1);return k*k*(3-2*k)};
+function n2(x,z){return Math.sin(x*.11+Math.sin(z*.07)*2)*.6+Math.sin(z*.13+x*.05)*.5+Math.sin((x+z)*.031)*1.2}
+// ---------- рендер ----------
+const R=new THREE.WebGLRenderer({canvas:document.getElementById('gl'),antialias:true,preserveDrawingBuffer:true});
+R.setPixelRatio(1);R.setSize(W,H,false);R.toneMapping=THREE.ACESFilmicToneMapping;R.toneMappingExposure=1.15;R.outputColorSpace=THREE.SRGBColorSpace;
+R.shadowMap.enabled=true;R.shadowMap.type=THREE.PCFSoftShadowMap;
+const sc=new THREE.Scene();const cam=new THREE.PerspectiveCamera(40,W/H,.05,600);
+const FOG_OUT=new THREE.FogExp2(0x1a2731,.028),FOG_IN=new THREE.FogExp2(0x0b0907,.02);sc.fog=FOG_OUT;sc.background=new THREE.Color(0x101a22);
+const comp=new EffectComposer(R);comp.addPass(new RenderPass(sc,cam));const bloom=new UnrealBloomPass(new THREE.Vector2(W/2,H/2),.9,.6,.82);comp.addPass(bloom);comp.addPass(new OutputPass());
+// ---------- материалы ----------
+const M=(c,r=.9,o={})=>new THREE.MeshStandardMaterial({color:c,roughness:r,metalness:0,...o});
+const SNOW=M(0xdfe7ee,.85),WOOD=M(0x4e4038,.95),WOOD2=M(0x6b5a4c,.9),ROOF=M(0x3b3d40,.8),FRAME=M(0xc9d3d6,.7),DARKGLASS=M(0x0c1216,.2),
+ WARM=new THREE.MeshStandardMaterial({color:0x2a1a0c,emissive:0xffa24a,emissiveIntensity:2.2,roughness:.6}),
+ YEL=M(0xe8b81e,.32),BLACK=M(0x030303,1),BOOT=M(0x15120f,.7),SKIN=M(0xe8b8a0,.65),PINE=M(0x16241d,.95),TRUNK=M(0x2c2119,1);
+function canvasTex(w,h,draw){const c=document.createElement('canvas');c.width=w;c.height=h;draw(c.getContext('2d'),w,h);const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=4;return t}
+// снег-земля
+{const g=new THREE.PlaneGeometry(420,420,220,220);g.rotateX(-Math.PI/2);const p=g.attributes.position;for(let i=0;i<p.count;i++){const x=p.getX(i),z=p.getZ(i);const road=Math.abs(z)<3.2?(1-Math.abs(z)/3.2)*.25:0;p.setY(i,n2(x,z)*.35*(Math.min(1,Math.hypot(x,z)/30))+.05*Math.sin(x*3.1)*Math.sin(z*2.7)-road)}g.computeVertexNormals();
+ const m=new THREE.Mesh(g,SNOW);m.receiveShadow=true;sc.add(m)}
+// дорога: две колеи
+for(const s of[-1,1]){const g=new THREE.PlaneGeometry(220,.55,110,1);g.rotateX(-Math.PI/2);const m=new THREE.Mesh(g,M(0x9aa3a8,.95));m.position.set(0,-.17,s*.85);m.receiveShadow=true;sc.add(m)}
+// ---------- изба ----------
+const LOGG=new THREE.CylinderGeometry(.17,.17,1,10);LOGG.rotateZ(Math.PI/2);
+const logs=[];// {x,y,z,len,ry}
+const HOUSES=[];
+function izba(x,z,ry,o={}){const g=new THREE.Group();g.position.set(x,0,z);g.rotation.y=ry;sc.add(g);const Wd=6.4,D=5.6,rows=13,lh=.31;
+ for(let r=0;r<rows;r++){const y=.2+r*lh;for(const s of[-1,1]){logs.push({g,x:0,y,z:s*D/2,len:Wd+.7,ry:0});logs.push({g,x:s*Wd/2,y:y+lh/2,z:0,len:D+.7,ry:Math.PI/2})}}
+ // фронтон
+ for(let r=0;r<7;r++){const y=.2+rows*lh+r*lh,len=Wd*(1-r/7);for(const s of[-1,1])logs.push({g,x:0,y,z:s*D/2,len:len+.2,ry:0})}
+ const top=.2+rows*lh,rh=2.3;// крыша: два ската + снег
+ for(const s of[-1,1]){const sl=Math.hypot(Wd/2+.6,rh);const rf=new THREE.Mesh(new THREE.BoxGeometry(sl,.12,D+1.4),ROOF);rf.position.set(s*(Wd/4+.15),top+rh/2,0);rf.rotation.z=-s*Math.atan2(rh,Wd/2+.6);rf.castShadow=rf.receiveShadow=true;g.add(rf);
+  const sn=new THREE.Mesh(new THREE.BoxGeometry(sl*.98,.32,D+1.3),SNOW);sn.position.set(s*(Wd/4+.15)-s*.05,top+rh/2+.2,0);sn.rotation.z=rf.rotation.z;sn.castShadow=true;g.add(sn)}
+ const ch=new THREE.Mesh(new THREE.BoxGeometry(.6,1.6,.6),M(0x6a5f58,.95));ch.position.set(1.1,top+rh+.1,.6);ch.castShadow=true;g.add(ch);
+ // окна на фасаде (z=+D/2): наличники + стекло
+ const wins=[];for(const wx of[-1.6,1.6]){const wy=2.0;const fr=new THREE.Mesh(new THREE.BoxGeometry(1.35,1.65,.12),FRAME);fr.position.set(wx,wy,D/2+.2);g.add(fr);
+  const gl=new THREE.Mesh(new THREE.PlaneGeometry(1.05,1.3),o.lit?WARM:DARKGLASS);gl.position.set(wx,wy,D/2+.27);g.add(gl);
+  const kr=new THREE.Mesh(new THREE.BoxGeometry(1.6,.28,.16),FRAME);kr.position.set(wx,wy+.95,D/2+.22);g.add(kr);const sil=new THREE.Mesh(new THREE.BoxGeometry(1.5,.12,.3),FRAME);sil.position.set(wx,wy-.85,D/2+.25);g.add(sil);
+  const sn=new THREE.Mesh(new THREE.BoxGeometry(1.5,.1,.32),SNOW);sn.position.set(wx,wy-.76,D/2+.25);g.add(sn);
+  for(const cx of[0])for(const k of[[0,1.3,.06],[1.05,.06,.06]]){const b=new THREE.Mesh(new THREE.BoxGeometry(k[0]||.06,k[1],.05),FRAME);b.position.set(wx,wy,D/2+.29);g.add(b)}
+  wins.push(gl);if(o.lit){const L=new THREE.PointLight(0xffa04a,9,9,1.6);L.position.set(wx,wy,D/2+1.1);g.add(L)}}
+ // дверь сбоку + крыльцо
+ const dr=new THREE.Mesh(new THREE.BoxGeometry(.12,2.1,1.1),M(0x3a2c22,.9));dr.position.set(Wd/2+.25,1.25,1.2);g.add(dr);
+ const pr=new THREE.Mesh(new THREE.BoxGeometry(1.4,.3,1.8),WOOD2);pr.position.set(Wd/2+.9,.15,1.2);pr.castShadow=pr.receiveShadow=true;g.add(pr);
+ // забор
+ for(let i=-9;i<=9;i++){const p=new THREE.Mesh(new THREE.BoxGeometry(.12,1.2+Math.sin(i*1.7+x)*.15,.05),WOOD);p.position.set(i*.55,.55,D/2+3.2);p.rotation.z=Math.sin(i*2.3+x)*.06;p.castShadow=true;g.add(p)}
+ const rail=new THREE.Mesh(new THREE.BoxGeometry(10.4,.08,.06),WOOD);rail.position.set(0,.8,D/2+3.17);g.add(rail);
+ const H0={g,wins,door:dr,front:new THREE.Vector3(x,0,z)};HOUSES.push(H0);return H0}
+// улица: 7 изб по двум сторонам дороги (фасад к дороге)
+const hs=[[-28,-9,0],[-14,-9.5,0],[0,-9,0,{lit:1}],[14,-9.3,0],[-21,9.2,Math.PI],[-6,9,Math.PI],[9,9.4,Math.PI]];
+hs.forEach(h=>izba(h[0],h[1],h[2],h[3]||{}));
+const VARYA=HOUSES[2];// дом Вари — со светом
+// инстансы брёвен
+{const im=new THREE.InstancedMesh(LOGG,WOOD,logs.length);const m4=new THREE.Matrix4(),q=new THREE.Quaternion(),e=new THREE.Euler(),v=new THREE.Vector3(),s=new THREE.Vector3();
+ sc.updateMatrixWorld(true);logs.forEach((l,i)=>{e.set(0,l.ry,0);q.setFromEuler(e);v.set(l.x,l.y,l.z);s.set(l.len,1,1);m4.compose(v,q,s);m4.premultiply(l.g.matrixWorld);im.setMatrixAt(i,m4)});im.castShadow=im.receiveShadow=true;sc.add(im)}
+// ёлки (инстансы): лес вокруг деревни
+{const cone=new THREE.ConeGeometry(1,1.6,9);const snowc=new THREE.ConeGeometry(.82,.5,9);const N=900;const P=[];
+ for(let i=0;i<N;i++){const a=rnd()*Math.PI*2,r=40+Math.pow(rnd(),.7)*120;const x=Math.cos(a)*r*1.3,z=Math.sin(a)*r;if(Math.abs(z)<5&&Math.abs(x)<200)continue;P.push([x,z,7+rnd()*9])}
+ // несколько ёлок ближе к домам
+ for(let i=0;i<40;i++){const x=-40+rnd()*80,z=(rnd()<.5?-1:1)*(18+rnd()*14);P.push([x,z,5+rnd()*6])}
+ const tiers=5,imB=new THREE.InstancedMesh(cone,PINE,P.length*tiers),imS=new THREE.InstancedMesh(snowc,SNOW,P.length*tiers),imT=new THREE.InstancedMesh(new THREE.CylinderGeometry(.18,.25,1,6),TRUNK,P.length);
+ const m4=new THREE.Matrix4(),q=new THREE.Quaternion(),v=new THREE.Vector3(),s=new THREE.Vector3();let k=0;
+ P.forEach(([x,z,h],i)=>{const y0=n2(x,z)*.35;v.set(x,y0+.6,z);s.set(1,1.4,1);m4.compose(v,q,s);imT.setMatrixAt(i,m4);for(let t=0;t<tiers;t++){const f=1-t/tiers,rad=h*.28*f+.3,y=y0+1.2+t*h/tiers*.95;q.setFromAxisAngle(new THREE.Vector3(0,1,0),rnd()*6);v.set(x,y+h*.08,z);s.set(rad,h/tiers*1.1,rad);m4.compose(v,q,s);imB.setMatrixAt(k,m4);v.set(x,y+h*.08+h/tiers*.42,z);s.set(rad*.9,h/tiers*.6,rad*.9);m4.compose(v,q,s);imS.setMatrixAt(k,m4);k++}});
+ [imB,imS,imT].forEach(m=>{m.castShadow=true;m.receiveShadow=true;sc.add(m)})}
+// столбы и провода
+for(let i=-4;i<=4;i++){const x=i*24+5;const p=new THREE.Mesh(new THREE.CylinderGeometry(.13,.17,8,7),WOOD);p.position.set(x,4,4.6);p.rotation.z=Math.sin(i*1.9)*.04;p.castShadow=true;sc.add(p);const cr=new THREE.Mesh(new THREE.BoxGeometry(.1,.1,1.4),WOOD);cr.position.set(x,7.5,4.6);sc.add(cr)}
+for(const dz of[-.6,.6]){const pts=[];for(let x=-91;x<=101;x+=2){const ph=((x-5)%24+24)%24/24;pts.push(new THREE.Vector3(x,7.55-Math.sin(ph*Math.PI)*.8,4.6+dz))}sc.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),new THREE.LineBasicMaterial({color:0x0a0c0e})))}
+// небо + луна
+{const g=new THREE.SphereGeometry(500,32,16);const m=new THREE.ShaderMaterial({side:THREE.BackSide,depthWrite:false,fog:false,uniforms:{},vertexShader:'varying vec3 p;void main(){p=normalize(position);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',fragmentShader:'varying vec3 p;void main(){float h=clamp(p.y,0.,1.);vec3 c=mix(vec3(.10,.15,.19),vec3(.02,.035,.05),pow(h,.5));gl_FragColor=vec4(c,1.);}'});sc.add(new THREE.Mesh(g,m));
+ const moon=new THREE.Mesh(new THREE.CircleGeometry(9,32),new THREE.MeshBasicMaterial({color:0xdfe9f2,fog:false}));moon.position.set(-140,150,-300);moon.lookAt(0,0,0);sc.add(moon);
+ const halo=new THREE.Sprite(new THREE.SpriteMaterial({map:canvasTex(256,256,(x,w,h)=>{const gr=x.createRadialGradient(128,128,10,128,128,128);gr.addColorStop(0,'rgba(200,220,240,.55)');gr.addColorStop(1,'rgba(200,220,240,0)');x.fillStyle=gr;x.fillRect(0,0,w,h)}),fog:false,depthWrite:false,transparent:true}));halo.scale.set(110,110,1);halo.position.copy(moon.position);sc.add(halo)}
+// свет
+const hemi=new THREE.HemisphereLight(0x50707f,0x0b1015,.55);sc.add(hemi);
+const moonL=new THREE.DirectionalLight(0xa9c3dc,1.1);moonL.position.set(-40,60,-30);moonL.castShadow=true;moonL.shadow.mapSize.set(2048,2048);Object.assign(moonL.shadow.camera,{left:-45,right:45,top:45,bottom:-45,near:1,far:200});moonL.shadow.bias=-.0006;sc.add(moonL);sc.add(moonL.target);
+// ---------- мужчина в жёлтом дождевике ----------
+function man(){const g=new THREE.Group();
+ const prof=[[0,0],[.62,0],[.58,.4],[.5,.9],[.44,1.2],[.4,1.45],[.3,1.55],[0,1.56]].map(p=>new THREE.Vector2(p[0],p[1]));
+ const coat=new THREE.Mesh(new THREE.LatheGeometry(prof,28),YEL);coat.position.y=.45;coat.scale.set(1,1,.8);coat.castShadow=true;g.add(coat);
+ const sh=new THREE.Mesh(new THREE.SphereGeometry(.47,20,12),YEL);sh.scale.set(1,.5,.72);sh.position.y=1.95;sh.castShadow=true;g.add(sh);
+ const hood=new THREE.Mesh(new THREE.SphereGeometry(.3,22,16,0,Math.PI*2,0,Math.PI*.78),YEL);hood.position.set(0,2.27,-.02);hood.rotation.x=-.25;hood.castShadow=true;g.add(hood);
+ const face=new THREE.Mesh(new THREE.SphereGeometry(.24,20,14),BLACK);face.scale.set(1,1.1,.6);face.position.set(0,2.2,.12);g.add(face);
+ const chin=new THREE.Mesh(new THREE.SphereGeometry(.12,12,10),M(0xb08878,.7));chin.scale.set(1,.7,.9);chin.position.set(0,2.0,.17);g.add(chin);
+ const legs=[];for(const s of[-1,1]){const l=new THREE.Group();l.position.set(s*.18,.62,0);const m=new THREE.Mesh(new THREE.CapsuleGeometry(.1,.5,4,8),BOOT);m.position.y=-.34;l.add(m);const b=new THREE.Mesh(new THREE.BoxGeometry(.18,.16,.34),BOOT);b.position.set(0,-.62,.06);l.add(b);g.add(l);legs.push(l)}
+ const arms=[];for(const s of[-1,1]){const a=new THREE.Group();a.position.set(s*.47,1.9,0);const m=new THREE.Mesh(new THREE.CapsuleGeometry(.11,.62,4,10),YEL);m.position.y=-.38;m.castShadow=true;a.add(m);const hnd=new THREE.Mesh(new THREE.SphereGeometry(.08,10,8),M(0x2a2420,.8));hnd.position.y=-.78;a.add(hnd);g.add(a);arms.push(a)}
+ // фонарик в правой руке
+ const fl=new THREE.Mesh(new THREE.CylinderGeometry(.045,.06,.3,10),M(0x1a1a1a,.4));fl.rotation.x=Math.PI/2;fl.position.set(0,-.8,.12);arms[1].add(fl);
+ const spot=new THREE.SpotLight(0xfff1d6,60,30,.32,.55,1.4);spot.castShadow=true;spot.shadow.mapSize.set(512,512);spot.position.set(0,-.8,.28);arms[1].add(spot);const tg=new THREE.Object3D();tg.position.set(0,-1.5,6);arms[1].add(tg);spot.target=tg;
+ // видимый луч
+ const bm=new THREE.ShaderMaterial({transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,side:THREE.DoubleSide,uniforms:{a:{value:.32}},vertexShader:'varying float vy;varying vec3 vn;varying vec3 vv;void main(){vy=uv.y;vec4 mv=modelViewMatrix*vec4(position,1.);vn=normalize(normalMatrix*normal);vv=normalize(-mv.xyz);gl_Position=projectionMatrix*mv;}',fragmentShader:'uniform float a;varying float vy;varying vec3 vn;varying vec3 vv;void main(){float f=pow(abs(dot(vn,vv)),1.6);gl_FragColor=vec4(vec3(1.,.95,.82)*a*vy*vy*f,1.);}'});
+ const beamG=new THREE.CylinderGeometry(.05,2.6,9,24,1,true);beamG.translate(0,-4.5,0);beamG.rotateX(-Math.PI/2);const beam=new THREE.Mesh(beamG,bm);beam.position.set(0,-.8,.28);beam.lookAt(new THREE.Vector3(0,-1.5,6).add(new THREE.Vector3()));arms[1].add(beam);
+ beam.rotation.set(0,0,0);beam.lookAt(0,-1.5,6);
+ g.userData={legs,arms,spot,beam,hood,face};g.traverse(o=>{if(o.isMesh)o.castShadow=true});sc.add(g);return g}
+const MAN=man();
+function poseMan(pos,ry,walk,armUp,knock){MAN.position.copy(pos);MAN.rotation.y=ry;const u=MAN.userData,s=Math.sin(walk*Math.PI*2);u.legs[0].rotation.x=s*.45;u.legs[1].rotation.x=-s*.45;u.arms[0].rotation.x=-s*.3+(knock||0);u.arms[1].rotation.x=-(armUp||0)-.2;MAN.position.y+=Math.abs(Math.cos(walk*Math.PI*2))*.04}
+// ---------- снег ----------
+const SN=5000,snp=new Float32Array(SN*3),sn0=[];for(let i=0;i<SN;i++)sn0.push([rnd()*40,rnd()*20,rnd()*40,.6+rnd()*.8,rnd()*6]);
+const snG=new THREE.BufferGeometry();snG.setAttribute('position',new THREE.BufferAttribute(snp,3));
+const flake=canvasTex(64,64,(x)=>{const gr=x.createRadialGradient(32,32,0,32,32,32);gr.addColorStop(0,'rgba(255,255,255,1)');gr.addColorStop(.4,'rgba(255,255,255,.6)');gr.addColorStop(1,'rgba(255,255,255,0)');x.fillStyle=gr;x.fillRect(0,0,64,64)});
+const snow=new THREE.Points(snG,new THREE.PointsMaterial({size:.07,map:flake,transparent:true,depthWrite:false,color:0xdbe6f0,opacity:.9}));snow.frustumCulled=false;sc.add(snow);
+function snowAt(t,c){for(let i=0;i<SN;i++){const s=sn0[i];const x=((s[0]+Math.sin(t*.7+s[4])*.6+t*.4)%40+40)%40-20,y=((s[1]-t*s[3])%20+20)%20-6,z=((s[2])%40+40)%40-20;snp[i*3]=c.x+x;snp[i*3+1]=Math.max(.05,c.y+y);snp[i*3+2]=c.z+z}snG.attributes.position.needsUpdate=true}
+// ---------- шторы у окна Вари (для кадра-хука изнутри) ----------
+const CURT=new THREE.Group();{const wx=VARYA.g.position.x+1.6,wz=VARYA.g.position.z+5.6/2-.15;
+ const tex=canvasTex(256,256,(x,w,h)=>{x.fillStyle='#5a2b26';x.fillRect(0,0,w,h);for(let i=0;i<40;i++){x.fillStyle=`rgba(${200+rnd()*40},${150+rnd()*40},90,.35)`;const cx=rnd()*w,cy=rnd()*h;x.beginPath();x.arc(cx,cy,6+rnd()*8,0,7);x.fill()}});
+ for(const s of[-1,1]){const g=new THREE.PlaneGeometry(1.4,2.4,30,1);const p=g.attributes.position;for(let i=0;i<p.count;i++)p.setZ(i,Math.sin(p.getX(i)*14)*.04);g.computeVertexNormals();const m=new THREE.Mesh(g,M(0xffffff,.95,{map:tex,side:THREE.DoubleSide}));m.position.set(wx+s*.78,2.0,wz-.05);m.rotation.y=Math.PI;CURT.add(m)}
+ // внутренняя стена с проёмом окна
+ const sh=new THREE.Shape();sh.moveTo(-4,-3);sh.lineTo(4,-3);sh.lineTo(4,3);sh.lineTo(-4,3);sh.lineTo(-4,-3);const hole=new THREE.Path();hole.moveTo(-.55,-.68);hole.lineTo(.55,-.68);hole.lineTo(.55,.68);hole.lineTo(-.55,.68);hole.lineTo(-.55,-.68);sh.holes.push(hole);
+ const wall=new THREE.Mesh(new THREE.ShapeGeometry(sh),M(0x2a1e16,1,{side:THREE.DoubleSide}));wall.position.set(wx,2.0,wz-.12);CURT.add(wall);
+ CURT.userData={wx,wz};CURT.visible=false;sc.add(CURT)}
+// ---------- комната (интерьер) — отдельно, далеко ----------
+const ROOM=new THREE.Group();ROOM.position.set(300,0,0);sc.add(ROOM);
+{const planks=canvasTex(512,512,(x,w,h)=>{for(let i=0;i<16;i++){const v=60+rnd()*25;x.fillStyle=`rgb(${v+20},${v},${v-12})`;x.fillRect(0,i*32,w,32);x.fillStyle='rgba(0,0,0,.45)';x.fillRect(0,i*32,w,3);for(let k=0;k<30;k++){x.fillStyle='rgba(0,0,0,.08)';x.fillRect(rnd()*w,i*32+rnd()*30,40+rnd()*120,1)}}});
+ planks.wrapS=planks.wrapT=THREE.RepeatWrapping;planks.repeat.set(2,2);
+ const box=new THREE.Mesh(new THREE.BoxGeometry(8,3.2,7),M(0xffffff,.95,{map:planks,side:THREE.BackSide}));box.position.y=1.6;box.receiveShadow=true;ROOM.add(box);
+ // стол + карта + записка + лампа
+ const table=new THREE.Mesh(new THREE.BoxGeometry(1.8,.08,1.1),M(0x5b4130,.7));table.position.set(-1.5,.95,-1.5);table.castShadow=table.receiveShadow=true;ROOM.add(table);
+ for(const a of[[-.8,-.45],[.8,-.45],[-.8,.45],[.8,.45]]){const l=new THREE.Mesh(new THREE.BoxGeometry(.07,.95,.07),M(0x4a3426,.8));l.position.set(-1.5+a[0],.47,-1.5+a[1]);ROOM.add(l)}
+ const map=canvasTex(1024,768,(x,w,h)=>{x.fillStyle='#d9cfb4';x.fillRect(0,0,w,h);for(let i=0;i<4000;i++){x.fillStyle=`rgba(90,70,40,${rnd()*.06})`;x.fillRect(rnd()*w,rnd()*h,2,2)}
+  x.fillStyle='rgba(60,100,60,.35)';for(let i=0;i<60;i++){x.beginPath();x.arc(rnd()*w,rnd()*h,20+rnd()*60,0,7);x.fill()}
+  x.strokeStyle='rgba(50,90,150,.8)';x.lineWidth=14;x.beginPath();x.moveTo(560,0);x.bezierCurveTo(480,250,640,450,520,768);x.stroke();
+  x.setLineDash([22,16]);x.strokeStyle='#b0201a';x.lineWidth=9;x.beginPath();x.moveTo(170,560);x.bezierCurveTo(330,520,420,380,560,330);x.bezierCurveTo(700,280,780,240,880,170);x.stroke();x.setLineDash([]);
+  x.fillStyle='#b0201a';for(const p of[[170,560],[880,170]]){x.beginPath();x.arc(p[0],p[1],16,0,7);x.fill()}
+  x.fillStyle='#2a2018';x.font='bold 46px DejaVu Serif, serif';x.fillText('Глухово',80,630);x.fillText('Сосновка',760,120);x.font='italic bold 52px DejaVu Serif, serif';x.fillStyle='#b0201a';x.fillText('40 км',560,420)});
+ const mp=new THREE.Mesh(new THREE.PlaneGeometry(1.3,.97),M(0xffffff,.9,{map}));mp.rotation.x=-Math.PI/2;mp.rotation.z=.08;mp.position.set(-1.55,1.0,-1.5);mp.receiveShadow=true;ROOM.add(mp);ROOM.userData.map=mp;
+ const note=canvasTex(512,360,(x,w,h)=>{x.fillStyle='#f3efe4';x.fillRect(0,0,w,h);x.strokeStyle='rgba(80,110,170,.4)';for(let i=1;i<9;i++){x.beginPath();x.moveTo(0,i*40);x.lineTo(w,i*40);x.stroke()}x.fillStyle='#1d3d8a';x.font='italic 44px DejaVu Serif, serif';x.fillText('Варюша,',40,90);x.fillText('никому не открывай!',40,170);x.fillText('Целую. Мама',40,250)});
+ const nt=new THREE.Mesh(new THREE.PlaneGeometry(.5,.35),M(0xffffff,.9,{map:note}));nt.rotation.x=-Math.PI/2;nt.rotation.z=-.25;nt.position.set(-1.05,1.002,-1.25);ROOM.add(nt);
+ const lamp=new THREE.PointLight(0xffb066,6,7,1.5);lamp.position.set(-1.9,1.9,-1.9);lamp.castShadow=true;ROOM.add(lamp);
+ const bulb=new THREE.Mesh(new THREE.SphereGeometry(.07,12,8),new THREE.MeshBasicMaterial({color:0xffd9a0}));bulb.position.copy(lamp.position);ROOM.add(bulb);ROOM.userData.lamp=lamp;
+ // печь
+ const pech=new THREE.Mesh(new THREE.BoxGeometry(1.6,2.2,1.6),M(0xd8d2c6,.95));pech.position.set(2.9,1.1,-2.6);pech.castShadow=pech.receiveShadow=true;ROOM.add(pech);
+ const fire=new THREE.Mesh(new THREE.PlaneGeometry(.5,.36),new THREE.MeshStandardMaterial({color:0x200800,emissive:0xff5a14,emissiveIntensity:3}));fire.position.set(2.9,.6,-1.79);ROOM.add(fire);
+ const fl=new THREE.PointLight(0xff6a24,4,6,1.6);fl.position.set(2.9,.7,-1.4);ROOM.add(fl);ROOM.userData.fire=fl;
+ // дверь с цепочкой (стена x=+4)
+ const door=new THREE.Group();door.position.set(3.97,0,1.2);ROOM.add(door);
+ const dpl=canvasTex(256,512,(x,w,h)=>{for(let i=0;i<5;i++){const v=55+rnd()*20;x.fillStyle=`rgb(${v+18},${v+4},${v-8})`;x.fillRect(i*w/5,0,w/5,h);x.fillStyle='rgba(0,0,0,.5)';x.fillRect(i*w/5,0,3,h)}x.fillStyle='rgba(0,0,0,.35)';x.fillRect(0,80,w,26);x.fillRect(0,400,w,26)});
+ const dd=new THREE.Mesh(new THREE.BoxGeometry(.08,2.1,1.0),M(0xffffff,.85,{map:dpl}));dd.position.set(-.05,1.05,0);door.add(dd);
+ const knob=new THREE.Group();knob.position.set(-.13,1.0,-.38);door.add(knob);const kb=new THREE.Mesh(new THREE.BoxGeometry(.06,.04,.18),M(0x8a8a86,.35,{metalness:.8}));kb.position.z=.07;knob.add(kb);ROOM.userData.knob=knob;
+ const chainPts=[];for(let i=0;i<14;i++){const k=i/13;chainPts.push(new THREE.Vector3(-.12,1.28-Math.sin(k*Math.PI)*.12,-.42+k*.55))}
+ const chain=new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(chainPts),40,.012,6),M(0xb5b5ae,.3,{metalness:.9}));door.add(chain);ROOM.userData.chain=chain;
+ // свет из щели под дверью (с улицы — фонарик) + тень ног
+ const gap=new THREE.Mesh(new THREE.PlaneGeometry(1.0,.02),new THREE.MeshBasicMaterial({color:0xfff0c8}));gap.rotation.y=-Math.PI/2;gap.position.set(-.1,.012,0);door.add(gap);ROOM.userData.gap=gap;
+ const gapL=new THREE.SpotLight(0xfff0d0,0,4,.9,.8,1.2);gapL.position.set(.3,.03,0);const gt=new THREE.Object3D();gt.position.set(-2,0,0);door.add(gt);gapL.target=gt;door.add(gapL);ROOM.userData.gapL=gapL;
+ // радио на подоконнике
+ const rad=new THREE.Mesh(new THREE.BoxGeometry(.55,.32,.22),M(0x5a3a22,.5));rad.position.set(-3.6,1.15,1.6);rad.rotation.y=Math.PI/2;ROOM.add(rad);
+ const dial=new THREE.Mesh(new THREE.PlaneGeometry(.36,.09),new THREE.MeshStandardMaterial({color:0x061a08,emissive:0x5cff7a,emissiveIntensity:1.6}));dial.position.set(-3.48,1.2,1.6);dial.rotation.y=Math.PI/2;ROOM.add(dial);
+ // папины сапоги у порога
+ for(const s of[0,1]){const b=new THREE.Mesh(new THREE.CapsuleGeometry(.09,.36,4,8),BOOT);b.position.set(3.5,.27,.25+s*.24);ROOM.add(b);const f=new THREE.Mesh(new THREE.BoxGeometry(.32,.12,.17),BOOT);f.position.set(3.42,.06,.25+s*.24);ROOM.add(f)}
+}
+// ---------- кадры (тайминг под черновую озвучку, потом подгоню под голос) ----------
+const V=(x,y,z)=>new THREE.Vector3(x,y,z);
+const vx=VARYA.g.position.x,vz=VARYA.g.position.z;
+const SHOTS=[
+ // хук: из комнаты Вари в щель штор — на улице жёлтый дождевик
+ {t0:0,t1:2,fog:FOG_OUT,curt:1,cam:[V(vx+1.6,2.05,vz+2.2),V(vx+1.6,2.0,vz+2.5)],look:[V(vx+1.0,1.4,vz+14),V(vx+1.2,1.5,vz+14)],fov:[38,30],
+  man:t=>poseMan(V(vx-3+t*.4,0,vz+12),Math.PI*.6,t*.6,.3,0),tx:'8 лет. Одна дома.'},
+ // улица: стучит в тёмную избу
+ {t0:2,t1:4,fog:FOG_OUT,cam:[V(-26,1.6,4),V(-25,1.7,3)],look:[V(-14,1.6,-5),V(-14,1.8,-5)],fov:[34,32],
+  man:t=>{const k=(t%0.5)/0.5;poseMan(V(-14+3.2+1.2,0,-9+1.2),-Math.PI/2,0,.1,-1.6+Math.sin(k*Math.PI)*.35)}},
+ // карта на столе
+ {t0:4,t1:6,fog:FOG_IN,room:1,cam:[V(300-1.4,2.2,-0.6),V(300-1.5,1.75,-1.0)],look:[V(300-1.55,1.0,-1.5),V(300-1.55,1.0,-1.5)],fov:[40,40],tx:'40 км до мамы'},
+ // он поворачивается к окну Вари
+ {t0:14,t1:16,fog:FOG_OUT,cam:[V(vx+1.6,1.7,vz+4.2),V(vx+1.6,1.7,vz+4.0)],look:[V(vx+4,1.9,vz+15),V(vx+4,2.1,vz+15)],fov:[22,16],
+  man:t=>poseMan(V(vx+4,0,vz+15),Math.PI-lerp(.9,0,sm(0,1.4,t)),0,.15,0)},
+ // дверь изнутри: тень и свет под дверью, цепочка
+ {t0:23,t1:25,fog:FOG_IN,room:1,dark:1,cam:[V(300+1.6,1.3,2.4),V(300+1.9,1.15,2.0)],look:[V(300+4,1.0,1.1),V(300+4,.9,1.1)],fov:[40,36]},
+];
+const sub=document.getElementById('sub'),t1=document.getElementById('t1');
+function seek(t){const s=SHOTS.find(x=>t>=x.t0&&t<x.t1)||SHOTS[SHOTS.length-1];const k=cl((t-s.t0)/(s.t1-s.t0),0,1),e=ease(k);
+ sc.fog=s.fog;CURT.visible=!!s.curt;MAN.visible=!!s.man;if(s.man)s.man(t-s.t0);
+ cam.position.lerpVectors(s.cam[0],s.cam[1],e);const lk=new THREE.Vector3().lerpVectors(s.look[0],s.look[1],e);cam.fov=lerp(s.fov[0],s.fov[1],e);
+ // ручная камера
+ const sh=s.dark?.012:.006;cam.position.x+=Math.sin(t*1.7)*sh*3+Math.sin(t*5.3)*sh;cam.position.y+=Math.sin(t*2.3)*sh*2;cam.updateProjectionMatrix();cam.lookAt(lk);
+ // интерьер: свет
+ const RD=ROOM.userData;RD.lamp.intensity=s.dark?0:6;RD.fire.intensity=3.5+Math.sin(t*13)*.6+Math.sin(t*7.1)*.5;RD.gapL.intensity=s.dark?8:0;RD.gap.visible=!!s.dark;hemi.intensity=s.room?.08:.55;moonL.intensity=s.room?0:1.1;
+ snow.visible=!s.room;if(!s.room)snowAt(t,cam.position);
+ t1.style.display=s.tx?'block':'none';if(s.tx)t1.textContent=s.tx;
+ comp.render();grain(t)}
+// зерно плёнки
+const gc=document.getElementById('grain'),gx=gc.getContext('2d'),gimg=gx.createImageData(540,960);
+function grain(t){let sd=Math.floor(t*30)*7919+1;const d=gimg.data;for(let i=0;i<d.length;i+=4){sd=(sd*16807)%2147483647;const v=(sd&255);d[i]=d[i+1]=d[i+2]=v;d[i+3]=255}gx.putImageData(gimg,0,0)}
+window.seek=seek;window.SHOTS=SHOTS;window.DUR=60;
+seek(0.5);window.READY=true;
+}catch(e){window.SCENE_ERR=e.stack||String(e);console.log('ERR',e)}
+</script></body></html>
