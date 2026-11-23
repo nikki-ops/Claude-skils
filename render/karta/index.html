@@ -1928,4 +1928,14 @@ try{// ===== ОБНОВЛЕНИЯ ДОМОВ (14.11) по комментария
  sw("Asder123w",()=>store3("SNOOP DOGG","#8a4ad8",8),"дом в стиле Snoop Dogg (обновлено 14.11)");
 })()}catch(e){console.warn("upd",e)}
 try{if(window.ZTOWER){ZTOWER.visible=true;ZTOWER.traverse(o=>o.visible=true)}}catch(e){}
+try{// ===== ТЕЛЕФОН: диета по памяти (iOS Safari закрывал вкладку после W14 + зоопарк) — только LITEMAP, ПК и ?video не трогаем =====
+if(LITEMAP)(function(){const GS=new Set(),TS=new Set();sc.traverse(o=>{if(o.isPoints||o.isInstancedMesh)return;if(o.geometry)GS.add(o.geometry);const ms=o.material?(Array.isArray(o.material)?o.material:[o.material]):[];ms.forEach(m=>{for(const k in m){const v=m[k];if(v&&v.isCanvasTexture)TS.add(v)}})});
+ // 1) цвета вершин → 1 байт, нормали → 1 байт (было 4+4): склеенные дома весят вдвое меньше
+ GS.forEach(g=>{const a=g.attributes;let ch=0;if(a.color&&a.color.array instanceof Float32Array){const f=a.color.array,u=new Uint8Array(f.length);for(let i=0;i<f.length;i++)u[i]=Math.round(Math.min(1,Math.max(0,f[i]))*255);g.setAttribute('color',new THREE.BufferAttribute(u,a.color.itemSize,true));ch=1}
+  if(a.normal&&a.normal.array instanceof Float32Array&&a.normal.count>64){const f=a.normal.array,u=new Int8Array(f.length);for(let i=0;i<f.length;i++)u[i]=Math.round(Math.min(1,Math.max(-1,f[i]))*127);g.setAttribute('normal',new THREE.BufferAttribute(u,3,true));ch=1}
+  if(g.attributes.uv&&g.attributes.color&&!g.index)g.deleteAttribute('uv');if(ch)g.dispose()});
+ // 2) таблички: вдвое меньше по ширине, без мипмапов, холст освобождаем после загрузки в видеокарту
+ TS.forEach(t=>{const im=t.image;if(!im||!im.getContext)return;let c=im;if(im.width>256){c=document.createElement('canvas');c.width=Math.round(im.width/2);c.height=Math.max(1,Math.round(im.height/2));c.getContext('2d').drawImage(im,0,0,c.width,c.height);im.width=im.height=1;t.image=c}
+  t.generateMipmaps=false;t.minFilter=THREE.LinearFilter;t.onUpdate=()=>{c.width=c.height=1};t.needsUpdate=true});
+})()}catch(e){console.warn("lite",e)}
 </script></body></html>
