@@ -9,7 +9,8 @@ body.rec,body.rec *{cursor:none!important}
 #world{position:absolute;inset:0;transform-origin:540px 960px}
 #blur{position:absolute;inset:0;display:none;transform-origin:540px 900px}
 .L{position:absolute;inset:0;pointer-events:none}
-#dim{background:rgba(12,10,24,.5);opacity:0}
+#dim{background:rgba(12,10,24,.28);opacity:0}
+#hring{position:absolute;transform:translate(-50%,-50%);border:10px solid #ff2d55;border-radius:50%;box-shadow:0 0 40px 12px rgba(255,45,85,.7);display:none;width:170px;height:170px}
 #night{background:radial-gradient(ellipse at 50% 40%,rgba(20,30,90,.45),rgba(6,10,40,.78));opacity:0}
 .nk{position:absolute;transform:translate(-50%,-100%);background:#fff6e2;color:#16120f;border-radius:16px;padding:4px 12px;text-align:center;line-height:1.05;box-shadow:0 4px 10px rgba(0,0,0,.35);white-space:nowrap;transform-origin:50% 100%}
 .nk.sec{background:#fff0a0;outline:8px solid #ffd23a;box-shadow:0 0 36px 16px rgba(255,210,58,.95)}
@@ -39,7 +40,7 @@ body.rec,body.rec *{cursor:none!important}
 #sub.up{top:250px;font-size:80px}
 #sub y{color:#ffd23a}#sub g{color:#5dff8a}
 /* телефон */
-#phone{position:absolute;left:230px;top:1920px;transform:scale(.86);transform-origin:50% 0;width:620px;height:1180px;border-radius:84px;background:#111;box-shadow:0 0 0 6px #3a3d4a,0 40px 80px rgba(0,0,0,.6);display:none}
+#phone{position:absolute;left:230px;top:1920px;transform:scale(.8);transform-origin:50% 0;width:620px;height:1180px;border-radius:84px;background:#111;box-shadow:0 0 0 6px #3a3d4a,0 40px 80px rgba(0,0,0,.6);display:none}
 #phone .scr{position:absolute;inset:18px;border-radius:68px;overflow:hidden;background:#0e1621;font-family:Rubik,Arial,sans-serif;font-weight:500;color:#fff}
 #phone .notch{position:absolute;left:50%;top:30px;width:170px;height:44px;margin-left:-85px;background:#000;border-radius:24px;z-index:3}
 .tgh{position:absolute;left:0;right:0;top:0;height:200px;background:#17212b;display:flex;align-items:flex-end;padding:0 26px 22px;box-sizing:border-box;gap:18px}
@@ -53,13 +54,13 @@ body.rec,body.rec *{cursor:none!important}
 .srch #q{color:#fff;font-weight:700}.srch .ph2{color:#7f91a4}.srch .car{width:4px;height:42px;background:#6ab3f3}
 #mini{display:block;width:100%;border-radius:20px}
 .post .pf{position:absolute;right:28px;bottom:16px;font-size:24px;color:#7f91a4}
-#cta{position:absolute;left:50%;top:1452px;transform:translateX(-50%);background:#ffd23a;color:#16120f;font-size:56px;padding:12px 40px;border-radius:30px;white-space:nowrap;box-shadow:0 8px 0 #b8891a;display:none}
+#cta{position:absolute;left:50%;top:1292px;transform:translateX(-50%);background:#ffd23a;color:#16120f;font-size:56px;padding:12px 40px;border-radius:30px;white-space:nowrap;box-shadow:0 8px 0 #b8891a;display:none}
 #hint{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,.75);color:#fff;font-size:56px;padding:30px 50px;border-radius:30px;text-align:center}
 #hint small{display:block;font-size:34px;color:#aaa;margin-top:10px}
 </style></head><body>
 <div id="stage">
  <div id="world"><iframe id="map" src="../../karta/index.html?video"></iframe><div class="L" id="night"></div><div class="L" id="dim"></div>
-  <div class="L" id="labs"></div><div class="L" id="dlabs"></div><div class="L" id="qs"></div></div>
+  <div class="L" id="labs"></div><div class="L" id="dlabs"></div><div class="L" id="qs"></div><div id="hring"></div></div>
  <canvas id="blur" width="1080" height="1920"></canvas>
  <div class="L"><div id="ring"></div><div id="tag">🔍 СЕКРЕТ</div></div><div id="arw"><b></b><i>⬇</i></div><div id="hero">ТЫ ТУТ! 👋</div>
  <div class="L" id="cards"></div>
@@ -198,10 +199,10 @@ function planDrone(){const RES_KEEP=RES;RES=RES.filter(h=>h.x>=-200&&h.x<=770&&h
    runs.forEach(([za,zb])=>{const key=SHOTS[ri%SHOTS.length],s=SHOT[key],G=GS[key];ri++;const m=(G.A+G.Bd)*.46,a=[cx,zb-G.Bd+m],b=[cx,za+G.A-m];const Lm=(G.A+G.Bd)*.55;if(a[1]-b[1]<Lm){const c=(a[1]+b[1])/2;a[1]=c+Lm/2;b[1]=c-Lm/2}/* одиночный дом — не проскочить */
     const D=G.A+G.Bd,zMax=zb-G.band,zMin=za+G.A-D*.14,/* нижний ряд — над субтитрами, верхний — у верхнего края */cl=zMax>=zMin?[zMin,zMax]:[(zMin+zMax)/2,(zMin+zMax)/2];/* край кадра не дальше 10% за последним рядом */
     const ca=[a[0],Math.max(cl[0],Math.min(cl[1],a[1]))],cb=[b[0],Math.max(cl[0],Math.min(cl[1],b[1]))];
-    if(prev){items.push({w:1,a:prev,b:ca,sa:prevS,sb:s});nW++}items.push({w:0,a,b,s,cl,len:Math.max(1,a[1]-b[1])});L+=Math.max(1,a[1]-b[1]);prev=cb;prevS=s})}
-  const v=L/Math.max(1,TS-nW*W_);let tt=0;items.forEach(it=>{it.d=it.w?W_:it.len/v;it.t0=tt;tt+=it.d});
+    if(prev){items.push({w:1,a:prev,b:ca,sa:prevS,sb:s});nW++}const it={w:0,a,b,s,cl,len:Math.max(1,a[1]-b[1])},K=40,cum=[0];let ws=0;for(let q=0;q<K;q++){const z=lerp(a[1],b[1],(q+.5)/K),nn=zs.filter(v=>v>=z-G.A&&v<=z+G.Bd).length;ws+=it.len/K*(.25+Math.min(1,nn/14));cum.push(ws)}it.cum=cum;it.wsum=ws;items.push(it);L+=ws;prev=cb;prevS=s})}
+  const v=L/Math.max(1,TS-nW*W_);let tt=0;items.forEach(it=>{it.d=it.w?W_:it.wsum/v;it.t0=tt;tt+=it.d});
   const sweep=s=>{s=Math.max(0,Math.min(tt-1e-6,s));const it=items.find(q=>s<q.t0+q.d)||items[items.length-1],u=(s-it.t0)/it.d;
-   return it.w?{x:lerp(it.a[0],it.b[0],ease(u)),z:lerp(it.a[1],it.b[1],ease(u)),w:u,sh:mixS(it.sa,it.sb,ease(u))}:{x:lerp(it.a[0],it.b[0],u),z:Math.max(it.cl[0],Math.min(it.cl[1],lerp(it.a[1],it.b[1],u))),w:-1,sh:it.s}};
+   return it.w?{x:lerp(it.a[0],it.b[0],ease(u)),z:lerp(it.a[1],it.b[1],ease(u)),w:u,sh:mixS(it.sa,it.sb,ease(u))}:(()=>{const c=it.cum,tw=u*it.wsum;let q=0;while(q<c.length-2&&c[q+1]<tw)q++;const f=(q+(tw-c[q])/Math.max(1e-9,c[q+1]-c[q]))/(c.length-1);return {x:it.a[0],z:Math.max(it.cl[0],Math.min(it.cl[1],lerp(it.a[1],it.b[1],f))),w:-1,sh:it.s}})()};
   const camAt=t=>{for(const q of Wn){if(t<q.ws||t>=q.wo)continue;const hm=sweep(sweepT(q.ws));
     if(q.k==='rise'){if(t<q.he){const u=(t-q.ws)/(q.he-q.ws);return {x:hm.x,z:hm.z-40*u,w:-1,sh:mixS(hm.sh,SHOT.R,ease(Math.min(1,u*1.5))),kind:'rise',q,ht:t-q.ws}}
      const u=(t-q.he)/W_;return {x:hm.x,z:hm.z-40,w:u,sh:mixS(SHOT.R,hm.sh,ease(u))}}
@@ -251,7 +252,7 @@ function layDrone(x,z,sh,sp,goldH,hero){setCam(x,z,sh.d,sh.p,sh.yaw);SPEC=null;S
 function flyDrone(t){const p=DR.camAt(t),sp=p.kind==='sp'?p.q.e:null,gold=p.kind==='gold'?p.q.h:null,hr=DR.heroes.find(q=>t>=q.t0&&t<q.t1);
  $('labs').style.display='none';$('dlabs').style.display='';layDrone(p.x,p.z,p.sh,sp,gold,hr?hr.h:null);cur='';
  // перелёт: смаз и пропадание подписей; подъём: подписи гаснут — видно весь город
- if(p.w>=0){const k=Math.sin(Math.PI*Math.min(1,p.w));$('world').style.filter=`blur(${(9*k).toFixed(1)}px)`;$('dlabs').style.opacity=1-k}
+ if(p.w>=0){const k=Math.sin(Math.PI*Math.min(1,p.w));$('world').style.filter=`blur(${(6*k).toFixed(1)}px)`;$('dlabs').style.opacity=1-k}
  else if(p.kind==='rise')$('dlabs').style.opacity=1-seg(p.ht,0,.35);else $('dlabs').style.opacity=1;
  let lo=0,hi=DR.FT.length;while(lo<hi){const m=(lo+hi)>>1;if(DR.FT[m]<=t)lo=m+1;else hi=m}
  const cn=$('cnt');cn.style.display='';const b=cn.querySelector('b'),v=lo.toLocaleString('ru');if(b.textContent!==v)b.textContent=v;
@@ -270,13 +271,12 @@ function blurShot(lv,key){if(BLV===key+lv||!MAPC)return;BLV=key+lv;const c=$('bl
 // ---------- мини-карта в телефоне ----------
 const mini=$('mini'),mx=mini.getContext('2d');let MB=null;
 let OV=null,CL=null,OVT=null;
-function prepMini(){if(!MAPC)return;const cx=(MB[0]+MB[1])/2,cz=(MB[2]+MB[3])/2;let d=700;
- for(let i=0;i<14;i++){camOnly(cx,cz,{d,p:1.5,yaw:0});const a=proj(MB[0],0,MB[2]),b=proj(MB[1],0,MB[3]);if(Math.min(a[0],b[0])>-10&&Math.max(a[0],b[0])<W+10)break;d*=1.08}
- setCam(cx,cz,d,1.5,0);const ov=document.createElement('canvas');ov.width=W;ov.height=1500;ov.getContext('2d').drawImage(MAPC,0,(H-1500)/2,W,1500,0,0,W,1500);const tp=proj(TARGET.x,0,TARGET.z);
- OV=ov;OVT=[tp[0],tp[1]-(H-1500)/2];
- setCam(TARGET.x,TARGET.z,95,1.45,0);const cl=document.createElement('canvas');cl.width=W;cl.height=1500;cl.getContext('2d').drawImage(MAPC,0,(H-1500)/2,W,1500,0,0,W,1500);CL=cl;cur=''}
+function prepMini(){if(!MAPC)return;const snap=(d,p)=>{setCam(TARGET.x,TARGET.z,d,p,0);const c=document.createElement('canvas');c.width=W;c.height=1500;const g=c.getContext('2d');g.filter='saturate(1.35) contrast(1.18) brightness(1.06)';g.drawImage(MAPC,0,(H-1500)/2,W,1500,0,0,W,1500);return c};
+ // карта района вокруг дома (чёткая, крупная) и крупный план дома; дом — в центре обоих снимков
+ OV=snap(330,1.5);CL=snap(105,1.42);OVT=[W/2,750];cur=''}
+let MINIT=0;
 function drawMini(z,tx,tz,pin){if(OV){const w=mini.width,h=mini.height,u=Math.min(1,(z-1)/7);mx.setTransform(1,0,0,1,0,0);mx.fillStyle='#d8673f';mx.fillRect(0,0,w,h);
-  const k=Math.pow(9,u),ox=lerp(w/2,OVT[0],u),oy=lerp(h/2,OVT[1],u);mx.setTransform(k,0,0,k,w/2-ox*k,h/2-oy*k);mx.drawImage(OV,0,0);mx.setTransform(1,0,0,1,0,0);
+  const k=Math.pow(3.1,u)*(1+.05*Math.min(1,z<=1?(MINIT||0):1)),ox=w/2,oy=h/2;mx.setTransform(k,0,0,k,w/2-ox*k,h/2-oy*k);mx.drawImage(OV,0,0);mx.setTransform(1,0,0,1,0,0);
   if(u>.7){mx.globalAlpha=seg(u,.7,1);mx.drawImage(CL,0,0);mx.globalAlpha=1}
   if(pin>0){const p=1+Math.sin(pin*12)*.06;mx.save();mx.translate(w/2,h/2-20);mx.scale(p,p);
    mx.fillStyle='rgba(255,210,58,.35)';mx.beginPath();mx.arc(0,0,90,0,7);mx.fill();
@@ -301,7 +301,7 @@ function mkCard(nick,text,big){const e=document.createElement('div');e.className
 let CARDS=[];function buildCards(){const box=$('cards');box.innerHTML='';CARDS=[];if(!IN)return;
  T13.cards.forEach((c,i)=>{const e=mkCard(c[1],c[2],true);box.appendChild(e);CARDS.push({e,t:c[0],x:540,y:i?1000:640,r:i?2.5:-2.5,big:1})});
  const RN=T13.rain,n=RN.length;RN.forEach((c,i)=>{const e=mkCard(c[0],c[1],false);box.appendChild(e);
-  const t=IN.rain0+(IN.rain1-IN.rain0-.25)*Math.pow(i/n,.8);CARDS.push({e,t,x:150+rnd(i+1)*780,y:330+rnd(i+50)*1000,r:(rnd(i+99)-.5)*18})});
+  const t=i<3?.9+i*.14:IN.rain0+(IN.rain1-IN.rain0-.25)*Math.pow((i-3)/(n-3),.8);CARDS.push({e,t,x:150+rnd(i+1)*780,y:330+rnd(i+50)*1000,r:(rnd(i+99)-.5)*18})});
  CARDS.forEach(c=>{const w=c.e.offsetWidth*(c.big?1:.9);c.x=Math.max(w/2+24,Math.min(W-w/2-24,c.x));c.e.style.left=c.x+'px';c.e.style.top=c.y+'px'})}
 // «?» над домами — «вы были правы, ников не было»
 function buildQs(){const box=$('qs');box.innerHTML='';QS=[];LABS.filter((l,i)=>i%2===0).slice(0,12).forEach((l,k)=>{const e=document.createElement('div');e.className='qm';e.textContent='?';e.style.left=l.X+'px';e.style.top=l.Y+'px';box.appendChild(e);QS.push({e,t:IN.empty0+.25+k*.17})})}
@@ -309,13 +309,14 @@ function buildConf(){const box=$('conf');box.innerHTML='';const C=['#ffd23a','#f
 // ---------- главный кадр: seek(t) детерминированно рисует момент t ----------
 let lastSub=-1;
 function setSub(t,P){let s='',si=-1,ts=0;SUBS.forEach((q,k)=>{if(q[0]<=t+1e-6){s=q[1];si=k;ts=q[0]}});const UP=P>=0&&P<PH.back0,S=$('sub');
- if(si!==lastSub){S.innerHTML=s;lastSub=si}S.classList.toggle('up',UP);S.style.top=UP?'190px':CFG.SUB_Y+'px';$('bot').style.top=(CFG.SUB_Y-40)+'px';
+ if(si!==lastSub){S.innerHTML=s;lastSub=si}S.classList.toggle('up',UP);S.style.top=UP?'175px':CFG.SUB_Y+'px';$('bot').style.top=(CFG.SUB_Y-40)+'px';
  const k=si<0?1:.82+.18*Math.min(1.1,pop(t,ts,.18));S.style.transform=`scale(${k})`}
-function hideAll(){$('dlabs').style.display='none';$('hero').style.display='none';$('dim').style.opacity=0;$('world').style.filter='';['tag','ring','arw','big','phone','cta','blur'].forEach(id=>$(id).style.display='none');$('cards').style.display='none';$('qs').style.display='none';$('conf').style.display='none';
+function hideAll(){$('hring').style.display='none';$('dlabs').style.display='none';$('hero').style.display='none';$('dim').style.opacity=0;$('world').style.filter='';['tag','ring','arw','big','phone','cta','blur'].forEach(id=>$(id).style.display='none');$('cards').style.display='none';$('qs').style.display='none';$('conf').style.display='none';
  $('night').style.opacity=0;$('world').style.transform='';$('map').style.visibility='';$('labs').style.visibility='';$('labs').style.opacity=1;$('cnt').style.transform='translateX(-50%)'}
 function intro(t){const I=IN;$('labs').style.display='';layFrame(IF,null,'IF');
  // A. комментарии на размытом городе
- if(t<I.empty0){$('labs').style.visibility='hidden';$('cnt').style.display='none';$('dim').style.opacity=1;$('world').style.transformOrigin='540px 900px';$('world').style.transform=`scale(${1+.05*ease(t/I.empty0)})`;
+ if(t<I.empty0){$('labs').style.visibility='hidden';$('cnt').style.display='none';$('dim').style.opacity=1;const HP=IF.hp||{x:540,y:900};$('world').style.transformOrigin=HP.x+'px '+HP.y+'px';$('world').style.transform=`scale(${1+.14*eout(Math.min(1,t/2.9))+.03*seg(t,2.9,I.empty0)})`;
+  const hr=$('hring');if(t<2.9){hr.style.display='block';hr.style.left=HP.x+'px';hr.style.top=HP.y+'px';hr.style.transform=`translate(-50%,-50%) scale(${pop(t,.1,.3)*(1+.12*Math.sin(t*9))})`}
   const C=$('cards');C.style.display='';const away=ease(seg(t,I.rain1,I.empty0));
   CARDS.forEach((c,i)=>{const p=pop(t,c.t,c.big?.26:.16);c.e.style.display=p>0?'flex':'none';if(p<=0)return;
    const dy=-260*away*(1+rnd(i+7)),dx=(rnd(i+3)-.5)*300*away;c.e.style.opacity=1-away;
@@ -352,10 +353,10 @@ function phone(t,P){const u=ease(seg(P,PH.back0,PH.back1));$('cnt').style.displa
  // фон: размытый последний кадр пролёта; к петле — размытый вступительный город (как в начале ролика)
  if(u>0){layFrame(IF,null,'IF');$('dim').style.opacity=u}else{const lv=Math.max(1/8,Math.round(ease(seg(P,0,.6))*8)/8);if(CFG.DRONE&&DR&&BLV.indexOf('D')!==0){const q=DR.camAt(FLY()-.01);setCam(q.x,q.z,q.sh.d,q.sh.p,q.sh.yaw)}blurShot(lv,CFG.DRONE&&DR?'D':'L'+cur)}
  const B=$('blur');B.style.display=u>=1?'none':'block';B.style.opacity=1-u;B.style.transform='';$('map').style.visibility=u>0?'':'hidden';$('labs').style.visibility='hidden';
- const ph=$('phone');ph.style.display=u>=1?'none':'block';ph.style.top=(1920-(1920-400)*ease(seg(P,0,.8))*(1-u))+'px';
+ const ph=$('phone');ph.style.display=u>=1?'none':'block';ph.style.top=(1920-(1920-330)*ease(seg(P,0,.8))*(1-u))+'px';
  const nick='@'+TARGET.n,k=Math.floor(nick.length*seg(P,PH.type0,PH.type1));$('q').textContent=nick.slice(0,k);$('qph').style.display=k?'none':'';
  ph.querySelector('.car').style.opacity=Math.floor(P*3)%2?0:1;
- const zz=ease(seg(P,PH.zoom0,PH.zoom1));drawMini(1+zz*7,MB[4]+(TARGET.x-MB[4])*zz,MB[5]+(TARGET.z-MB[5])*zz,P>PH.pin?P-PH.pin:0);
+ MINIT=seg(P,.6,PH.zoom0);const zz=ease(seg(P,PH.zoom0,PH.zoom1));drawMini(1+zz*7,MB[4]+(TARGET.x-MB[4])*zz,MB[5]+(TARGET.z-MB[5])*zz,P>PH.pin?P-PH.pin:0);
  const c=seg(P,PH.cta,PH.cta+.5)*(1-u);$('cta').style.display=c>0?'block':'none';$('cta').style.opacity=c;$('cta').style.transform=`translateX(-50%) translateY(${(1-c)*40+Math.sin(P*6)*6}px)`}
 function seek(t){const P=t-FLY();hideAll();setSub(t,P);
  if(IN&&t<FS)intro(t);else if(P<0)fly(t);else phone(t,P)}
@@ -383,7 +384,7 @@ $('map').addEventListener('load',()=>{cw=$('map').contentWindow;const iv=setInte
  if(COVER.missing.length)console.warn('не попали:',COVER.missing);
  let x0=1e9,x1=-1e9,z0=1e9,z1=-1e9;RES.forEach(h=>{x0=Math.min(x0,h.x);x1=Math.max(x1,h.x);z0=Math.min(z0,h.z);z1=Math.max(z1,h.z)});MB=[x0,x1,z0,z1,(x0+x1)/2,(z0+z1)/2];
  const ok=RES.filter(h=>/^[A-Za-zА-Яа-яЁё0-9_.\-]{5,13}$/.test(h.n));let r=CFG.SEED*9301+49297;TARGET=ok[(r%233280+233280)%ok.length];
- prepMini();if(IN){layFrame(IF,null,'IF');buildQs();buildCards();buildConf()}
+ prepMini();if(IN){layFrame(IF,null,'IF');const hl=LABS.slice().sort((a,b)=>Math.hypot(a.X-540,a.Y-860)-Math.hypot(b.X-540,b.Y-860))[0];if(hl)IF.hp={x:hl.X,y:hl.Y+40};buildQs();buildCards();buildConf()}
  if(!(CFG.DRONE&&DR)){const gk=SCHED.findIndex(s=>s.gold);if(gk>=0){showFrame(gk);COVER.gold=SCHED[gk].goldName||null}}// имя золотого дома — ответ для приза
  seek(0);$('hint').innerHTML='Нажми <b style="color:#ffd23a">R</b> — запись Shorts<small>'+COVER.total+' ников · все в кадре · '+DUR().toFixed(1)+' с</small>';
  if(document.body.classList.contains('render'))$('hint').style.display='none';window.DUR=DUR();window.READY=true}catch(e){console.error('сцена:',e);$('hint').textContent='Ошибка: '+e.message;window.SCENE_ERR=e.message+' '+(e.stack||'').split('\n')[1]}},200)});
