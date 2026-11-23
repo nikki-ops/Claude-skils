@@ -1,0 +1,175 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><title>Все ники — шортс</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@500;700;900&display=swap" rel="stylesheet">
+<style>
+html,body{margin:0;height:100%;background:#000;overflow:hidden}
+body.rec,body.rec *{cursor:none!important}
+#stage{position:absolute;left:0;top:0;width:1080px;height:1920px;transform-origin:0 0;overflow:hidden;background:#0b0d1a;font-family:Rubik,'Arial Black',Arial,sans-serif;font-weight:900}
+#map{position:absolute;left:0;top:0;width:1080px;height:1920px;border:0;background:#0b0d1a}
+.L{position:absolute;inset:0;pointer-events:none}
+.nk{position:absolute;transform:translate(-50%,-100%);background:#fff6e2;color:#16120f;border-radius:16px;padding:4px 12px;text-align:center;line-height:1.05;box-shadow:0 4px 10px rgba(0,0,0,.35);white-space:nowrap}
+.nk.sec{background:#fff0a0;outline:8px solid #ffd23a;box-shadow:0 0 36px 16px rgba(255,210,58,.95)}
+#tag{position:absolute;transform:translate(-50%,-100%);background:#d8202a;color:#fff;font-size:46px;padding:4px 24px;border-radius:18px;border:5px solid #ffd23a;white-space:nowrap;display:none}
+#ring{position:absolute;transform:translate(-50%,-50%);border:9px solid #ffd23a;border-radius:50%;box-shadow:0 0 40px 10px rgba(255,210,58,.8),inset 0 0 30px rgba(255,210,58,.6);display:none}
+#top{position:absolute;left:0;right:0;top:0;height:120px;background:linear-gradient(rgba(11,13,26,.55),rgba(11,13,26,0))}
+#bot{position:absolute;left:0;right:0;top:0;height:250px;background:linear-gradient(rgba(11,13,26,0),rgba(11,13,26,.78) 22%,rgba(11,13,26,.78) 78%,rgba(11,13,26,0))}
+#cnt{position:absolute;left:50%;top:60px;box-shadow:0 8px 24px rgba(0,0,0,.45);transform:translateX(-50%);background:#1a1d36;border:6px solid #f7c24a;border-radius:44px;color:#fff;font-size:54px;padding:8px 40px;white-space:nowrap}
+#cnt b{color:#f7c24a}
+#sub{position:absolute;left:4%;right:4%;top:0;text-align:center;color:#fff;font-size:84px;line-height:1.05;-webkit-text-stroke:15px #000;paint-order:stroke fill;letter-spacing:.5px}
+#sub.up{top:250px;font-size:80px}
+#sub y{color:#ffd23a}#sub g{color:#5dff8a}
+/* телефон */
+#phone{position:absolute;left:230px;top:1920px;width:620px;height:1180px;border-radius:84px;background:#111;box-shadow:0 0 0 6px #3a3d4a,0 40px 80px rgba(0,0,0,.6);display:none}
+#phone .scr{position:absolute;inset:18px;border-radius:68px;overflow:hidden;background:#0e1621;font-family:Rubik,Arial,sans-serif;font-weight:500;color:#fff}
+#phone .notch{position:absolute;left:50%;top:30px;width:170px;height:44px;margin-left:-85px;background:#000;border-radius:24px;z-index:3}
+.tgh{position:absolute;left:0;right:0;top:0;height:200px;background:#17212b;display:flex;align-items:flex-end;padding:0 26px 22px;box-sizing:border-box;gap:18px}
+.tgh .bk{font-size:46px;color:#6ab3f3;font-weight:700}
+.tgh .av{width:86px;height:86px;border-radius:50%;background:linear-gradient(135deg,#f7a23a,#e8503a);display:flex;align-items:center;justify-content:center;font-size:50px;flex:none}
+.tgh .tt{flex:1;min-width:0}.tgh .tt b{display:block;font-size:36px;font-weight:700}.tgh .tt small{font-size:26px;color:#7f91a4}
+.tgh svg{flex:none}
+.post{position:absolute;left:24px;right:24px;top:228px;bottom:34px;background:#182533;border-radius:30px;padding:22px;box-sizing:border-box}
+.post .ph{font-size:30px;font-weight:700;margin-bottom:14px}.post .ph i{font-style:normal;color:#6ab3f3}
+.srch{height:78px;border-radius:40px;background:#242f3d;display:flex;align-items:center;padding:0 26px;font-size:36px;gap:14px;margin-bottom:16px}
+.srch #q{color:#fff;font-weight:700}.srch .ph2{color:#7f91a4}.srch .car{width:4px;height:42px;background:#6ab3f3}
+#mini{display:block;width:100%;border-radius:20px}
+.post .pf{position:absolute;right:28px;bottom:16px;font-size:24px;color:#7f91a4}
+#cta{position:absolute;left:50%;top:1678px;transform:translateX(-50%);background:#ffd23a;color:#16120f;font-size:56px;padding:12px 40px;border-radius:30px;white-space:nowrap;box-shadow:0 8px 0 #b8891a;display:none}
+#hint{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,.75);color:#fff;font-size:56px;padding:30px 50px;border-radius:30px;text-align:center}
+#hint small{display:block;font-size:34px;color:#aaa;margin-top:10px}
+</style></head><body>
+<div id="stage">
+ <iframe id="map" src="../../karta/index.html?video"></iframe>
+ <div class="L" id="labs"></div><div class="L"><div id="ring"></div><div id="tag">🔍 СЕКРЕТ</div></div>
+ <div id="top"></div><div id="bot"></div>
+ <div id="cnt">Жителей: <b>0</b> / 1 434</div>
+ <div id="phone"><div class="notch"></div><div class="scr">
+  <div class="tgh"><span class="bk">‹</span><div class="av">🐱</div><div class="tt"><b>Город подписчиков</b><small>канал · карта Марса</small></div>
+   <svg width="64" height="64" viewBox="0 0 64 64"><circle cx="32" cy="32" r="32" fill="#2aabee"/><path d="M14 31.5 46 19c1.6-.6 3 .4 2.5 2.7l-5.4 25.5c-.4 1.8-1.5 2.3-3 1.4l-8.3-6.1-4 3.9c-.4.4-.8.8-1.7.8l.6-8.5 15.4-13.9c.7-.6-.1-.9-1-.3l-19 12-8.2-2.6c-1.8-.5-1.8-1.8.2-2.4z" fill="#fff"/></svg></div>
+  <div class="post"><div class="ph">🗺 Карта города · <i>1 434 дома</i></div>
+   <div class="srch"><span>🔍</span><span id="q"></span><span class="car"></span><span class="ph2" id="qph">найди свой дом по нику</span></div>
+   <canvas id="mini" width="1080" height="1500"></canvas><div class="pf">👁 12,4K · 10:42</div></div>
+ </div></div>
+ <div id="cta">Ссылка в шапке профиля 👇</div>
+ <div id="sub"></div>
+ <div id="hint">Загружаем карту…<small></small></div>
+</div>
+<script>
+// ======================================================================
+// Шортс «ВСЕ НИКИ»: пролёт по ВСЕМ домам кадрами по 0.6 с → телефон с Telegram.
+// Карта — render/karta/index.html (не меняется, открывается внутри iframe).
+// Запуск в браузере: открыть через локальный сервер и нажать R (рендер в mp4 — video.mjs).
+// ======================================================================
+const CFG={
+ FLY_SEC:6,        // КОНФИГ: поменять 6 сек на 50 сек для финального ролика (FLY_SEC:50). Все ники помещаются в COVER.frames*0.6 с — см. консоль/таймкоды
+ FRAME:0.6,        // длина кадра пролёта, с
+ PHONE_SEC:8,      // финал с телефоном, с (последние LOOP_SEC — возврат к первому кадру)
+ LOOP_SEC:0.6,     // петля: телефон уезжает, город с никами возвращается — последний кадр = первый
+ SECRET_FRAME:5,   // на каком кадре пасхалка «СЕКРЕТ» (с 1)
+ SEED:13,          // какой ник «печатается» в поиске телефона
+ SUB_Y:1375,       // верх строки субтитров, px из 1920 (ниже ~1560 их закрывает подпись ролика Shorts)
+ VIEW:{d:150,p:1.15,yaw:0}, // камера: дальность, наклон, поворот (0 = улицы ровно)
+};
+const W=1080,H=1920,ST=document.getElementById('stage'),$=id=>document.getElementById(id);
+const ease=u=>u<=0?0:u>=1?1:u*u*(3-2*u),seg=(t,a,b)=>Math.max(0,Math.min(1,(t-a)/(b-a)));
+const FLY=()=>CFG.FLY_SEC,DUR=()=>CFG.FLY_SEC+CFG.PHONE_SEC;
+// ---------- субтитры: по 2–4 слова, <y>жёлтый</y>, <g>зелёный</g> ----------
+function subs(){const F=FLY(),S=[
+ [0.0,'Вы спрашивали...'],[0.8,'почему <y>вас нет?</y>'],[1.6,'Вот <y>ВСЕ 1 434!</y>'],
+ [(CFG.SECRET_FRAME-1)*CFG.FRAME,'Смотри — <y>СЕКРЕТ!</y>'],[(CFG.SECRET_FRAME-1)*CFG.FRAME+0.8,'Лови свой <y>ник</y>'],[(CFG.SECRET_FRAME-1)*CFG.FRAME+1.6,'на <g>ПАУЗЕ!</g>']];
+ if(F>=20){// длинная версия: крючки каждые ~6 с
+  const mid=['Твой дом <y>точно здесь</y>','Видишь себя? Пиши <g>«НАШЁЛ»</g>','Не моргай... <g>пауза!</g>','Скинь <g>другу</g> — пусть найдёт себя','Ищи <y>свой ник</y>...','Нашёл друга? <g>Отметь</g> его!','Почти <y>все</y> на месте...','Ещё чуть-чуть...'];
+  let t=6;mid.forEach(m=>{if(t<F-2.6){S.push([t,m]);t+=Math.max(4,(F-8)/mid.length)}})}
+ S.push([F-1.4,'Нашёл? Пиши <g>«НАШЁЛ»!</g>'],[F,'Не успел <y>поймать?</y>'],[F+1.2,'Залетай в наш <g>ТГ</g>'],[F+2.4,'ссылка <y>в шапке</y> профиля'],
+  [F+3.8,'вбей <y>ник</y> —'],[F+4.8,'и карта найдёт <y>твой дом!</y>'],[F+6.2,'Тут <y>ВСЕ!</y>'],[F+CFG.PHONE_SEC-CFG.LOOP_SEC,'Ведь...']);// петля: «...ведь» → «Вы спрашивали...»
+ return S.sort((a,b)=>a[0]-b[0])}
+let SUBS=subs();
+function place(){const B=document.getElementById('bot'),S=document.getElementById('sub');B.style.top=(CFG.SUB_Y-40)+'px';S.style.top=CFG.SUB_Y+'px'}
+// ---------- карта в iframe ----------
+let cw,MP,THREE,cam,RES=[],FR=[],COVER=null,SECRET=null,TARGET=null,cur=-1;
+function frameStyles(){const d=cw.document,s=d.createElement('style');
+ s.textContent='#st .bub,#st .pn{display:none!important} body>*:not(#st){display:none!important} #st>*:not(canvas){display:none!important}';d.head.appendChild(s);MP.setAll(false)}
+function proj(x,y,z){const v=new THREE.Vector3(x,y,z).project(cam);return [(v.x*.5+.5)*W,(-v.y*.5+.5)*H,v.z]}
+const lab=h=>Math.min((h.top||6)+.8,18);
+// дом подписан в кадре, если его основание в окне карты (между плашками) и подпись не за краем
+const BAND=()=>[CFG.SUB_Y+20,CFG.SUB_Y+170];// плотная часть полосы — дома под ней не видны
+const INWIN=(bx,by)=>{const B=BAND();return bx>=12&&bx<=1068&&by>=20&&by<=1900&&!(by>B[0]&&by<B[1])};
+function labY(x,y,by){const B=BAND();if(by>=B[1])return Math.max(B[1]+50,y);y=Math.min(y,B[0]-6);return Math.max(x>170&&x<910?222:62,y)}
+function setCam(x,z){Object.assign(MP.K,{tx:x,tz:z,d:CFG.VIEW.d,yaw:CFG.VIEW.yaw,p:CFG.VIEW.p});MP.draw()}
+function cover(){// жадное покрытие: минимум кадров, чтобы КАЖДЫЙ ник был подписан хотя бы в одном кадре
+ const c0=RES[0];setCam(c0.x,c0.z);
+ let x0=1e9,x1=-1e9,z0=1e9,z1=-1e9;RES.forEach(h=>{x0=Math.min(x0,h.x);x1=Math.max(x1,h.x);z0=Math.min(z0,h.z);z1=Math.max(z1,h.z)});
+ const C=[];for(let cx=x0-40;cx<=x1+40;cx+=16)for(let cz=z0-60;cz<=z1+60;cz+=16){const S=[];
+  RES.forEach((h,i)=>{if(Math.abs(h.x-cx)>140||Math.abs(h.z-cz)>200)return;const b=proj(h.x-cx+c0.x,0,h.z-cz+c0.z);if(INWIN(b[0],b[1]))S.push(i)});if(S.length)C.push({cx,cz,S})}
+ const left=new Set(RES.map((_,i)=>i)),pick=[];
+ while(left.size){let best=null,bn=0;for(const c of C){let n=0;for(const i of c.S)if(left.has(i))n++;if(n>bn||(n===bn&&best&&c.S.length>best.S.length)){bn=n;best=c}}if(!best)break;best.S.forEach(i=>left.delete(i));pick.push(best)}
+ // порядок: от самого плотного, дальше — ближайший сосед (жёсткие склейки, но район меняется плавно)
+ // первый кадр (хук) — обычный жилой квартал: много низких домов, без высоток и башни
+ const flat=c=>c.S.reduce((a,i)=>a+((RES[i].top||6)<10&&!RES[i].hid?1:-3),0);pick.sort((a,b)=>flat(b)-flat(a));const ord=[pick.shift()];while(pick.length){const l=ord[ord.length-1];let k=0,bd=1e9;pick.forEach((p,i)=>{const d=Math.hypot(p.cx-l.cx,p.cz-l.cz);if(d<bd){bd=d;k=i}});ord.push(pick.splice(k,1)[0])}
+ const seen=new Set(),tc={};ord.forEach((f,i)=>{f.cum=0;f.S.forEach(j=>{if(!seen.has(j)){seen.add(j);tc[RES[j].n]=+(i*CFG.FRAME).toFixed(1)}});f.cum=seen.size});
+ return {frames:ord.length,total:RES.length,covered:seen.size,missing:RES.filter((_,i)=>!seen.has(i)).map(h=>h.n),order:ord,timecodes:tc}}
+function fitFont(t,cx){const MW=158;let f=32;for(;f>=21;f--){cx.font='900 '+f+'px Rubik,Arial Black';if(cx.measureText(t).width<=MW)break}return f}
+const MC=document.createElement('canvas').getContext('2d');
+function showFrame(i){if(i===cur)return;cur=i;const f=FR[i%FR.length];setCam(f.cx,f.cz);
+ const box=$('labs');box.innerHTML='';const vis=[];
+ RES.forEach(h=>{if(Math.abs(h.x-f.cx)>140||Math.abs(h.z-f.cz)>200)return;const b=proj(h.x,0,h.z);if(!INWIN(b[0],b[1])||b[2]>1)return;const p=proj(h.x,lab(h),h.z);vis.push([h,p[0],labY(p[0],p[1],b[1]),b])});
+ // жители, чьи дома стоят в основании Золотой башни, — столбиком на башне
+ const tw=vis.filter(v=>v[0].hid);if(tw.length){const ax=tw.reduce((a,v)=>a+v[3][0],0)/tw.length,ay=Math.min(...tw.map(v=>v[3][1]));tw.sort((a,b)=>a[0].n.localeCompare(b[0].n));tw.forEach((v,k)=>{v[1]=ax;v[2]=labY(ax,ay-10-k*46,ay)})}
+ let sec=null;if(i===CFG.SECRET_FRAME-1){vis.slice().sort((a,b)=>Math.hypot(a[1]-540,a[2]-800)-Math.hypot(b[1]-540,b[2]-800)).some(v=>{if(!/UTOPAN/i.test(v[0].n)){sec=v;return true}})}
+ SECRET=null;const placed=[];vis.sort((a,b)=>a[2]-b[2]);vis.forEach(v=>{const [h,x,y]=v,e=document.createElement('div'),t='@'+h.n;let fs=fitFont(t,MC);
+  if(fs<21){fs=22;const k=Math.ceil(t.length/2);e.append(t.slice(0,k),document.createElement('br'),t.slice(k))}else e.textContent=t;
+  e.className='nk'+(sec&&sec===v?' sec':'');e.style.fontSize=fs+'px';const X=Math.max(90,Math.min(990,x));e.style.left=X+'px';e.style.top=y+'px';box.appendChild(e);
+  // раздвижка: подпись не должна налезать на уже поставленные (сдвиг вниз/вверх на свою высоту)
+  const w=e.offsetWidth,hh=e.offsetHeight,B=BAND(),hit=Y=>placed.some(r=>X-w/2<r[2]+4&&X+w/2>r[0]-4&&Y-hh<r[3]+3&&Y>r[1]-3),okY=Y=>Y-hh>=8&&Y<=1912&&!(Y>B[0]-4&&Y-hh<B[1]+46)&&!(X+w/2>170&&X-w/2<910&&Y-hh<170);
+  let Y=y;for(const k of [0,1,-1,2,-2,3,-3]){const t=y+k*(hh+5);if(okY(t)&&!hit(t)){Y=t;break}}e.style.top=Y+'px';placed.push([X-w/2,Y-hh,X+w/2,Y]);if(sec===v)SECRET={e,b:v[3]}});
+ $('cnt').querySelector('b').textContent=(i>=FR.length?COVER.total:f.cum).toLocaleString('ru')}// после полного круга счётчик остаётся на 1 434
+// ---------- мини-карта в телефоне ----------
+const mini=$('mini'),mx=mini.getContext('2d');let MB=null;
+function drawMini(z,tx,tz,pin){const w=mini.width,h=mini.height;mx.setTransform(1,0,0,1,0,0);mx.fillStyle='#d8673f';mx.fillRect(0,0,w,h);
+ const s=Math.min(w/(MB[1]-MB[0]+60),h/(MB[3]-MB[2]+60))*z;mx.setTransform(s,0,0,s,w/2-tx*s,h/2-tz*s);
+ mx.fillStyle='#6b625c';for(let i=0;i<=16;i++)mx.fillRect(-194+60*i-8,-416,7,712);for(let j=0;j<=15;j++)mx.fillRect(-194,-416+48*j-8,960,7);
+ RES.forEach(o=>{mx.fillStyle=o===TARGET?'#ffd23a':o.district==='Район TikTok'?'#5fe0ff':o.district==='Новостройки'?'#f4f4f4':'#fff0d8';mx.fillRect(o.x-3.6,o.z-3.6,7.2,7.2)});
+ if(pin>0){const X=TARGET.x,Z=TARGET.z,k=1/s;mx.save();mx.translate(X,Z);mx.scale(k,k);const p=1+Math.sin(pin*12)*.06;mx.scale(p,p);
+  mx.fillStyle='rgba(255,210,58,.35)';mx.beginPath();mx.arc(0,0,70,0,7);mx.fill();
+  mx.fillStyle='#e8283a';mx.beginPath();mx.moveTo(0,0);mx.bezierCurveTo(-46,-60,-46,-120,0,-130);mx.bezierCurveTo(46,-120,46,-60,0,0);mx.fill();mx.fillStyle='#fff';mx.beginPath();mx.arc(0,-90,18,0,7);mx.fill();
+  mx.scale(1.8,1.8);mx.font='900 50px Rubik,Arial Black';mx.textAlign='center';const t1='Твой дом найден!',t2='@'+TARGET.n,ww=Math.max(mx.measureText(t1).width,mx.measureText(t2).width)+60;
+  mx.fillStyle='#ffd23a';mx.beginPath();mx.roundRect(-ww/2,-290,ww,140,30);mx.fill();mx.fillStyle='#16120f';mx.fillText(t1,0,-232);mx.font='900 44px Rubik,Arial Black';mx.fillText(t2,0,-176);mx.restore()}}
+// ---------- главный кадр: seek(t) детерминированно рисует момент t ----------
+function seek(t){const F=FLY(),P=t-F;
+ // субтитры
+ let s='';for(const q of SUBS)if(q[0]<=t+1e-6)s=q[1];const UP=P>=0&&P<CFG.PHONE_SEC-CFG.LOOP_SEC;$('sub').innerHTML=s;$('sub').classList.toggle('up',UP);$('sub').style.top=UP?'250px':CFG.SUB_Y+'px';$('bot').style.top=(CFG.SUB_Y-40)+'px';
+ if(P<0){// пролёт
+  $('map').style.filter='';$('phone').style.display='none';$('cta').style.display='none';['labs','cnt','top','bot'].forEach(id=>{$(id).style.display='';$(id).style.opacity=1});
+  showFrame(Math.floor(t/CFG.FRAME+1e-6));
+  const on=SECRET&&Math.floor(t*5)%2===0;$('tag').style.display=SECRET?'block':'none';$('ring').style.display=SECRET?'block':'none';
+  if(SECRET){const r=SECRET.e.getBoundingClientRect(),sr=ST.getBoundingClientRect(),k=sr.width/W;$('tag').style.left=((r.left-sr.left)/k+r.width/k/2)+'px';$('tag').style.top=((r.top-sr.top)/k-14)+'px';$('tag').style.opacity=on?1:.25;
+   const R=150;Object.assign($('ring').style,{left:SECRET.b[0]+'px',top:(SECRET.b[1]-30)+'px',width:R+'px',height:R+'px',opacity:on?1:.45})}
+ }else{// финал: блюр, телефон, Telegram, поиск ника, пин; в конце — возврат к кадру 1 (петля)
+  const LP=CFG.PHONE_SEC-CFG.LOOP_SEC,u=ease(seg(P,LP,CFG.PHONE_SEC));
+  $('tag').style.display='none';$('ring').style.display='none';
+  if(u>0){showFrame(0);['labs','cnt','bot'].forEach(id=>{$(id).style.display='';$(id).style.opacity=u})}else{['labs','cnt','bot'].forEach(id=>{$(id).style.display='none';$(id).style.opacity=1})}
+  const b=ease(seg(P,0,.6))*(1-u);$('map').style.filter=b>0.001?`blur(${10*b}px) brightness(${1-.5*b})`:'';
+  const ph=$('phone');ph.style.display=u>=1?'none':'block';ph.style.top=(1920-(1920-470)*ease(seg(P,0,.8))*(1-u))+'px';
+  const nick='@'+TARGET.n,k=Math.floor(nick.length*seg(P,1.2,3.0));$('q').textContent=nick.slice(0,k);$('qph').style.display=k?'none':'';
+  $('phone').querySelector('.car').style.opacity=Math.floor(P*3)%2?0:1;
+  const zz=ease(seg(P,3.2,4.2));drawMini(1+zz*7,MB[4]+(TARGET.x-MB[4])*zz,MB[5]+(TARGET.z-MB[5])*zz,P>4.2?P-4.2:0);
+  const c=seg(P,2.4,2.9)*(1-u);$('cta').style.display=c>0?'block':'none';$('cta').style.opacity=c;$('cta').style.transform=`translateX(-50%) translateY(${(1-c)*40+Math.sin(P*6)*6}px)`}}
+// ---------- загрузка ----------
+function fit(){if(document.body.classList.contains('render'))return;const k=Math.min(innerWidth/W,innerHeight/H);ST.style.transform=`scale(${k})`;ST.style.left=(innerWidth-W*k)/2+'px'}
+addEventListener('resize',fit);fit();
+if(/[?&]render/.test(location.search)){document.body.classList.add('render');ST.style.transform='none'}
+$('map').addEventListener('load',()=>{cw=$('map').contentWindow;const iv=setInterval(()=>{if(!cw.MP)return;clearInterval(iv);
+ try{MP=cw.MP;THREE=cw.THREE;cam=cw.eval('cam');frameStyles();
+ RES=MP.L.filter(h=>!h.site&&!h.bld&&!h.anon&&h.n&&h.g);
+ COVER=cover();FR=COVER.order;window.COVER=COVER;
+ console.log(`[все ники] жителей с ником: ${COVER.total}, покрыто: ${COVER.covered}, кадров: ${COVER.frames} = ${(COVER.frames*CFG.FRAME).toFixed(1)} с пролёта`);
+ if(COVER.missing.length)console.warn('не попали:',COVER.missing);
+ let x0=1e9,x1=-1e9,z0=1e9,z1=-1e9;RES.forEach(h=>{x0=Math.min(x0,h.x);x1=Math.max(x1,h.x);z0=Math.min(z0,h.z);z1=Math.max(z1,h.z)});MB=[x0,x1,z0,z1,(x0+x1)/2,(z0+z1)/2];
+ const ok=RES.filter(h=>/^[A-Za-zА-Яа-яЁё0-9_.\-]{5,13}$/.test(h.n));let r=CFG.SEED*9301+49297;TARGET=ok[(r%233280+233280)%ok.length];
+ seek(0);$('hint').innerHTML='Нажми <b style="color:#ffd23a">R</b> — запись Shorts<small>'+COVER.total+' ников · '+COVER.frames+' кадров для всех · демо '+CFG.FLY_SEC+' с + телефон '+CFG.PHONE_SEC+' с</small>';
+ if(document.body.classList.contains('render'))$('hint').style.display='none';window.DUR=DUR();window.READY=true}catch(e){console.error('сцена:',e);$('hint').textContent='Ошибка: '+e.message;window.SCENE_ERR=e.message}},200)});
+// ---------- режим записи: R ----------
+let play=null;function start(){$('hint').style.display='none';document.body.classList.add('rec');cur=-1;const t0=performance.now();
+ if(play)cancelAnimationFrame(play);const loop=()=>{const t=(performance.now()-t0)/1000;if(t>DUR()){seek(DUR()-.01);document.body.classList.remove('rec');play=null;return}seek(t);play=requestAnimationFrame(loop)};loop()}
+addEventListener('keydown',e=>{if(window.READY&&/^(r|к)$/i.test(e.key))start()});
+window.seek=seek;window.CFG=CFG;
+</script></body></html>
