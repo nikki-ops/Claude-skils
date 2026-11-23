@@ -19,7 +19,7 @@ p.on('pageerror',e=>console.log('Ошибка:',e.message));
 if(THREE_LOCAL)await p.route(/three\.min\.js/,r=>r.fulfill({path:THREE_LOCAL,contentType:'text/javascript'}));
 await p.goto(`http://127.0.0.1:${srv.address().port}/render/seriya/13-vse-niki/scene.html?render`);
 await p.waitForFunction(()=>window.READY||window.SCENE_ERR,null,{timeout:600000});const ERR=await p.evaluate(()=>window.SCENE_ERR);if(ERR){console.log('Сцена не запустилась:',ERR);await b.close();srv.close();process.exit(1)}
-if(FLY)await p.evaluate(f=>{CFG.FLY_SEC=+f;window.DUR=CFG.FLY_SEC+CFG.PHONE_SEC},FLY);
+if(FLY)await p.evaluate(f=>{CFG.FLY_SEC=+f;window.DUR=CFG.FLY_SEC+CFG.PHONE_SEC;SUBS=subs()},FLY);
 const C=await p.evaluate(()=>({total:COVER.total,covered:COVER.covered,frames:COVER.frames,missing:COVER.missing,tc:COVER.timecodes,fly:CFG.FLY_SEC,frame:CFG.FRAME,dur:window.DUR}));
 console.log(`ников: ${C.total}, покрыто кадрами: ${C.covered}, нужно кадров на всех: ${C.frames} (${(C.frames*C.frame).toFixed(1)} с). Пролёт в этом рендере: ${C.fly} с = ${Math.round(C.fly/C.frame)} кадров.`);
 if(C.missing.length)console.log('НЕ ПОПАЛИ:',C.missing.join(', '));
