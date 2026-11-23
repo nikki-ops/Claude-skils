@@ -21,6 +21,8 @@ body.rec,body.rec *{cursor:none!important}
 #ring{position:absolute;transform:translate(-50%,-50%);border:9px solid #ffd23a;border-radius:50%;box-shadow:0 0 40px 10px rgba(255,210,58,.8),inset 0 0 30px rgba(255,210,58,.6);display:none}
 #arw{position:absolute;transform:translate(-50%,-100%);display:none;text-align:center;pointer-events:none;transform-origin:50% 100%}
 #hero{position:absolute;display:none;transform:translate(-50%,-100%);transform-origin:50% 100%;background:#5dff8a;color:#0d2a14;font-size:46px;padding:6px 24px;border-radius:20px;border:5px solid #fff;white-space:nowrap;box-shadow:0 8px 18px rgba(0,0,0,.45)}
+#join{position:absolute;left:50%;top:292px;width:940px;transform:translateX(-50%);transform-origin:50% 0;display:none;text-align:center;background:#5dff8a;color:#0d2a14;border:7px solid #fff;border-radius:34px;padding:16px 26px;box-shadow:0 14px 34px rgba(0,0,0,.5)}
+#join b{display:block;font-size:74px;line-height:1.05}#join span{display:block;font-size:42px;line-height:1.15;margin-top:6px}
 #arw b{display:block;background:#ff2d55;color:#fff;font-size:50px;padding:6px 26px;border-radius:22px;border:5px solid #fff;white-space:nowrap;box-shadow:0 8px 20px rgba(0,0,0,.45)}
 #arw i{display:block;font-style:normal;font-size:96px;line-height:.9;color:#ff2d55;-webkit-text-stroke:6px #fff;paint-order:stroke fill}
 /* комментарии */
@@ -62,7 +64,7 @@ body.rec,body.rec *{cursor:none!important}
  <div id="world"><iframe id="map" src="../../karta/index.html?video"></iframe><div class="L" id="night"></div><div class="L" id="dim"></div>
   <div class="L" id="labs"></div><div class="L" id="dlabs"></div><div class="L" id="qs"></div><div id="hring"></div></div>
  <canvas id="blur" width="1080" height="1920"></canvas>
- <div class="L"><div id="ring"></div><div id="tag">🔍 СЕКРЕТ</div></div><div id="arw"><b></b><i>⬇</i></div><div id="hero">ТЫ ТУТ! 👋</div>
+ <div class="L"><div id="ring"></div><div id="tag">🔍 СЕКРЕТ</div></div><div id="arw"><b></b><i>⬇</i></div><div id="hero">ТЫ ТУТ! 👋</div><div id="join"><b>НЕТ ДОМА? 🏠</b><span>Напиши ник в комментах + подпишись — построю!</span></div>
  <div class="L" id="cards"></div>
  <div id="top"></div><div id="bot"></div>
  <div id="cnt">Жителей: <b>0</b> / 1 434</div>
@@ -258,6 +260,8 @@ function flyDrone(t){const p=DR.camAt(t),sp=p.kind==='sp'?p.q.e:null,gold=p.kind
  const cn=$('cnt');cn.style.display='';const b=cn.querySelector('b'),v=lo.toLocaleString('ru');if(b.textContent!==v)b.textContent=v;
  // герой-ник
  const hb=$('hero');if(hr&&HERO){const pp=pop(t,hr.t0,.22);hb.style.display='block';hb.style.left=Math.max(170,Math.min(910,HERO.X))+'px';hb.style.top=Math.max(330,HERO.top-8)+'px';hb.style.transform=`translate(-50%,-100%) scale(${pp})`}else hb.style.display='none';
+ // правило для новых зрителей: как получить свой дом
+ const JW=[[15.6,18.9],[47.9,52.95]].find(w=>t>=w[0]&&t<w[1]);if(JW){const j=$('join');j.style.display='block';j.style.transform=`translateX(-50%) scale(${pop(t,JW[0],.3)*(1+.025*Math.sin((t-JW[0])*7))})`;$('hero').style.display='none'}
  let zs=1,ox=540,oy=900;
  if(sp&&SPEC){const de=p.ht,u=ease(de/.25);zs=1+.18*u;ox=SPEC.x;oy=SPEC.y;
   const a=$('arw'),pp=de<.3?.5+.62*ease(de/.3)-.12*seg(de,.2,.3):1;a.style.display='block';a.querySelector('b').textContent=sp.lab||'';
@@ -311,7 +315,7 @@ let lastSub=-1;
 function setSub(t,P){let s='',si=-1,ts=0;SUBS.forEach((q,k)=>{if(q[0]<=t+1e-6){s=q[1];si=k;ts=q[0]}});const UP=P>=0&&P<PH.back0,S=$('sub');
  if(si!==lastSub){S.innerHTML=s;lastSub=si}S.classList.toggle('up',UP);S.style.top=UP?'175px':CFG.SUB_Y+'px';$('bot').style.top=(CFG.SUB_Y-40)+'px';
  const k=si<0?1:.82+.18*Math.min(1.1,pop(t,ts,.18));S.style.transform=`scale(${k})`}
-function hideAll(){$('hring').style.display='none';$('dlabs').style.display='none';$('hero').style.display='none';$('dim').style.opacity=0;$('world').style.filter='';['tag','ring','arw','big','phone','cta','blur'].forEach(id=>$(id).style.display='none');$('cards').style.display='none';$('qs').style.display='none';$('conf').style.display='none';
+function hideAll(){$('join').style.display='none';$('hring').style.display='none';$('dlabs').style.display='none';$('hero').style.display='none';$('dim').style.opacity=0;$('world').style.filter='';['tag','ring','arw','big','phone','cta','blur'].forEach(id=>$(id).style.display='none');$('cards').style.display='none';$('qs').style.display='none';$('conf').style.display='none';
  $('night').style.opacity=0;$('world').style.transform='';$('map').style.visibility='';$('labs').style.visibility='';$('labs').style.opacity=1;$('cnt').style.transform='translateX(-50%)'}
 function intro(t){const I=IN;$('labs').style.display='';layFrame(IF,null,'IF');
  // A. комментарии на размытом городе
@@ -365,7 +369,7 @@ function sfxList(){const L=[];if(IN){L.push([.86,'whoosh',.7]);T13.cards.forEach
   QS.forEach(q=>L.push([q.t,'blip',.5]));L.push([IN.night0,'swish',.6]);const N=LABS.length;for(let k=0;k<N;k++)L.push([IN.sign0+(IN.sign1-IN.sign0)*k/N,'tick',.4]);
   L.push([IN.all0,'whoosh',1]);L.push([IN.all0+.1,'drum',.7]);L.push([IN.roll1,'ding',1])}
  if(CFG.DRONE&&DR){let tt=FS;for(let t=FS;t<FLY();t+=1/30){const p=DR.camAt(t),q=DR.camAt(t-1/30);if(p.w>=0&&!(q.w>=0))L.push([t,'whoosh',.6])}
-  DR.Wn.forEach(q=>{if(q.k==='sp')L.push([q.we,'boom',.8]);if(q.k==='gold')L.push([q.we,'sparkle',1]);if(q.k==='rise')L.push([q.ws,'swish',.9])});DR.heroes.forEach(q=>L.push([q.t0,'pop',.7]))}
+  DR.Wn.forEach(q=>{if(q.k==='sp')L.push([q.we,'boom',.8]);if(q.k==='gold')L.push([q.we,'sparkle',1]);if(q.k==='rise')L.push([q.ws,'swish',.9])});DR.heroes.forEach(q=>L.push([q.t0,'pop',.7]));L.push([15.6,'ding',.7],[47.9,'ding',.7])}
  else SCHED.forEach((s,k)=>{const t=FS+k*CFG.FRAME;if(k===0||s.f!==SCHED[k-1].f)L.push([t,'whoosh',.45]);if(s.ev&&!s.gold&&(k===0||SCHED[k-1].ev!==s.ev))L.push([s.ev.t,'boom',.8]);if(s.gold)L.push([t,'sparkle',1])});
  const F=FLY();L.push([F,'swish',.8]);const nick='@'+TARGET.n;for(let k=1;k<=nick.length;k++)L.push([F+PH.type0+(PH.type1-PH.type0)*k/nick.length,'click',.5]);
  L.push([F+PH.pin,'ding',.8]);L.push([F+PH.back0,'swish',.7]);return L.filter(x=>x[0]>=0&&x[0]<DUR())}
