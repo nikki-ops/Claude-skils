@@ -57,7 +57,7 @@ body.rec,body.rec *{cursor:none!important}
 </style></head><body>
 <div id="stage">
  <div id="world"><iframe id="map" src="../../karta/index.html?video"></iframe><div class="L" id="night"></div>
-  <div class="L" id="labs"></div><div class="L" id="qs"></div></div>
+  <div class="L" id="labs"></div><div class="L" id="dlabs"></div><div class="L" id="qs"></div></div>
  <canvas id="blur" width="1080" height="1920"></canvas>
  <div class="L"><div id="ring"></div><div id="tag">🔍 СЕКРЕТ</div></div><div id="arw"><b></b><i>⬇</i></div>
  <div class="L" id="cards"></div>
@@ -92,7 +92,11 @@ const CFG={
  SUB_Y:1375,       // верх строки субтитров, px из 1920
  VIEW:{d:150,p:1.15,yaw:0}, // камера пролёта (d растёт сам, если иначе не все ники влезают)
  PUNCH:0.10,       // толчок-зум на каждой склейке (0.10 = кадр влетает с 110 %)
- DRIFT:0.035,      // медленный наезд внутри кадра
+ DRIFT:0.035,      // медленный наезд внутри кадра (режим склеек)
+ DRONE:true,       // пролёт как с дрона: непрерывный полёт полосами над всеми домами (false — склейки по 0.6 с)
+ WHIP:0.22,        // резкий перелёт дрона (между полосами и к особым домам), с
+ DRONE_D:185,      // высота дрона (больше — шире обзор, быстрее облёт всех домов)
+ HOLD:1.25,        // сколько дрон висит над особым домом (пиццерия, чёрная дыра…), с
 };
 if(window.T13){CFG.FLY_SEC=T13.fly;CFG.PHONE_SEC=+(T13.dur-T13.fly).toFixed(2)}
 const PH=window.T13?T13.phone:{cta:2.4,type0:1.2,type1:3.0,zoom0:3.2,zoom1:4.2,pin:4.2,back0:CFG.PHONE_SEC-CFG.LOOP_SEC,back1:CFG.PHONE_SEC};
@@ -106,7 +110,7 @@ const rnd=k=>{const x=Math.sin(k*127.1+311.7)*43758.5453;return x-Math.floor(x)}
 function subs(){if(window.T13)return T13.s.map(q=>[q[0],q[2]]);const F=FLY();return [[0,'Вы спрашивали...'],[0.8,'почему <y>вас нет?</y>'],[1.6,'Вот <y>ВСЕ 1 434!</y>'],[F,'Не успел <y>поймать?</y>'],[F+1.2,'Залетай в наш <g>ТГ</g>'],[F+2.4,'ссылка <y>в шапке</y> профиля'],[F+3.8,'вбей <y>ник</y> —'],[F+4.8,'и карта найдёт <y>твой дом!</y>']]}
 let SUBS=subs();
 // ---------- карта в iframe ----------
-let BLV='',MAPC=null,cw,MP,THREE,cam,RES=[],FR=[],COVER=null,SECRET=null,TARGET=null,cur='',IF=null,SCHED=[],SPEC=null,LABS=[],QS=[];
+let RES_ALL=[],BLV='',MAPC=null,cw,MP,THREE,cam,RES=[],FR=[],COVER=null,SECRET=null,TARGET=null,cur='',IF=null,SCHED=[],SPEC=null,LABS=[],QS=[];
 function frameStyles(){const d=cw.document,s=d.createElement('style');
  s.textContent='#st .bub,#st .pn{display:none!important} body>*:not(#st){display:none!important} #st>*:not(canvas){display:none!important}';d.head.appendChild(s);MP.setAll(false)}
 function proj(x,y,z){const v=new THREE.Vector3(x,y,z).project(cam);return [(v.x*.5+.5)*W,(-v.y*.5+.5)*H,v.z]}
@@ -158,6 +162,78 @@ function layFrame(f,sl,key){if(key===cur)return;cur=key;setCam(f.cx,f.cz);SPEC=n
  if(sl&&sl.ev&&!sl.gold&&!SPEC)SPEC={x:540,y:900,lx:540,lt:640};
  if(sl)$('cnt').querySelector('b').textContent=sl.cum.toLocaleString('ru')}
 function showFrame(i){const sl=SCHED[Math.max(0,Math.min(i,SCHED.length-1))];layFrame(sl.f,sl,'s'+i)}
+// ================= ДРОН =================
+// Камера летит вперёд (к верху экрана) полосами над городом; каждая полоса — 2 колонки кварталов.
+// На особых словах озвучки — резкий перелёт к дому, зависание с зумом и стрелкой, затем полёт продолжается.
+let DR=null;const LBL=new Map();
+function droneGeom(){const c0=RES[0];setCam(c0.x,c0.z,CFG.DRONE_D);let A=0,Bd=0;const hw=[];
+ for(let dz=-520;dz<=520;dz+=6){let lo=1e9,hi=-1e9;for(let dx=-340;dx<=340;dx+=6){const b=proj(c0.x+dx,0,c0.z+dz);if(b[2]<1&&INWIN(b[0],b[1])&&b[1]>200){lo=Math.min(lo,dx);hi=Math.max(hi,dx)}}
+  if(hi>lo){A=Math.max(A,-dz);Bd=Math.max(Bd,dz);hw.push(Math.min(-lo,hi))}}
+ hw.sort((a,b)=>a-b);return {A,Bd,hw:hw[Math.floor(hw.length*.5)]}}
+const lerp=(a,b,u)=>a+(b-a)*u;
+function planDrone(){const G=droneGeom(),F0=FS,F1=FLY(),W_=CFG.WHIP,HOLD=CFG.HOLD;
+ // особые дома: окно = перелёт туда + зависание + перелёт обратно в полёт; полёт в это время стоит на паузе
+ const S=T13.ev.filter(e=>e.n).sort((a,b)=>a.t-b.t).map(e=>{const h=RES.find(o=>o.n===e.n);if(!h)return null;const ws=e.t-.07;
+  return {e,h,ws,we:ws+W_,he:ws+W_+HOLD,wo:ws+2*W_+HOLD,p0:[h.x,h.z+6],p1:[h.x,h.z-10]}}).filter(Boolean);
+ const sweepT=t=>{let s=Math.max(0,t-F0);S.forEach(q=>{if(t>q.ws)s-=Math.min(t,q.wo)-q.ws});return s};
+ const TS=sweepT(F1);let x0=1e9,x1=-1e9;RES.forEach(h=>{x0=Math.min(x0,h.x);x1=Math.max(x1,h.x)});
+ for(let tries=0;tries<6;tries++){
+  const SW0=2*G.hw*.95*Math.pow(.92,tries),n=Math.ceil((x1-x0+1)/SW0),SW=(x1-x0+1)/n,items=[];let L=0,nW=0,prev=null;
+  for(let k=0;k<n;k++){const cx=x0+SW*(k+.5),zs=RES.filter(h=>Math.abs(h.x-cx)<=SW/2+.01).map(h=>h.z).sort((a,b)=>b-a);if(!zs.length)continue;
+   const runs=[];let zb=zs[0],za=zs[0];for(const z of zs.slice(1)){if(za-z>(G.A+G.Bd)*.55){runs.push([za,zb]);zb=z}za=z}runs.push([za,zb]);
+   runs.forEach(([za,zb])=>{const m=(G.A+G.Bd)*.42,a=[cx,zb-G.Bd+m],b=[cx,za+G.A-m];/* меньше пустого края города в кадре */if(prev){items.push({w:1,a:prev,b:a});nW++}items.push({w:0,a,b,len:a[1]-b[1]});L+=a[1]-b[1];prev=b})}
+  const v=L/Math.max(1,TS-nW*W_);let tt=0;items.forEach(it=>{it.d=it.w?W_:it.len/v;it.t0=tt;tt+=it.d});
+  const sweep=s=>{s=Math.max(0,Math.min(tt-1e-6,s));const it=items.find(q=>s<q.t0+q.d)||items[items.length-1],u=(s-it.t0)/it.d;
+   return it.w?{x:lerp(it.a[0],it.b[0],ease(u)),z:lerp(it.a[1],it.b[1],ease(u)),w:u}:{x:lerp(it.a[0],it.b[0],u),z:lerp(it.a[1],it.b[1],u),w:-1}};
+  const camAt=t=>{for(const q of S){if(t<q.ws||t>=q.wo)continue;const sp=sweep(sweepT(q.ws)),home=[sp.x,sp.z];
+    if(t<q.we){const u=(t-q.ws)/W_;return {x:lerp(home[0],q.p0[0],ease(u)),z:lerp(home[1],q.p0[1],ease(u)),w:u}}
+    if(t<q.he){const u=(t-q.we)/HOLD;return {x:lerp(q.p0[0],q.p1[0],u),z:lerp(q.p0[1],q.p1[1],u),w:-1,sp:q,ht:t-q.we}}
+    const u=(t-q.he)/W_;return {x:lerp(q.p1[0],home[0],ease(u)),z:lerp(q.p1[1],home[1],ease(u)),w:u}}
+   return sweep(sweepT(t))};
+  // проверка: каждый ник в кадре ≥ 0,27 с (8 кадров при 30 к/с)
+  const c0=RES[0];setCam(c0.x,c0.z,CFG.DRONE_D);const cnt=new Map(),first=new Map();
+  if(IN)IF.S.forEach(i=>{first.set(RES[i],IN.sign0);cnt.set(RES[i],99)});
+  for(let t=F0;t<F1;t+=1/30){const p=camAt(t);if(p.w>=.15&&p.w<=.85)continue;
+   RES.forEach(h=>{if(Math.abs(h.x-p.x)>260||Math.abs(h.z-p.z)>540)return;const b=proj(h.x-p.x+c0.x,0,h.z-p.z+c0.z);if(b[2]<1&&INWIN(b[0],b[1])){cnt.set(h,(cnt.get(h)||0)+1);if(!first.has(h))first.set(h,+t.toFixed(2))}})}
+  const missing=RES.filter(h=>(cnt.get(h)||0)<8);
+  DR={camAt,S,items,v,G,SW,first,missing,FT:[...first.values()].sort((a,b)=>a-b)};
+  console.log(`[дрон] высота ${CFG.DRONE_D}, полос ${n}, ширина ${SW.toFixed(0)}, глубина кадра ${(G.A+G.Bd).toFixed(0)}, скорость ${v.toFixed(0)}/с, дом в кадре ~${((G.A+G.Bd)/v).toFixed(2)} с, перелётов ${nW}, полёта ${TS.toFixed(1)} с, не попали: ${missing.length}`);
+  if(!missing.length)break}
+ // золотой дом — тот, над которым дрон пролетает на словах «я подписал золотом»
+ const gt=T13.ev.find(e=>e.gold);if(gt){const t=gt.t+1.25,p=DR.camAt(t),c0=RES[0];setCam(c0.x,c0.z,CFG.DRONE_D);let best=null,bd=1e9;
+  RES.forEach(h=>{if(!/^[A-Za-z0-9_]{4,14}$/.test(h.n)||/UTOPAN/i.test(h.n)||h.hid)return;const b=proj(h.x-p.x+c0.x,0,h.z-p.z+c0.z);if(!(b[2]<1&&INWIN(b[0],b[1])))return;const d=Math.hypot(b[0]-540,b[1]-760);if(d<bd){bd=d;best=h}});
+  DR.gold=best;DR.goldT=[gt.t+.9,gt.t+2.3]}
+ const tc={};DR.first.forEach((t,h)=>tc[h.n]=t);
+ COVER=Object.assign(COVER||{},{total:RES_ALL.length,covered:DR.first.size,missing:RES_ALL.filter(h=>!DR.first.has(h)||DR.missing.includes(h)).map(h=>h.n),timecodes:tc,gold:DR.gold?DR.gold.n:null,slots:0,frames:0,d:CFG.DRONE_D})}
+function labelEl(h){let o=LBL.get(h);if(o)return o;const e=document.createElement('div'),t='@'+h.n;let fs=fitFont(t,MC);
+ if(fs<21){fs=22;const k=Math.ceil(t.length/2);e.append(t.slice(0,k),document.createElement('br'),t.slice(k))}else e.textContent=t;
+ e.className='nk';e.style.fontSize=fs+'px';$('dlabs').appendChild(e);o={e,off:0,w:0,hh:0};LBL.set(h,o);return o}
+function layDrone(x,z,sp,goldH){setCam(x,z,CFG.DRONE_D);SPEC=null;SECRET=null;const vis=[];
+ RES.forEach(h=>{if(Math.abs(h.x-x)>220||Math.abs(h.z-z)>440)return;const b=proj(h.x,0,h.z);if(b[2]>1||!INWIN(b[0],b[1]))return;const p=proj(h.x,lab(h),h.z);vis.push([h,p[0],labY(p[0],p[1],b[1]),b])});
+ const tw=vis.filter(v=>v[0].hid);if(tw.length){const ax=tw.reduce((a,v)=>a+v[3][0],0)/tw.length,ay=Math.min(...tw.map(v=>v[3][1]));tw.sort((a,b)=>a[0].n.localeCompare(b[0].n));tw.forEach((v,k)=>{v[1]=ax;v[2]=labY(ax,ay-10-k*46,ay)})}
+ const on=new Set(),placed=[],B=BAND();vis.sort((a,b)=>a[2]-b[2]);
+ vis.forEach(v=>{const [h,x0,y]=v,o=labelEl(h),e=o.e;on.add(o);e.style.display='block';const isSp=!!(sp&&sp.n===h.n);e.classList.toggle('hl',isSp);e.classList.toggle('sec',goldH===h);
+  if(!o.w){o.w=e.offsetWidth;o.hh=e.offsetHeight}const X=Math.max(90,Math.min(990,x0)),w=o.w,hh=o.hh;
+  const hit=Y=>placed.some(r=>X-w/2<r[2]+4&&X+w/2>r[0]-4&&Y-hh<r[3]+3&&Y>r[1]-3),okY=Y=>Y-hh>=8&&Y<=1912&&!(Y>B[0]-4&&Y-hh<B[1]+46)&&!(X+w/2>170&&X-w/2<910&&Y-hh<170);
+  let Y=y;for(const k of [o.off,0,1,-1,2,-2,3,-3]){const tt=y+k*(hh+5);if(okY(tt)&&!hit(tt)){Y=tt;o.off=k;break}}
+  e.style.left=X+'px';e.style.top=Y+'px';placed.push([X-w/2,Y-hh,X+w/2,Y]);
+  if(isSp)SPEC={x:v[3][0],y:v[3][1]-20,lx:X,lt:Y-hh};if(goldH===h)SECRET={e,b:v[3]}});
+ LBL.forEach(o=>{if(!on.has(o))o.e.style.display='none'})}
+function flyDrone(t){const p=DR.camAt(t),sp=p.sp?p.sp.e:null,gold=DR.gold&&t>=DR.goldT[0]&&t<DR.goldT[1]?DR.gold:null;
+ $('labs').style.display='none';$('dlabs').style.display='';layDrone(p.x,p.z,sp,gold);cur='';
+ // перелёт: смаз и пропадание подписей
+ if(p.w>=0){const k=Math.sin(Math.PI*Math.min(1,p.w));$('world').style.filter=`blur(${(9*k).toFixed(1)}px)`;$('dlabs').style.opacity=1-k}else $('dlabs').style.opacity=1;
+ // счётчик: сколько жителей уже пролетели
+ let lo=0,hi=DR.FT.length;while(lo<hi){const m=(lo+hi)>>1;if(DR.FT[m]<=t)lo=m+1;else hi=m}
+ const cn=$('cnt');cn.style.display='';const b=cn.querySelector('b'),v=lo.toLocaleString('ru');if(b.textContent!==v)b.textContent=v;
+ let zs=1,ox=540,oy=900;
+ if(sp&&SPEC){const de=p.ht,u=ease(de/.25);zs=1+.18*u;ox=SPEC.x;oy=SPEC.y;
+  const a=$('arw'),pp=de<.3?.5+.62*ease(de/.3)-.12*seg(de,.2,.3):1;a.style.display='block';a.querySelector('b').textContent=sp.lab||'';
+  const ax=SPEC.x+(SPEC.lx-SPEC.x)*zs,ay=SPEC.y+(SPEC.lt-SPEC.y)*zs-6;a.style.left=Math.max(200,Math.min(880,ax))+'px';a.style.top=Math.max(330,ay)+'px';a.style.transform=`translate(-50%,-100%) scale(${pp})`}
+ $('world').style.transformOrigin=ox+'px '+oy+'px';$('world').style.transform=zs>1.0001?`scale(${zs})`:'';
+ if(SECRET){const on=Math.floor(t*5)%2===0,r=SECRET.e.getBoundingClientRect(),sr=ST.getBoundingClientRect(),k=sr.width/W;$('tag').style.display='block';$('ring').style.display='block';
+  $('tag').style.left=((r.left-sr.left)/k+r.width/k/2)+'px';$('tag').style.top=((r.top-sr.top)/k-14)+'px';$('tag').style.opacity=on?1:.25;
+  Object.assign($('ring').style,{left:SECRET.b[0]+'px',top:(SECRET.b[1]-30)+'px',width:'150px',height:'150px',opacity:on?1:.45})}}
 // ---------- размытый стоп-кадр (быстро: считается один раз на уровень) ----------
 function blurShot(lv,key){if(BLV===key+lv||!MAPC)return;BLV=key+lv;const c=$('blur').getContext('2d');c.filter=`blur(${10*lv}px) brightness(${1-.45*lv})`;c.clearRect(0,0,W,H);c.drawImage(MAPC,0,0,W,H);c.filter='none'}
 // ---------- мини-карта в телефоне ----------
@@ -188,9 +264,9 @@ let lastSub=-1;
 function setSub(t,P){let s='',si=-1,ts=0;SUBS.forEach((q,k)=>{if(q[0]<=t+1e-6){s=q[1];si=k;ts=q[0]}});const UP=P>=0&&P<PH.back0,S=$('sub');
  if(si!==lastSub){S.innerHTML=s;lastSub=si}S.classList.toggle('up',UP);S.style.top=UP?'250px':CFG.SUB_Y+'px';$('bot').style.top=(CFG.SUB_Y-40)+'px';
  const k=si<0?1:.82+.18*Math.min(1.1,pop(t,ts,.18));S.style.transform=`scale(${k})`}
-function hideAll(){['tag','ring','arw','big','phone','cta','blur'].forEach(id=>$(id).style.display='none');$('cards').style.display='none';$('qs').style.display='none';$('conf').style.display='none';
+function hideAll(){$('dlabs').style.display='none';$('world').style.filter='';['tag','ring','arw','big','phone','cta','blur'].forEach(id=>$(id).style.display='none');$('cards').style.display='none';$('qs').style.display='none';$('conf').style.display='none';
  $('night').style.opacity=0;$('world').style.transform='';$('map').style.visibility='';$('labs').style.visibility='';$('labs').style.opacity=1;$('cnt').style.transform='translateX(-50%)'}
-function intro(t){const I=IN;layFrame(IF,null,'IF');
+function intro(t){const I=IN;$('labs').style.display='';layFrame(IF,null,'IF');
  // A. комментарии на размытом городе
  if(t<I.empty0){blurShot(1,'IF');const B=$('blur');B.style.display='block';B.style.transform=`scale(${1.06+.05*t/I.empty0})`;$('map').style.visibility='hidden';$('labs').style.visibility='hidden';$('cnt').style.display='none';
   const C=$('cards');C.style.display='';const away=ease(seg(t,I.rain1,I.empty0));
@@ -214,7 +290,7 @@ function intro(t){const I=IN;layFrame(IF,null,'IF');
  bg.innerHTML=v.toLocaleString('ru')+'<small>жителей!</small>';bg.style.transform=`translate(-50%,-50%) scale(${bp*(.85+.15*seg(t,I.all0,I.all0+.3))})`;
  const cf=$('conf');if(t>=I.roll1){cf.style.display='';[...cf.children].forEach((e,i)=>{const dt=t-I.roll1,x=540+(rnd(i)-.5)*1000*Math.min(1,dt*3),y=760-560*rnd(i+20)*Math.max(0,1-dt*2.2)+1000*dt*dt*(.8+rnd(i+40));
   e.style.left=x+'px';e.style.top=y+'px';e.style.transform=`rotate(${dt*720*(rnd(i+60)-.5)}deg)`})}}
-function fly(t){const i=Math.floor((t-FS)/CFG.FRAME+1e-6);if(cur==='IF')cur='';showFrame(i);const sl=SCHED[Math.max(0,Math.min(i,SCHED.length-1))],dt=t-(FS+i*CFG.FRAME);
+function fly(t){if(CFG.DRONE&&DR)return flyDrone(t);$('labs').style.display='';const i=Math.floor((t-FS)/CFG.FRAME+1e-6);if(cur==='IF')cur='';showFrame(i);const sl=SCHED[Math.max(0,Math.min(i,SCHED.length-1))],dt=t-(FS+i*CFG.FRAME);
  $('cnt').style.display='';$('cnt').style.transform=`translateX(-50%) scale(${1+.14*(1-seg(dt,0,.16))})`;
  let zs,ox=540+((i%3)-1)*170,oy=820+((i%2)?-110:110);
  if(sl.ev&&!sl.gold&&SPEC){const de=t-sl.ev.t,u=ease(de/0.25);zs=1+0.18*u;ox=SPEC.x;oy=SPEC.y;
@@ -225,9 +301,9 @@ function fly(t){const i=Math.floor((t-FS)/CFG.FRAME+1e-6);if(cur==='IF')cur='';s
  if(SECRET){const on=Math.floor(t*5)%2===0,r=SECRET.e.getBoundingClientRect(),sr=ST.getBoundingClientRect(),k=sr.width/W;$('tag').style.display='block';$('ring').style.display='block';
   $('tag').style.left=((r.left-sr.left)/k+r.width/k/2)+'px';$('tag').style.top=((r.top-sr.top)/k-14)+'px';$('tag').style.opacity=on?1:.25;
   Object.assign($('ring').style,{left:SECRET.b[0]+'px',top:(SECRET.b[1]-30)+'px',width:'150px',height:'150px',opacity:on?1:.45})}}
-function phone(t,P){const u=ease(seg(P,PH.back0,PH.back1));$('cnt').style.display='none';
+function phone(t,P){const u=ease(seg(P,PH.back0,PH.back1));$('cnt').style.display='none';$('labs').style.display='';
  // фон: размытый последний кадр пролёта; к петле — размытый вступительный город (как в начале ролика)
- if(u>0){layFrame(IF,null,'IF');blurShot(1,'IF')}else{const lv=Math.max(1/8,Math.round(ease(seg(P,0,.6))*8)/8);blurShot(lv,'L'+cur)}
+ if(u>0){layFrame(IF,null,'IF');blurShot(1,'IF')}else{const lv=Math.max(1/8,Math.round(ease(seg(P,0,.6))*8)/8);if(CFG.DRONE&&DR&&BLV.indexOf('D')!==0){const q=DR.camAt(FLY()-.01);setCam(q.x,q.z,CFG.DRONE_D)}blurShot(lv,CFG.DRONE&&DR?'D':'L'+cur)}
  const B=$('blur');B.style.display='block';B.style.transform=u>0?'scale(1.06)':'';$('map').style.visibility='hidden';$('labs').style.visibility='hidden';
  const ph=$('phone');ph.style.display=u>=1?'none':'block';ph.style.top=(1920-(1920-470)*ease(seg(P,0,.8))*(1-u))+'px';
  const nick='@'+TARGET.n,k=Math.floor(nick.length*seg(P,PH.type0,PH.type1));$('q').textContent=nick.slice(0,k);$('qph').style.display=k?'none':'';
@@ -240,7 +316,9 @@ function seek(t){const P=t-FLY();hideAll();setSub(t,P);
 function sfxList(){const L=[];if(IN){T13.cards.forEach(c=>L.push([c[0],'pop',1]));CARDS.slice(T13.cards.length).forEach(c=>L.push([c.t,'tick',.55]));L.push([IN.rain1,'swish',.8]);
   QS.forEach(q=>L.push([q.t,'blip',.5]));L.push([IN.night0,'swish',.6]);const N=LABS.length;for(let k=0;k<N;k++)L.push([IN.sign0+(IN.sign1-IN.sign0)*k/N,'tick',.4]);
   L.push([IN.all0,'whoosh',1]);L.push([IN.all0+.1,'drum',.7]);L.push([IN.roll1,'ding',1])}
- SCHED.forEach((s,k)=>{const t=FS+k*CFG.FRAME;if(k===0||s.f!==SCHED[k-1].f)L.push([t,'whoosh',.45]);if(s.ev&&!s.gold&&(k===0||SCHED[k-1].ev!==s.ev))L.push([s.ev.t,'boom',.8]);if(s.gold)L.push([t,'sparkle',1])});
+ if(CFG.DRONE&&DR){let tt=FS;for(let t=FS;t<FLY();t+=1/30){const p=DR.camAt(t),q=DR.camAt(t-1/30);if(p.w>=0&&!(q.w>=0))L.push([t,'whoosh',.6])}
+  DR.S.forEach(q=>L.push([q.we,'boom',.8]));if(DR.gold)L.push([DR.goldT[0],'sparkle',1])}
+ else SCHED.forEach((s,k)=>{const t=FS+k*CFG.FRAME;if(k===0||s.f!==SCHED[k-1].f)L.push([t,'whoosh',.45]);if(s.ev&&!s.gold&&(k===0||SCHED[k-1].ev!==s.ev))L.push([s.ev.t,'boom',.8]);if(s.gold)L.push([t,'sparkle',1])});
  const F=FLY();L.push([F,'swish',.8]);const nick='@'+TARGET.n;for(let k=1;k<=nick.length;k++)L.push([F+PH.type0+(PH.type1-PH.type0)*k/nick.length,'click',.5]);
  L.push([F+PH.pin,'ding',.8]);L.push([F+PH.back0,'swish',.7]);return L.filter(x=>x[0]>=0&&x[0]<DUR())}
 // ---------- загрузка ----------
@@ -251,14 +329,15 @@ $('map').addEventListener('load',()=>{cw=$('map').contentWindow;const iv=setInte
  try{MP=cw.MP;THREE=cw.THREE;cam=cw.eval('cam');frameStyles();
  cw.requestAnimationFrame=()=>0;// карта не перерисовывает себя сама — только по команде (в разы быстрее рендер)
  MAPC=[...cw.document.querySelectorAll('canvas')].sort((a,b)=>b.width*b.height-a.width*a.height)[0];
- RES=MP.L.filter(h=>!h.site&&!h.bld&&!h.anon&&h.n&&h.g);
- plan();window.COVER=COVER;
+ RES_ALL=MP.L.filter(h=>!h.site&&!h.bld&&!h.anon&&h.n&&h.g);
+ RES=RES_ALL.filter(h=>!/ЧАЭС/i.test(h.district||''));// ЧАЭС в ролике не показываем
+ plan();if(CFG.DRONE&&IN){CFG.VIEW.d=150;IF.S=(()=>{const c0=RES[0];setCam(c0.x,c0.z);return visSet(IF.cx,IF.cz)})();planDrone()}window.COVER=COVER;
  console.log(`[все ники] жителей: ${COVER.total}, показано: ${COVER.covered}, кадров покрытия: ${COVER.frames}, слотов пролёта: ${COVER.slots}, камера d=${COVER.d}`);
  if(COVER.missing.length)console.warn('не попали:',COVER.missing);
  let x0=1e9,x1=-1e9,z0=1e9,z1=-1e9;RES.forEach(h=>{x0=Math.min(x0,h.x);x1=Math.max(x1,h.x);z0=Math.min(z0,h.z);z1=Math.max(z1,h.z)});MB=[x0,x1,z0,z1,(x0+x1)/2,(z0+z1)/2];
  const ok=RES.filter(h=>/^[A-Za-zА-Яа-яЁё0-9_.\-]{5,13}$/.test(h.n));let r=CFG.SEED*9301+49297;TARGET=ok[(r%233280+233280)%ok.length];
  if(IN){layFrame(IF,null,'IF');buildQs();buildCards();buildConf()}
- const gk=SCHED.findIndex(s=>s.gold);if(gk>=0){showFrame(gk);COVER.gold=SCHED[gk].goldName||null}// имя золотого дома — ответ для приза
+ if(!(CFG.DRONE&&DR)){const gk=SCHED.findIndex(s=>s.gold);if(gk>=0){showFrame(gk);COVER.gold=SCHED[gk].goldName||null}}// имя золотого дома — ответ для приза
  seek(0);$('hint').innerHTML='Нажми <b style="color:#ffd23a">R</b> — запись Shorts<small>'+COVER.total+' ников · все в кадре · '+DUR().toFixed(1)+' с</small>';
  if(document.body.classList.contains('render'))$('hint').style.display='none';window.DUR=DUR();window.READY=true}catch(e){console.error('сцена:',e);$('hint').textContent='Ошибка: '+e.message;window.SCENE_ERR=e.message+' '+(e.stack||'').split('\n')[1]}},200)});
 // ---------- режим записи: R ----------
