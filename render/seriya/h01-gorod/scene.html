@@ -76,6 +76,7 @@ TENT.position.set(3.2,0,.5);sc.add(TENT);
 // домик
 const HOUSE=new THREE.Group();{const b=new THREE.Mesh(new THREE.BoxGeometry(2.8,2.2,2.6),L(0xf2e2c4));b.position.y=1.1;b.castShadow=true;HOUSE.add(b);const r=new THREE.Mesh(new THREE.ConeGeometry(2.3,1.5,4),L(0x4f8fe8));r.rotation.y=Math.PI/4;r.position.y=2.95;r.castShadow=true;HOUSE.add(r);
  const d=new THREE.Mesh(new THREE.PlaneGeometry(.7,1.2),new THREE.MeshBasicMaterial({color:0x6a4326}));d.position.set(0,.6,1.31);HOUSE.add(d);const w=new THREE.Mesh(new THREE.PlaneGeometry(.6,.6),new THREE.MeshBasicMaterial({color:0x9fd8ff}));w.position.set(.85,1.4,1.31);HOUSE.add(w)}
+{const nt=ctex(512,128,(x,w,h)=>{x.fillStyle='#1d2a44';x.fillRect(0,0,w,h);x.strokeStyle='#ffd23a';x.lineWidth=10;x.strokeRect(5,5,w-10,h-10);x.fillStyle='#ffd23a';x.font='900 64px Inter, Arial';x.textAlign='center';x.textBaseline='middle';x.fillText('@ТВОЙ_НИК',w/2,h/2+4)});const p=new THREE.Mesh(new THREE.PlaneGeometry(2.2,.55),new THREE.MeshBasicMaterial({map:nt}));p.position.set(0,2.05,1.32);HOUSE.add(p)}
 HOUSE.position.set(3.2,0,.5);sc.add(HOUSE);
 // дом мечты — ракета
 const ROCKET=new THREE.Group();{const b=new THREE.Mesh(new THREE.CylinderGeometry(1.1,1.2,5,20),L(0xf4f1ea));b.position.y=3;b.castShadow=true;ROCKET.add(b);const n=new THREE.Mesh(new THREE.ConeGeometry(1.1,2.2,20),L(0xe8402a));n.position.y=6.6;ROCKET.add(n);
@@ -104,13 +105,13 @@ function place(P,x,y,z,o){P.m.visible=P.sh.visible=true;P.m.position.set(x,y+1.9
 function hide(P){P.m.visible=P.sh.visible=false;P.tag.style.display='none'}
 function tagAt(P,show){if(!show){P.tag.style.display='none';return}const v=P.m.position.clone();v.y+=2.15;v.project(cam);P.tag.style.display='block';P.tag.style.left=((v.x*.5+.5)*W)+'px';P.tag.style.top=((-v.y*.5+.5)*H)+'px'}
 // ---------- текст озвучки (черновой тайминг до записи голоса) ----------
-const LINES=[[0,2.5,'В этом городе <y>0 жителей</y>.'],[2.5,5,'Первым будешь <y>ты</y>!'],[5,8,'Знакомься — это <y>Прораб</y>.'],[8,11,'Он тут совсем <y>один</y>… и ему скучно.'],[11,14,'Но есть <y>правило</y>.'],[14,18,'Пишешь свой <y>ник</y> в комментариях…'],[18,21,'…и ты <y>появляешься</y> в городе!'],[21,25,'Сначала — <y>палатка</y>.'],[25,29,'Пишешь под следующим роликом — кран строит <y>дом</y>.'],[29,33,'Самые залайканные заказы — <y>дом мечты</y>.'],[33,36,'Первые <y>десять</y> — дом сразу!'],[36,39,'Подпишись, чтобы найти <y>себя</y> в следующей серии.'],[39,42,'Ну что… кто будет <y>первым</y>?']];
-const TITLES=[[0,2.5,'В ЭТОМ ГОРОДЕ<br><b>0 ЖИТЕЛЕЙ</b>'],[2.5,5,'ПЕРВЫЙ — <b>ТЫ</b>'],[11,14,''],[14,18,'ПИШИ <b>НИК</b> 👇'],[33,36,'ПЕРВЫЕ <b>10</b> —<br>ДОМ СРАЗУ'],[36,39,'<b>ПОДПИШИСЬ</b>'],[39,42,'КТО <b>ПЕРВЫЙ</b>?']];
+const LINES=[[0,2.5,'В этом городе <y>0 жителей</y>.'],[2.5,5,'Первым будешь <y>ты</y>!'],[5,8,'Знакомься — это <y>Прораб</y>.'],[8,11,'Он тут совсем <y>один</y>… и ему скучно.'],[11,14,'Но есть <y>правило</y>.'],[14,18,'Подпишись и напиши свой <y>ник</y> в комментариях…'],[18,21,'…и ты <y>появляешься</y> в городе!'],[21,26,'А кран сразу строит тебе <y>дом</y> — с твоим ником.'],[26,31,'Хочешь <y>особенный</y> дом? Напиши какой — построим.'],[31,35,'Первые жители — дома прямо <y>у площади</y>.'],[35,39,'Подпишись, чтобы найти <y>себя</y> в следующей серии.'],[39,42,'Ну что… кто будет <y>первым</y>?']];
+const TITLES=[[0,2.5,'В ЭТОМ ГОРОДЕ<br><b>0 ЖИТЕЛЕЙ</b>'],[2.5,5,'ПЕРВЫЙ — <b>ТЫ</b>'],[14,18,'ПОДПИШИСЬ +<br><b>НИК</b> 👇'],[21,26,'<b>ДОМ</b> СРАЗУ'],[26,31,'ЛЮБОЙ <b>ДОМ</b>'],[31,35,'ПЕРВЫЕ —<br><b>У ПЛОЩАДИ</b>'],[35,39,'<b>ПОДПИШИСЬ</b>'],[39,42,'КТО <b>ПЕРВЫЙ</b>?']];
 const DUR=42;const $=id=>document.getElementById(id);
 // ---------- камера по планам ----------
 const SH=[[0,2.5,V(0,3.5,9),V(0,3,6.5),V(0,3.2,-2),V(0,3.6,-2)],[2.5,5,V(0,4,10),V(0,9,22),V(0,2,-2),V(0,2,-4)],[5,8,V(-1.5,2.9,8.5),V(-1.2,2.9,7.6),V(-.6,2.7,-1),V(-.6,2.7,-1)],[8,11,V(-3.2,2.6,8),V(-3,2.6,7.2),V(-2.4,2.4,0),V(-2.4,2.4,0)],[11,14,V(-2,3,8),V(-1.8,3,7.2),V(-1.6,2.8,0),V(-1.6,2.8,0)],
- [14,18,V(1,3,9),V(1,3,8.5),V(1,2.4,0),V(1,2.4,0)],[18,21,V(1.5,2.9,8.2),V(1.6,2.9,7.4),V(1.4,2.6,.3),V(1.4,2.6,.3)],[21,25,V(5.5,3,7),V(5,3,6.2),V(2.6,1.6,.3),V(2.6,1.6,.3)],[25,29,V(6,6,12),V(5.5,5,10),V(4,4,.3),V(3.4,2,.3)],[29,33,V(-1,4,8),V(-2,6,10),V(-3.6,3.5,-4),V(-3.6,4,-4)],
- [33,36,V(-1.2,3,8),V(-1,3,7.2),V(-.8,2.8,0),V(-.8,2.8,0)],[36,39,V(-.5,3,8),V(-.4,3,7.4),V(-.6,2.8,0),V(-.6,2.8,0)],[39,42,V(0,6,18),V(0,4,10),V(0,2.5,-2),V(0,3,-2)]];
+ [14,18,V(1,3,9),V(1,3,8.5),V(1,2.4,0),V(1,2.4,0)],[18,21,V(1.5,2.9,8.2),V(1.6,2.9,7.4),V(1.4,2.6,.3),V(1.4,2.6,.3)],[21,26,V(6,6,12),V(5.5,4.5,10),V(4,4.5,.3),V(3,2,.3)],[26,31,V(-1,4,8),V(-2,6,10),V(-3.6,3.5,-4),V(-3.6,4,-4)],
+ [31,35,V(-1.2,3,8),V(-1,3,7.2),V(-.8,2.8,0),V(-.8,2.8,0)],[35,39,V(-.5,3,8),V(-.4,3,7.4),V(-.6,2.8,0),V(-.6,2.8,0)],[39,42,V(0,6,18),V(0,4,10),V(0,2.5,-2),V(0,3,-2)]];
 function seek(t){t=((t%DUR)+DUR)%DUR;const s=SH.find(x=>t>=x[0]&&t<x[1])||SH[SH.length-1];const k=sm(s[0],s[1],t);
  cam.position.lerpVectors(s[2],s[3],k);cam.position.y+=Math.sin(t*1.3)*.03;cam.lookAt(new THREE.Vector3().lerpVectors(s[4],s[5],k));cam.updateProjectionMatrix();
  // табличка падает в хуке и в петле
@@ -119,30 +120,30 @@ function seek(t){t=((t%DUR)+DUR)%DUR;const s=SH.find(x=>t>=x[0]&&t<x[1])||SH[SH.
  // перекати-поле
  const tx=t>=2.5&&t<5?lerp(-12,12,(t-2.5)/2.5):t>=39?lerp(-12,10,(t-39)/3):99;TUMB.position.set(tx,.6+Math.abs(Math.sin(t*6))*.4,1.5);TUMB.rotation.z=-t*6;
  // Прораб
- let bossOn=t>=5&&t<17||t>=33||t>=2.5&&t<5;
+ let bossOn=t>=5&&t<17||t>=31||t>=2.5&&t<5;
  if(bossOn){let bx=-.6,bz=-.6,mood='smile',wave=false,y=0;
   if(t<5){bx=-6;bz=-6} if(t>=5&&t<8){const k2=sm(5,5.8,t);bx=lerp(.6,-.6,k2);wave=t>5.6}
-  if(t>=8&&t<11){bx=-2.4;bz=0;y=.62;mood='sly'} if(t>=11&&t<17){bx=-1.6;bz=0;mood='smile'} if(t>=33){bx=-.8;bz=0;mood=t>=36&&t<39?'laugh':'smile';wave=t>=39}
+  if(t>=8&&t<11){bx=-2.4;bz=0;y=.62;mood='sly'} if(t>=11&&t<17){bx=-1.6;bz=0;mood='smile'} if(t>=31){bx=-.8;bz=0;mood=t>=35&&t<39?'laugh':'smile';wave=t>=39}
   place(BOSS,bx,y,bz,{t,mood,wave,talk:true});tagAt(BOSS,t>=5)}else hide(BOSS);
  // новый житель
- const newOn=t>=18.4&&t<33;if(newOn){place(NEW,1.4,0,.4,{t,mood:t<19.5?'shock':'laugh',wave:t>=19.5&&t<21});tagAt(NEW,true)}else hide(NEW);
+ const newOn=t>=18.4&&t<31;if(newOn){place(NEW,1.4,0,.4,{t,mood:t<19.5?'shock':'laugh',wave:t>=19.5&&t<21});tagAt(NEW,true)}else hide(NEW);
  // хлопок появления
  if(t>=18&&t<19){PUFF.forEach(p=>{const a=t-18;p.m.visible=true;const r=.3+a*2.5*p.s;p.m.position.set(1.4+Math.cos(p.a)*r,1.5+Math.sin(p.a)*r,.4);p.m.material.opacity=.9*(1-a);p.m.scale.setScalar(.8+a*1.5)})}
  // палатка → дом краном
- TENT.visible=t>=21&&t<27.5;if(TENT.visible){const k2=sm(21,21.6,t);TENT.scale.set(1,k2,1)}
- const MH=CRANE.userData.MH;CRANE.visible=t>=25&&t<29;CABLE.visible=CRANE.visible;HOUSE.visible=t>=25&&t<33;
- if(HOUSE.visible){const k2=sm(25.3,27.6,t);HOUSE.position.y=(1-k2)*9;HOUSE.rotation.y=Math.sin(t*3)*.05*(1-k2);const top=HOUSE.position.y+3.7;CABLE.scale.y=Math.max(.01,MH+.6-top);CABLE.position.set(3.2,top+(MH+.6-top)/2,.5)}
- PUFF.forEach(p=>{if(t>=27.6&&t<28.5){const a=t-27.6;p.m.visible=true;const r=1.5+a*4*p.s;p.m.position.set(3.2+Math.cos(p.a)*r,.3+a,.5+Math.sin(p.a)*r*.6);p.m.material.opacity=.8*(1-a/.9);p.m.scale.setScalar(.6+a*1.6)}});
+ TENT.visible=false;
+ const MH=CRANE.userData.MH;CRANE.visible=t>=21&&t<26;CABLE.visible=CRANE.visible;HOUSE.visible=t>=21&&t<31;
+ if(HOUSE.visible){const k2=sm(21.3,23.8,t);HOUSE.position.y=(1-k2)*9;HOUSE.rotation.y=Math.sin(t*3)*.05*(1-k2);const top=HOUSE.position.y+3.7;CABLE.scale.y=Math.max(.01,MH+.6-top);CABLE.position.set(3.2,top+(MH+.6-top)/2,.5)}
+ PUFF.forEach(p=>{if(t>=23.8&&t<24.7){const a=t-23.8;p.m.visible=true;const r=1.5+a*4*p.s;p.m.position.set(3.2+Math.cos(p.a)*r,.3+a,.5+Math.sin(p.a)*r*.6);p.m.material.opacity=.8*(1-a/.9);p.m.scale.setScalar(.6+a*1.6)}});
  // дом мечты
- ROCKET.visible=t>=29&&t<42;if(ROCKET.visible){const k2=sm(29.3,30.2,t);ROCKET.scale.set(1,Math.max(.01,k2*(1+.1*Math.sin(k2*Math.PI))),1)}
- CONF.forEach(c=>{const a=t-29.6;const on=a>0&&a<3;c.m.visible=on;if(on){c.m.position.set(-4+c.x,9-((a*c.v)%9),-4+c.z);c.m.rotation.set(a*4+c.ph,a*3,0)}});
+ ROCKET.visible=t>=26&&t<42;if(ROCKET.visible){const k2=sm(26.6,27.5,t);ROCKET.scale.set(1,Math.max(.01,k2*(1+.1*Math.sin(k2*Math.PI))),1)}
+ CONF.forEach(c=>{const a=t-26.9;const on=a>0&&a<3;c.m.visible=on;if(on){c.m.position.set(-4+c.x,9-((a*c.v)%9),-4+c.z);c.m.rotation.set(a*4+c.ph,a*3,0)}});
  // оверлеи
  const ti=TITLES.find(x=>t>=x[0]&&t<x[1]);$('title').innerHTML=ti?ti[2]:'';$('title').style.transform=`scale(${ti?1+.12*(1-sm(ti[0],ti[0]+.25,t)):1})`;
  const li=LINES.find(x=>t>=x[0]&&t<x[1]);$('sub').innerHTML=li?li[2]:'';
  $('cn').textContent='0';$('cnt').style.display=(t<5||t>=39)?'block':'none';
- $('steps').style.display=t>=21&&t<33?'flex':'none';[...$('steps').children].forEach((d,i)=>d.classList.toggle('on',(i===0&&t<25)||(i===1&&t>=25&&t<29)||(i===2&&t>=29)));
- const ci=t>=11&&t<14;$('card').style.display=ci?'block':'none';$('card').innerHTML='<div class="h">ПРАВИЛО ГОРОДА</div><div class="t">Пишешь ник в комментариях —<br>появляешься в городе</div>';$('card').style.transform=`translate(-50%,0) rotate(-2deg) scale(${ci?sm(11,11.3,t):0})`;
- $('bell').style.display=t>=36&&t<39?'block':'none';$('bell').style.transform=`translate(-50%,0) rotate(${Math.sin(t*14)*18}deg)`;
+ $('steps').style.display='none';[...$('steps').children].forEach((d,i)=>d.classList.toggle('on',(i===0&&t<25)||(i===1&&t>=25&&t<29)||(i===2&&t>=29)));
+ const ci=t>=11&&t<14;$('card').style.display=ci?'block':'none';$('card').innerHTML='<div class="h">ПРАВИЛО ГОРОДА</div><div class="t">Подписка + ник в комментариях =<br>твой дом в городе</div>';$('card').style.transform=`translate(-50%,0) rotate(-2deg) scale(${ci?sm(11,11.3,t):0})`;
+ $('bell').style.display=t>=35&&t<39?'block':'none';$('bell').style.transform=`translate(-50%,0) rotate(${Math.sin(t*14)*18}deg)`;
  const ph=t>=14&&t<18;$('phone').style.top=(ph?lerp(1920,1380,sm(14,14.5,t)):1920)+'px';const nick='@ТВОЙ_НИК';$('inp').textContent=ph?nick.slice(0,Math.floor(cl((t-14.6)/1.6,0,1)*nick.length)):'';$('send').style.transform=`scale(${t>=17&&t<17.3?.85:1})`;
  $('sub').style.top=ph?'1180px':'1330px';
  R.render(sc,cam)}
