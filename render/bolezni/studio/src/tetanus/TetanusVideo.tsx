@@ -73,7 +73,7 @@ const HandShot: React.FC<{ s: Shot; f: number }> = ({ s, f }) => {
   const origin = `${(WOUND[0] / 1080) * 100}% ${(WOUND[1] / 1920) * 100}%`;
   return (
     <AbsoluteFill style={{ transform: `translate(${shakeBite}px, 0) scale(${zoom})`, transformOrigin: origin }}>
-      <OldHand frame={f} uid={`h${s.bar}`} bite={bite} burn={h.burn ? 0.6 : 0} water={h.water ? interpolate(f, [0, 8], [0, 1], clamp) : 0} soap={h.soap ? interpolate(f, [5, 30], [0.2, 1], clamp) : 0} syringe={h.syringe ? interpolate(f, [3, 70], [0, 1], clamp) : 0} tremble={h.burn ? 0.4 : 0} />
+      <OldHand frame={f} uid={`h${s.bar}`} bite={bite} puncture burn={h.burn ? 0.6 : 0} water={h.water ? interpolate(f, [0, 8], [0, 1], clamp) : 0} soap={h.soap ? interpolate(f, [5, 30], [0.2, 1], clamp) : 0} syringe={h.syringe ? interpolate(f, [3, 70], [0, 1], clamp) : 0} tremble={h.burn ? 0.4 : 0} />
     </AbsoluteFill>
   );
 };
@@ -121,7 +121,7 @@ const XrayView: React.FC<{ s: Shot; f: number }> = ({ s, f }) => {
       <XrayShot frame={f} p={p} brainHit={hit} />
       {s.spine && <AbsoluteFill style={{ background: "radial-gradient(ellipse 30% 45% at 50% 45%, rgba(244,42,16,0.35), rgba(0,0,0,0))", opacity: interpolate(f, [B - 30, B - 10], [0, 1], clamp) * (0.7 + 0.3 * Math.sin(f / 3)), mixBlendMode: "screen" }} />}
       {s.chest && <AbsoluteFill style={{ background: "radial-gradient(ellipse 45% 25% at 50% 52%, rgba(244,42,16,0.45), rgba(0,0,0,0))", opacity: 0.6 + 0.4 * Math.sin(f / 4), mixBlendMode: "screen" }} />}
-      <Note text={s.chest ? "ДИАФРАГМА И МЫШЦЫ ГРУДИ — В СПАЗМЕ" : `ДО СПИННОГО МОЗГА: ${Math.max(0, Math.round(70 * (1 - Math.min(1, p / SPINE))))} СМ`} y={1700} color={s.chest || p >= SPINE ? C.red : C.yellow} size={44} />
+      <Note text={s.chest ? "ДИАФРАГМА — В СПАЗМЕ" : `ДО СПИННОГО МОЗГА: ${Math.max(0, Math.round(70 * (1 - Math.min(1, p / SPINE))))} СМ`} y={1700} color={s.chest || p >= SPINE ? C.red : C.yellow} size={44} />
     </>
   );
 };
@@ -223,7 +223,7 @@ export const TetanusVideo: React.FC = () => {
   const frame = useCurrentFrame();
   return (
     <AbsoluteFill style={{ background: "#000" }}>
-      <Audio src={staticFile("tetanus_music.wav")} volume={0.9} />
+      <Audio src={staticFile("tetanus_phonk.wav")} volume={0.9} />
       <AbsoluteFill style={{ transform: shake(frame) }}>
         {SHOTS.map((s) => (
           <Sequence key={s.bar} from={s.bar * B} durationInFrames={B}>

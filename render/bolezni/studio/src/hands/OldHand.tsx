@@ -8,6 +8,7 @@ import { OLD, SkinDefs, Wr, FingerView, Vein, AgeSpots, Crepe, KnitDefs } from "
 export type OldHandProps = {
   frame?: number;
   bite?: number; // 0..1 укус лисы: проколы, царапины, отёк, ореол, струйки крови
+  puncture?: boolean; // одиночный прокол (гвоздь/проволока) вместо укуса: без царапин, одна точка
   burn?: number; // 0..1 жжение в шраме: пульсирующий жар + «покалывание» вверх по предплечью
   scar?: number; // 0..1 зажившый шрам (по умолчанию 1, если burn>0)
   water?: number; // 0..1 струя воды из-под крана на рану
@@ -73,7 +74,7 @@ const VEINS: { pts: P[]; w: number }[] = [
   { pts: [[770, 1250], [760, 1330], [742, 1400], [745, 1500], [762, 1620]], w: 10 },
 ];
 
-export const OldHand: React.FC<OldHandProps> = ({ frame = 0, bite = 0, burn = 0, scar, water = 0, soap = 0, syringe = 0, tremble = 0, bg = "#120c08", uid = "oh" }) => {
+export const OldHand: React.FC<OldHandProps> = ({ frame = 0, bite = 0, puncture = false, burn = 0, scar, water = 0, soap = 0, syringe = 0, tremble = 0, bg = "#120c08", uid = "oh" }) => {
   const p = `${uid}-`;
   const id = (s: string) => `${p}${s}`;
   const u = (s: string) => `url(#${p}${s})`;
@@ -231,7 +232,7 @@ export const OldHand: React.FC<OldHandProps> = ({ frame = 0, bite = 0, burn = 0,
           {/* шрам и жжение — под кожей */}
           {scarA > 0 && <Scar a={scarA} p={p} />}
           {burn > 0 && <Burn a={burn} frame={frame} p={p} />}
-          {bite > 0 && <Bite a={bite} frame={frame} p={p} />}
+          {bite > 0 && <Bite a={bite} frame={frame} p={p} single={puncture} />}
           {water > 0 && <WetSkin a={water} frame={frame} p={p} />}
         </g>
         {burn > 0 && <ellipse cx={WOUND[0]} cy={WOUND[1]} rx={260} ry={240} fill="#ff4a1e" opacity={burn * 0.16 * (0.6 + 0.4 * Math.sin(frame * 0.35))} filter={u("b42")} style={{ mixBlendMode: "screen" }} />}
@@ -269,7 +270,8 @@ const SCRATCH: { a: P; b: P; c: number }[] = [
   { a: [-128, -60], b: [20, 110], c: 10 },
 ];
 
-const Bite: React.FC<{ a: number; frame: number; p: string }> = ({ a, p }) => {
+const Bite: React.FC<{ a: number; frame: number; p: string; single?: boolean }> = ({ a, p, single }) => {
+  const SCR = single ? [] : SCRATCH, PUN = single ? PUNCT.slice(0, 1) : PUNCT;
   const u = (s: string) => `url(#${p}${s})`;
   const [wx, wy] = WOUND;
   const r = mulberry(404);
@@ -283,9 +285,9 @@ const Bite: React.FC<{ a: number; frame: number; p: string }> = ({ a, p }) => {
       <ellipse cx={wx - 22} cy={wy - 26} rx={95} ry={70} fill="#f6cdb8" opacity={0.4 * sw} filter={u("b18")} />
       <path d={`M${wx + 60} ${wy - 40} Q${wx + 110} ${wy + 40} ${wx + 40} ${wy + 100}`} stroke="#8a3a40" strokeWidth={36} fill="none" opacity={0.3 * sw} filter={u("b18")} />
       {/* синяки-кровоподтёки */}
-      {PUNCT.map(([dx, dy], i) => <ellipse key={`bz${i}`} cx={wx + dx} cy={wy + dy} rx={34} ry={28} fill="#7a2d48" opacity={0.42 * sw} filter={u("b8")} />)}
+      {PUN.map(([dx, dy], i) => <ellipse key={`bz${i}`} cx={wx + dx} cy={wy + dy} rx={34} ry={28} fill="#7a2d48" opacity={0.42 * sw} filter={u("b8")} />)}
       {/* царапины: припухший валик, рваный сужающийся порез, тёмная сердцевина, капельки */}
-      {SCRATCH.map((s, i) => {
+      {SCR.map((s, i) => {
         const A: P = [wx + s.a[0], wy + s.a[1]], B: P = [wx + s.b[0], wy + s.b[1]];
         const M: P = [(A[0] + B[0]) / 2 + s.c, (A[1] + B[1]) / 2 - s.c * 0.6];
         const q = (t: number): P => [(1 - t) * (1 - t) * A[0] + 2 * (1 - t) * t * M[0] + t * t * B[0], (1 - t) * (1 - t) * A[1] + 2 * (1 - t) * t * M[1] + t * t * B[1]];
@@ -310,7 +312,7 @@ const Bite: React.FC<{ a: number; frame: number; p: string }> = ({ a, p }) => {
         );
       })}
       {/* проколы клыков */}
-      {PUNCT.map(([dx, dy], i) => {
+      {PUN.map(([dx, dy], i) => {
         const x = wx + dx, y = wy + dy, s = pop * (i < 2 ? 1.1 : 0.95);
         const tear = smoothClosed(blobPts([x, y], 15 * s, 12 * s, mulberry(70 + i), 8, 0.4));
         return (
