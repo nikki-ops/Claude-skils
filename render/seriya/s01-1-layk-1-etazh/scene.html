@@ -12,8 +12,10 @@ html,body{margin:0;height:100%;background:#000;overflow:hidden}
 #cnt{position:absolute;left:50%;top:1370px;transform:translate(-50%,0);background:#1a1d36;border:8px solid #ffd23a;border-radius:48px;color:#fff;font-size:92px;padding:10px 50px;white-space:nowrap;box-shadow:0 10px 30px rgba(0,0,0,.5);transform-origin:50% 50%}
 #cnt b{color:#ffd23a}
 #nick{position:absolute;left:50%;top:1525px;transform:translateX(-50%);color:#fff;font-size:58px;-webkit-text-stroke:10px #000;paint-order:stroke fill;white-space:nowrap}
-#you{position:absolute;left:50%;top:760px;transform:translate(-50%,-50%) scale(0);background:#5dff8a;color:#0d2a14;border:8px solid #fff;border-radius:40px;padding:16px 46px;text-align:center;font-size:96px;line-height:1.02;white-space:nowrap;box-shadow:0 0 60px 20px rgba(93,255,138,.55)}
+#you{position:absolute;left:50%;top:1380px;transform:translate(-50%,-50%) scale(0);background:#5dff8a;color:#0d2a14;border:8px solid #fff;border-radius:40px;padding:16px 46px;text-align:center;font-size:96px;line-height:1.02;white-space:nowrap;box-shadow:0 0 60px 20px rgba(93,255,138,.55)}
 #you small{display:block;font-size:50px;margin-top:6px}
+#bait{position:absolute;left:50%;top:470px;transform:translateX(-50%);background:rgba(20,22,40,.82);color:#fff;font-size:44px;padding:10px 30px;border-radius:26px;white-space:nowrap;border:4px solid #ffd23a}
+#cloud{position:absolute;inset:-200px;pointer-events:none;background:radial-gradient(circle at 30% 40%,#fff 0 18%,transparent 34%),radial-gradient(circle at 70% 55%,#fff 0 20%,transparent 36%),radial-gradient(circle at 45% 70%,#fff 0 22%,transparent 38%),radial-gradient(circle at 60% 25%,#fff 0 16%,transparent 32%),#f4f8ff;opacity:0}
 </style></head><body>
 <div id="stage">
  <iframe id="map" src="../../karta/index.html?video"></iframe>
@@ -21,7 +23,9 @@ html,body{margin:0;height:100%;background:#000;overflow:hidden}
  <div id="head">1 ЛАЙК = 1 ЭТАЖ 👍<small>каждый этаж — ник жителя</small></div>
  <div id="cnt">ЭТАЖ <b id="cn">0</b></div>
  <div id="nick"></div>
+ <div id="bait">👀 на крыше кто-то сидит…</div>
  <div id="you">ТВОЙ ЭТАЖ?<small>лайк + ник в комменты 👇</small></div>
+<div id="cloud"></div>
 </div>
 <script>
 // Шортс «1 лайк = 1 этаж» (≈12,5 с = 20 долей при 96 BPM, петля). Карта render/karta/index.html не меняется — башня добавляется в её сцену из iframe.
@@ -45,28 +49,43 @@ function floor(i,n){const g=new THREE.Group();const col=new THREE.Color(PAL[i%PA
 function signTex(){const c=cw.document.createElement('canvas');c.width=512;c.height=256;const x=c.getContext('2d');x.fillStyle='#5dff8a';x.fillRect(0,0,512,256);x.strokeStyle='#fff';x.lineWidth=16;x.strokeRect(8,8,496,240);x.fillStyle='#0d2a14';x.font='900 84px Rubik, Arial Black, Arial';x.textAlign='center';x.fillText('ТВОЙ',256,112);x.fillText('ЭТАЖ?',256,206);return new THREE.CanvasTexture(c)}
 function build(){TOWER=new THREE.Group();sc.add(TOWER);
  const L=cw.MP.L.filter(h=>h.n&&!h.site&&!h.bld&&!h.anon&&/^[A-Za-zА-Яа-яЁё0-9_.\-]{4,14}$/.test(h.n));const pick=[];const used=new Set();while(pick.length<NF){const h=L[Math.floor(rnd()*L.length)];if(!used.has(h.n)){used.add(h.n);pick.push(h.n)}}NICKS=pick;
- const base=new THREE.Mesh(new THREE.BoxGeometry(FW+3,.5,FW+3),new THREE.MeshLambertMaterial({color:0x4a4550}));base.position.set(CX,.25,CZ);sc.add(base);
+ const base=new THREE.Mesh(new THREE.BoxGeometry(FW*2,.3,FW*2),new THREE.MeshLambertMaterial({color:0xe6dcc4}));base.position.set(CX,.15,CZ);sc.add(base);
  for(let i=0;i<NF;i++)FLOORS.push(floor(i,NICKS[i]));
  // верхушка: пустая площадка с пунктиром и табличкой
  TOP=new THREE.Group();const pad=new THREE.Mesh(new THREE.BoxGeometry(FW+.6,.35,FW+.6),new THREE.MeshLambertMaterial({color:0x5a5560}));pad.position.y=.17;TOP.add(pad);
  const ed=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(FW,FH-.4,FW)),new THREE.LineDashedMaterial({color:0x5dff8a,dashSize:.8,gapSize:.5}));ed.computeLineDistances();ed.position.y=.35+(FH-.4)/2;TOP.add(ed);
  
- TOP.position.set(CX,NF*FH,CZ);TOP.visible=false;sc.add(TOP)}
+ // крошечный кот-мэр на углу верхушки (приманка — виден только в конце)
+ const cat=new THREE.Group(),cm=new THREE.MeshLambertMaterial({color:0xf2a23a}),dk=new THREE.MeshLambertMaterial({color:0x2a1a10}),wh=new THREE.MeshLambertMaterial({color:0xfff4e0});
+ const B=(g,w,h,d,m,x,y,z)=>{const o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);o.position.set(x,y,z);g.add(o);return o};
+ B(cat,.55,.5,.75,cm,0,.25,0);B(cat,.5,.45,.45,cm,0,.72,.22);B(cat,.12,.16,.08,cm,-.15,1.0,.22);B(cat,.12,.16,.08,cm,.15,1.0,.22);B(cat,.07,.07,.02,dk,-.1,.78,.45);B(cat,.07,.07,.02,dk,.1,.78,.45);B(cat,.18,.08,.03,wh,0,.64,.45);
+ const tail=B(cat,.1,.1,.5,cm,0,.4,-.5);tail.rotation.x=-.8;const paw=new THREE.Group();paw.position.set(.3,.5,.2);cat.add(paw);B(paw,.12,.4,.12,cm,0,.2,0);
+ const tie=B(cat,.08,.25,.02,new THREE.MeshLambertMaterial({color:0xd8202a}),0,.35,.38);
+ cat.position.set(FW/2-.9,.35,FW/2-.9);cat.rotation.y=.5;cat.scale.setScalar(1.15);TOP.add(cat);TOP.userData.paw=paw;
+ TOP.position.set(CX,NF*FH,CZ);TOP.visible=false;sc.add(TOP);
+ // убрать всё, что стоит на месте башни (только мелкие объекты, склеенные районы не трогаем)
+ const fb=new THREE.Box3(new THREE.Vector3(CX-FW,-1,CZ-FW),new THREE.Vector3(CX+FW,60,CZ+FW)),bb=new THREE.Box3(),sz=new THREE.Vector3();let hid=0;
+ sc.updateMatrixWorld(true);const skip=new Set([TOWER,TOP,base,...FLOORS]);
+ sc.traverse(o=>{if(!o.visible||skip.has(o)||o===sc)return;let p=o;while(p){if(skip.has(p))return;p=p.parent}if(!(o.isMesh||o.isGroup))return;bb.setFromObject(o);if(bb.isEmpty())return;bb.getSize(sz);if(sz.x>30||sz.z>30)return;if(bb.intersectsBox(fb)&&bb.min.y<40){o.visible=false;hid++}});
+ console.log('[башня] убрано объектов:',hid)}
 // высота верхушки к моменту t
 function topY(t){let n=0;for(const x of TF)if(t>=x)n++;return n*FH}
 function seek(t){t=((t%DUR)+DUR)%DUR;let n=0;
  FLOORS.forEach((f,i)=>{const t0=TF[i],on=t>=t0;f.visible=on;if(on){n++;const d=i<4?.22:i<12?.14:.09,k=cl((t-t0)/d,0,1);const bo=(1-k)*(1-k);f.position.y=i*FH+bo*FH*2.2;const sq=k<1?1+.12*Math.sin(k*Math.PI):1;f.scale.set(sq,1/sq,sq)}});
  const end=t>=T_END;TOP.visible=end;if(end){const k=cl((t-T_END)/.18,0,1);TOP.position.y=NF*FH+(1-k)*(1-k)*FH*2;}
  // камера: следит за верхушкой, плавно отъезжает и облетает
- const ty=Math.max(0,topY(t)-FH*.5),k1=sm(0,T_END,t),yaw=lerp(-.25,.55,k1)+Math.sin(t*.9)*.03,dist=lerp(34,58,sm(2.2,T_END,t))-sm(T_END,DUR,t)*22,up=dist*.6;
+ const ty=Math.max(0,topY(t)-FH*.5),k1=sm(0,T_END,t),yaw=lerp(-.25,.55,k1)+Math.sin(t*.9)*.03,dist=lerp(34,58,sm(2.2,T_END,t))-sm(T_END,T_END+.8,t)*30,up=dist*.6;
  let sy=0;if(n>0){const lt=TF[n-1],a=cl((t-lt)/.15,0,1);sy=(1-a)*(n<5?.5:.18)*Math.sin(a*20)}
- cam.position.set(CX+Math.sin(yaw)*dist,ty+up+sy+(end?sm(T_END,DUR,t)*8:0),CZ+Math.cos(yaw)*dist);cam.fov=lerp(55,50,k1);cam.updateProjectionMatrix();cam.lookAt(CX,ty+(end?sm(T_END,DUR,t)*2:0)+1,CZ);
+ const T_UP=DUR-.55,kin=1-sm(0,.45,t),kup=sm(T_UP,DUR,t);
+ cam.position.set(CX+Math.sin(yaw)*dist,ty+up+sy+kin*14+kup*10,CZ+Math.cos(yaw)*dist);cam.fov=lerp(55,50,k1);cam.updateProjectionMatrix();cam.lookAt(CX,ty+1+kup*60,CZ);
+ if(end&&TOP.userData.paw)TOP.userData.paw.rotation.z=t>T_END+.5?-2.2+Math.sin(t*14)*.5:0;
+ $('cloud').style.opacity=Math.max(kin,kup).toFixed(3);$('bait').style.display=t<T_END?'block':'none';
  R.render(sc,cam);
  // надписи
  const shown=end?NF:n;$('cn').textContent=shown;const pul=n>0?cl((t-TF[n-1])/.12,0,1):1;$('cnt').style.transform=`translate(-50%,0) scale(${1+(1-pul)*.12})`;
  $('nick').textContent=(!end&&n>0)?'@'+NICKS[n-1]:'';$('nick').style.display=n>0&&n<=12&&!end?'block':'none';
  const yk=sm(T_END,T_END+.25,t);$('you').style.transform=`translate(-50%,-50%) scale(${yk*(1+Math.sin(t*10)*.03*yk)})`;$('cnt').style.display=end?'none':'block'}
-function sfxList(){const L=[];TF.forEach((x,i)=>L.push([x+(i<4?.2:i<12?.12:.08),i<12?'pop':'tick',i<4?1:i<12?.8:.5]));L.push([T_END,'whoosh',.8]);L.push([T_END+.18,'ding',1]);return L}
+function sfxList(){const L=[];TF.forEach((x,i)=>L.push([x+(i<4?.2:i<12?.12:.08),i<12?'pop':'tick',i<4?1:i<12?.8:.5]));L.push([T_END,'whoosh',.8]);L.push([T_END+.18,'ding',1]);L.push([T_END+.5,'pop',.7]);L.push([DUR-.5,'swish',.8]);return L}
 function fit(){if(document.body.classList.contains('render'))return;const k=Math.min(innerWidth/W,innerHeight/H);$('stage').style.transform=`scale(${k})`;$('stage').style.left=(innerWidth-W*k)/2+'px'}
 addEventListener('resize',fit);fit();if(/[?&]render/.test(location.search)){document.body.classList.add('render');$('stage').style.transform='none'}
 $('map').addEventListener('load',()=>{cw=$('map').contentWindow;const iv=setInterval(()=>{if(!cw.MP)return;clearInterval(iv);
