@@ -137,7 +137,7 @@ function seek(t){const d=sm(3.2,5.0,t),wob=Math.sin(t*28)*.03*(d>0&&d<1?1:0);
  if(t<2.6){const k=sm(0,2.6,t);cam.fov=46;cam.position.set(lerp(-5.2,-4.6,k),lerp(1.5,1.6,k),lerp(9.5,8.7,k));cam.lookAt(lerp(-.4,0,k),lerp(2.4,2.3,k),-1.5);sp=[-2.6,3.4]}
  else{const k=sm(2.6,DUR,t);cam.fov=44;cam.position.set(lerp(-8.5,-7.8,k),lerp(3.6,3.3,k),lerp(10,9.2,k));cam.lookAt(lerp(0,.4,k),lerp(1.6,1.4,k),-2.2);sp=[-3.4,3.6]}
  cam.updateProjectionMatrix();
- SOL.position.set(sp[0],2.37,sp[1]);SOL.lookAt(cam.position.x,2.37,cam.position.z);shd.position.set(sp[0],.03,sp[1]);drawHero(px,{type:'us',face:t<3.7?'laugh':'shock',wave:t<2.6,t,talk:t<2.6});ptex.needsUpdate=true;
+ SOL.position.set(sp[0],2.37,sp[1]);SOL.lookAt(cam.position.x,2.37,cam.position.z);shd.position.set(sp[0],.03,sp[1]);drawHero(px,{type:'us',face:t<1.5?'smug':t<3.7?'laugh':'shock',wave:t<2.6,t,talk:t<2.6});ptex.needsUpdate=true;
  PUF.forEach(p=>{const ph=((t*1.5+p.d)%1),on=t>3.1&&t<5.3;p.m.visible=on;if(on){const r=ph*2.2*p.s;p.m.position.set(HERO.position.x-.2+Math.cos(p.a)*r,2.9*(1-d*.65)+ph*1.3,HERO.position.z+Math.sin(p.a)*r);p.m.material.opacity=.85*(1-ph);p.m.scale.setScalar(.7+ph*1.6)}});
  bokeh.uniforms.focus.value=cam.position.distanceTo(SOL.position)*.9;
  cam.layers.set(LINE);sc.overrideMaterial=NM;R.setRenderTarget(nrt);R.setClearColor(0x000000,1);R.clear();R.render(sc,cam);sc.overrideMaterial=null;cam.layers.set(2);const om=SOL.material;SOL.material=SOLM;R.setRenderTarget(mrt);R.clear();R.render(sc,cam);SOL.material=om;R.setRenderTarget(null);sc.overrideMaterial=null;cam.layers.enableAll();
