@@ -223,7 +223,9 @@ export const TetanusVideo: React.FC = () => {
   const frame = useCurrentFrame();
   return (
     <AbsoluteFill style={{ background: "#000" }}>
-      <Audio src={staticFile("tetanus_phonk.wav")} volume={0.9} />
+      {/* голос хука (golos/b01-stolbnyak-huk.mp3, 3,8 с) и музыка, приглушённая под ним */}
+      <Audio src={staticFile("tetanus_phonk.wav")} volume={(f) => (f < 130 ? 0.35 : interpolate(f, [130, 150], [0.35, 0.9], clamp))} />
+      <Audio src={staticFile("tetanus_hook.mp3")} volume={1} />
       <AbsoluteFill style={{ transform: shake(frame) }}>
         {SHOTS.map((s) => (
           <Sequence key={s.bar} from={s.bar * B} durationInFrames={B}>
