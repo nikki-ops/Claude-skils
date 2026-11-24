@@ -31,7 +31,7 @@ html,body{margin:0;background:#000;overflow:hidden}
 <div id="cnt" class="ov">ЖИТЕЛЕЙ: <b id="cn">0</b></div><div id="title" class="ov"></div><div id="steps" class="ov"><div>1 · ПАЛАТКА</div><div>2 · ДОМ</div><div>3 · ДОМ МЕЧТЫ</div></div>
 <div id="card" class="ov"></div><div id="bell" class="ov">🔔</div>
 <div id="phone" class="ov"><div class="row"><div class="av"></div><div class="inp" id="inp"></div></div><div style="text-align:right"><span class="send" id="send">ОТПРАВИТЬ</span></div></div>
-<div id="timer" class="ov">СНОС ЧЕРЕЗ <b id="tm">24:00:00</b></div><div id="sub" class="ov"></div></div>
+<div id="timer" class="ov">СНОС ЧЕРЕЗ <b id="tm">24:00:00</b></div><div id="sub" class="ov"></div><div id="flash" class="ov" style="inset:0;background:#fff;opacity:0"></div></div>
 <script src="zhiteli.js"></script>
 <script type="importmap">{"imports":{"three":"/render/_istochniki/three/build/three.module.js"}}</script>
 <script type="module">
@@ -129,61 +129,87 @@ function place(P,x,y,z,o){P.m.visible=P.sh.visible=true;P.m.position.set(x,y+1.9
 function hide(P){P.m.visible=P.sh.visible=false;P.tag.style.display='none'}
 function tagAt(P,show){if(!show){P.tag.style.display='none';return}const v=P.m.position.clone();v.y+=2.15;v.project(cam);P.tag.style.display='block';P.tag.style.left=((v.x*.5+.5)*W)+'px';P.tag.style.top=((-v.y*.5+.5)*H)+'px'}
 // ---------- текст озвучки (черновой тайминг до записи голоса) ----------
-const LINES=[[0,2,'Этот город <y>снесут</y> через 24 часа…'],[2,5,'…если в нём <y>никто</y> не поселится.'],[5,9,'Это <y>Прораб</y>. Он построил этот город один.'],[9,13,'И он <y>не справится</y> без тебя.'],[13,17,'Напиши свой <y>ник</y> в комментариях…'],[17,21,'…и кран поставит твой <y>дом</y> прямо перед бульдозером!'],[21,25,'Каждый дом отодвигает снос <y>на час</y>.'],[25,29,'Нужно всего <y>десять</y> жителей.'],[29,33,'Но кто сидит <y>за рулём</y>… никто не знает.'],[33,37,'<y>Подпишись</y> — узнаешь в следующей серии.'],[37,40,'Этот город <y>снесут</y> через 24 часа…']];
-const TITLES=[[2,5,'ЖИТЕЛЕЙ: <b>0</b>'],[13,17,'ПИШИ <b>НИК</b> 👇'],[21,25,'<b>+1 ЧАС</b>'],[25,29,'<b>1 / 10</b> ЖИТЕЛЕЙ'],[29,33,'КТО <b>ЗА РУЛЁМ</b>?'],[33,37,'<b>ПОДПИШИСЬ</b> 🔔']];
+// ================= v4: «Этот дом снесут…» — хук-разрушение, быстрый монтаж, растущая ставка =================
+const LINES=[[0,2,'Этот дом <y>снесут</y>…'],[2,4,'А <y>24 часа назад</y>…'],[4,6,'Прораб построил город. <y>Совсем один</y>.'],[6,8,'И тут приехал <y>бульдозер</y>.'],[8,10,'Сначала — <y>забор</y>!'],[10,12,'Потом — <y>стену</y>!'],[12,14,'Прораб <y>не справится</y> без тебя.'],[14,17,'Напиши свой <y>ник</y> в комментариях…'],[17,20,'…и кран поставит твой <y>дом</y> прямо на его пути!'],[20,23,'Каждый дом — это <y>щит</y>. Плюс час до сноса!'],[23,25,'Нужно всего <y>десять</y> жителей.'],[25,28,'Но кто <y>за рулём</y>… никто не знает.'],[28,31,'А бульдозер уже <y>разгоняется</y>…'],[31,34,'<y>Подпишись</y> — узнаешь, успели ли мы.'],[37,40,'Этот дом <y>снесут</y>…']];
+const BIG=(t,c)=>`<span style="font-size:190px;color:${c}">${t}</span>`;
+const TITLES=[[.4,2,BIG('СНОС!','#ff2a1a')],[2,2.7,'24 ЧАСА<br><b>НАЗАД…</b>'],[8,10,'<b>ЗАБОР</b> 💥'],[10,12,'<b>СТЕНА</b> 💥'],[14,17,'ПИШИ <b>НИК</b> 👇'],[20,23,'<b>+1 ЧАС</b> ⏳'],[23,25,'<b>1 / 10</b> ЖИТЕЛЕЙ'],[25,28,'КТО <b>ЗА РУЛЁМ</b>?'],[28,31,BIG('РАЗГОН!','#ffd23a')],[31,34,'<b>ПОДПИШИСЬ</b> 🔔'],[37.6,40,BIG('СНОС!','#ff2a1a')]];
 const DUR=40;const $=id=>document.getElementById(id);
-// раскладка: табличка (0,0,-2) лицом к +z; бульдозер позади таблички, едет к ней (лицом к +z)
-// раскладка v3: табличка на въезде (0,0,9) → за ней дом Прораба (0,0,-3); бульдозер едет справа (+x) на дом Прораба.
+const DZ=-1.2;// линия бульдозера: накрывает забор (z≈0) и бок дома Прораба
+// дом Прораба — детали откреплены от группы, чтобы ломать по одной
 const HB=makeHouse(THREE,{nick:'Прораб',floors:2,porch:true});HB.position.set(0,0,-3);sc.add(HB);
 {const nt=ctex(512,128,(x,w,h)=>{x.fillStyle='#e8801a';x.fillRect(0,0,w,h);x.strokeStyle='#fff';x.lineWidth=10;x.strokeRect(5,5,w-10,h-10);x.fillStyle='#fff';x.font='900 72px Inter, Arial';x.textAlign='center';x.textBaseline='middle';x.fillText('ПРОРАБ',w/2,h/2+4)});const p=new THREE.Mesh(new THREE.PlaneGeometry(2.2,.55),new THREE.MeshBasicMaterial({map:nt}));p.position.set(0,3.9,1.53);HB.add(p)}
-const DEB=[];for(let i=0;i<16;i++){const m=new THREE.Mesh(new THREE.BoxGeometry(.25,.12,.5),L(i%3?0x8a5a32:0xf6f2ea));m.visible=false;sc.add(m);DEB.push({m,vx:(Math.random()*-1-1)*3,vy:3+Math.random()*4,vz:(Math.random()-.5)*4,r:Math.random()*6})}
+sc.updateMatrixWorld(true);const PARTS=[];HB.traverse(o=>{if(o.isMesh)PARTS.push(o)});
+let SD=31;const r1=()=>{SD=(SD*16807)%2147483647;return (SD-1)/2147483646};
+const tipX=(t)=>dozX(t)-3.55;
+PARTS.forEach(o=>{sc.attach(o);const b=new THREE.Box3().setFromObject(o),c=b.getCenter(new THREE.Vector3());
+ o.userData.p0=o.position.clone();o.userData.q0=o.quaternion.clone();o.userData.c=c;o.userData.v=new THREE.Vector3(-(2+r1()*5),3+r1()*5,(r1()-.5)*6);o.userData.w=new THREE.Vector3(r1()*8,r1()*8,r1()*8);
+ let ct=99;if(c.z>-3.9&&c.z<1.6)for(let tt=6;tt<=12;tt+=.02){if(tipX(tt)<c.x-.05){ct=tt;break}}o.userData.ct=ct;
+ o.userData.ta=(()=>{const v=o.userData.v,y0=c.y;return (v.y+Math.sqrt(v.y*v.y+2*9.8*Math.max(.05,y0-.15)))/9.8})()});
+const Q=new THREE.Quaternion(),E=new THREE.Euler();
+function partAt(o,a,boost){const U=o.userData;if(a<=0){o.position.copy(U.p0);o.quaternion.copy(U.q0);return}
+ const v=U.v.clone().multiplyScalar(boost),ta=(v.y+Math.sqrt(v.y*v.y+2*9.8*Math.max(.05,U.c.y-.15)))/9.8,aa=Math.min(a,ta);
+ o.position.set(U.p0.x+v.x*aa,U.p0.y+v.y*aa-4.9*aa*aa,U.p0.z+v.z*aa);E.set(U.w.x*aa,U.w.y*aa,U.w.z*aa);Q.setFromEuler(E);o.quaternion.copy(U.q0).premultiply(Q)}
+const DEB=[];for(let i=0;i<22;i++){const m=new THREE.Mesh(new THREE.BoxGeometry(.25,.12,.5),L(i%3?0x8a5a32:0xf6f2ea));m.visible=false;sc.add(m);DEB.push({m,vx:-(1+r1()*3)*1.4,vy:3+r1()*4,vz:(r1()-.5)*4,r:r1()*6})}
+const SMK=[];for(let i=0;i<10;i++){const m=new THREE.Mesh(new THREE.SphereGeometry(.45,8,6),new THREE.MeshBasicMaterial({color:0x3a3a40,transparent:true,depthWrite:false}));m.visible=false;sc.add(m);SMK.push({m,ph:i/10})}
 const PLOTPOS=[[-6.5,-3],[-12.5,-3],[-18,-3],[-12.5,6],[-6.5,6],[0,6],[6.3,6],[12.5,6],[18,6]];
-const SH=[[0,1.4,V(0,3.6,19),V(0,3.6,17.8),V(0,3.6,9),V(0,3.6,9)],[1.4,2,V(0,3.6,17.8),V(1,9,17),V(0,3.6,9),V(3,1.5,-3)],
- [2,5,V(1,9,17),V(-3,8,18),V(3,1.5,-3),V(5,1.5,-3)],[5,9,V(-3,2.8,7),V(-2,2.8,6),V(1.5,2,-1.5),V(2.6,2,-1.8)],[9,13,V(1,2.6,6.5),V(1.6,2.4,5.5),V(3.2,2,-2.5),V(3.4,1.8,-2.5)],
- [13,17,V(-2,6,14),V(-1,5.5,13),V(5,1.6,-3),V(6,1.6,-3)],[17,21,V(14,7,9),V(13,6,8),V(7,2.4,-3),V(8,1.6,-3)],[21,25,V(4,4,10),V(2,3.5,9),V(5,1.6,-2),V(8,1.6,-3)],
- [25,29,null,null,V(0,0,1.5),V(0,0,1.5)],[29,33,V(16.9,3.95,-2.4),V(17.9,3.85,-3),V(21,3.8,-3),V(21,3.8,-3)],[33,37,V(-2.5,2.8,6.5),V(-2,2.8,6),V(1,2.6,-1),V(1,2.6,-1)],
- [37,40,V(1,9,17),V(0,3.6,19),V(3,1.5,-3),V(0,3.6,9)]];
+// x бульдозера (нос отвала = x-3.55)
+function dozX(t){if(t<.5)return lerp(8,5.2,sm(0,.45,t));if(t<2)return 5.2;if(t<4)return 30;if(t<6)return lerp(30,13,sm(4,6,t));if(t<8)return lerp(13,7,sm(6,8,t));
+ if(t<10)return lerp(7,5.8,sm(8,9.6,t));if(t<12)return lerp(5.8,5,sm(10,11.6,t));if(t<14)return 5;if(t<17)return lerp(5,13.5,sm(14.2,16.4,t));
+ if(t<20)return t<18.5?13.5:lerp(13.5,12.2,sm(18.5,19,t));if(t<23)return lerp(12.2,20,sm(20.2,22,t));if(t<28)return 20;if(t<31)return lerp(20,18,sm(28.5,31,t));
+ if(t<34)return 18;if(t<37)return lerp(18,14,sm(34,37,t));return lerp(14,8,sm(37,40,t))}
+const SH=[[0,.5,V(6,1.2,7),V(5.6,1.3,6.4),V(2,1.8,-1.5),V(2,1.8,-1.5)],[.5,2,V(-4,4,12),V(-5,6,15),V(0,2,-2),V(0,1.5,-2)],[2,2.7,V(0,3.6,19),V(0,3.6,17.4),V(0,3.6,9),V(0,3.6,9)],
+ [2.7,4,V(-8,10,14),V(-3,7,10),V(0,2,-3),V(0,2,-3)],[4,6,V(-2.6,2.8,7),V(-2,2.8,6),V(-.7,2.3,0),V(-.7,2.3,0)],[6,8,V(1.5,3,9.5),V(2.5,2.6,8.5),V(12,1.8,DZ),V(8,1.8,DZ)],
+ [8,10,V(4.5,2,6),V(4,2,5),V(2.5,1,-.5),V(2.3,1,-.5)],[10,12,V(-1,3.5,8),V(0,3.2,7),V(2,2.5,-2),V(1.8,2.5,-2)],[12,14,V(3.4,2.4,6.2),V(3,2.4,5.4),V(1.4,2,1.2),V(1.4,2,1.2)],
+ [14,17,V(-2,7,15),V(-1,6,13),V(4,1,-2),V(6,1,-2)],[17,20,V(14,6,10),V(12,5,9),V(7,2.4,DZ),V(8,1.6,DZ)],[20,23,V(3,3.5,9),V(1.5,3,8),V(4,1.8,-1),V(7,1.8,-1)],
+ [23,25,null,null,V(0,0,1.5),V(0,0,1.5)],[25,28,V(16.9,3.95,DZ+.6),V(17.9,3.85,DZ),V(21,3.8,DZ),V(21,3.8,DZ)],[28,31,V(2,1.3,4),V(3,1.2,3.5),V(18,2.5,DZ),V(18,2.5,DZ)],
+ [31,34,V(-2.5,2.8,6.5),V(-2,2.8,6),V(-.4,2.6,.4),V(-.4,2.6,.4)],[34,37,V(6,1,3),V(6.5,1.1,2.5),V(17,2,DZ),V(14,2,DZ)],[37,40,V(5,2,9),V(6,1.2,7),V(2,1.8,-1.5),V(2,1.8,-1.5)]];
+const CUTS=[.5,2,2.7,4,6,8,10,12,14,17,20,23,25,28,31,34,37];
 const clock=(sec)=>{sec=Math.max(0,Math.floor(sec));const h=Math.floor(sec/3600),m=Math.floor(sec%3600/60),s2=sec%60;return [h,m,s2].map(v=>String(v).padStart(2,'0')).join(':')};
+const HITS=[.45,9.1,10.6,19];
 function seek(t){t=((t%DUR)+DUR)%DUR;const s=SH.find(x=>t>=x[0]&&t<x[1])||SH[SH.length-1];const k=sm(s[0],s[1],t);
- if(s[2]){cam.position.lerpVectors(s[2],s[3],k)}else{const a=lerp(-.7,.5,k);cam.position.set(Math.sin(a)*25,23,1.5+Math.cos(a)*25)}
- // удары: тряска камеры
- let hit=0;for(const h0 of[10.2,19.3]){const d=t-h0;if(d>=0&&d<.6)hit=Math.max(hit,(1-d/.6)*.25)}
- cam.position.x+=Math.sin(t*47)*hit;cam.position.y+=Math.sin(t*1.3)*.03+Math.cos(t*39)*hit;cam.lookAt(new THREE.Vector3().lerpVectors(s[4],s[5],k));cam.updateProjectionMatrix();
- const U=DOZ.userData;DOZ.rotation.y=-Math.PI/2;
- // x бульдозера (нос отвала = x-3.55): едет к дому Прораба → упирается → откатывается разогнаться → таран в новый дом → назад → снова едет
- let dx=26;if(t<2)dx=lerp(15,13,t/2);else if(t<5)dx=lerp(13,9.5,sm(2,5,t));else if(t<9)dx=lerp(9.5,7.4,sm(5,9,t));else if(t<13)dx=lerp(7.4,6.85,sm(9,12,t));
- else if(t<17)dx=lerp(6.85,14,sm(13.4,16.5,t));else if(t<21)dx=t<18.6?14:lerp(14,12.45,sm(18.6,19.3,t));else if(t<25)dx=lerp(12.45,20,sm(21.3,23.5,t));else if(t<33)dx=20;else if(t<37)dx=lerp(20,16,sm(33.5,37,t));else dx=lerp(16,15,(t-37)/3);
- const eng=Math.sin(t*38)*.05;DOZ.position.set(dx,Math.abs(eng)*.4,-3+eng);U.blade.position.y=1.2;U.blade.rotation.x=0;
- U.beacon.material.color.setHSL(.07,1,.45+.25*Math.sign(Math.sin(t*12)));U.bl.intensity=Math.sin(t*12)>0?12:2;
- U.catM.visible=t>=30.8&&t<31.2;U.glass.opacity=U.catM.visible?.25:.55;
+ if(s[2])cam.position.lerpVectors(s[2],s[3],k);else{const a=lerp(-.7,.5,k);cam.position.set(Math.sin(a)*25,23,1.5+Math.cos(a)*25)}
+ let hit=0;for(const h0 of HITS){const d=t-h0;if(d>=0&&d<.6)hit=Math.max(hit,(1-d/.6)*.3)}
+ const rev=t>=28&&t<31?.06:0;cam.position.x+=Math.sin(t*47)*(hit+rev);cam.position.y+=Math.sin(t*1.3)*.03+Math.cos(t*39)*(hit+rev);
+ // резкий наезд в начале каждого плана
+ const cut=CUTS.filter(c=>c<=t).pop()??0,ca=t-cut;cam.fov=48-8*Math.exp(-ca*6)*(ca<.4?1:0);
+ cam.lookAt(new THREE.Vector3().lerpVectors(s[4],s[5],k));cam.updateProjectionMatrix();
+ $('flash').style.opacity=(ca<.08&&[.5,2,2.7,17,37].includes(cut))?(1-ca/.08)*.8:0;
+ const U=DOZ.userData,dx=dozX(t);DOZ.rotation.y=-Math.PI/2;const eng=Math.sin(t*38)*(.04+rev);DOZ.position.set(dx,Math.abs(eng)*.4,DZ+eng);U.blade.position.y=1.2;U.blade.rotation.x=0;
+ U.beacon.material.color.setHSL(.07,1,.45+.25*Math.sign(Math.sin(t*12)));U.bl.intensity=Math.sin(t*12)>0?12:2;U.catM.visible=t>=26.3&&t<26.7;U.glass.opacity=U.catM.visible?.25:.55;
  SIGN.position.set(0,0,9);SIGN.rotation.set(0,0,0);TUMB.visible=CRATE.visible=TENT.visible=ROCKET.visible=false;
- // дом Прораба трясётся при давлении
- const press=t>=9&&t<13?.025*Math.sin(t*30):0;HB.rotation.z=press+(t>=10.2&&t<10.8?.05*(1-(t-10.2)/.6)*Math.sin(t*60):0);
+ // разрушение дома Прораба: в хуке — всё взрывается; в истории — по мере прохода отвала
+ PARTS.forEach(o=>{const U2=o.userData;if(t<2){const pre=U2.ct<12;partAt(o,pre?9:(t-.45),pre?1:1.8)}else if(t<6)partAt(o,0,1);else partAt(o,t-U2.ct,1)});
  // Прораб
- if(t<5)hide(BOSS);
- else if(t<9){const run=sm(5.2,7,t);place(BOSS,lerp(-.7,2.9,run),0,lerp(.4,-1.5,run),{t,mood:'shock'});BOSS.m.rotation.z=0;tagAt(BOSS,true)}
- else if(t<13){const tip=dx-3.55;place(BOSS,tip-.5,0,-1.5,{t,mood:'shock'});BOSS.m.rotation.z=-.14;tagAt(BOSS,true)}
- else if(t<17){place(BOSS,2.9,0,-1.5,{t,mood:'smile',wave:true});BOSS.m.rotation.z=0;tagAt(BOSS,false)}
- else if(t<25){place(BOSS,-.7,0,.5,{t,mood:t<19.3?'shock':'laugh',wave:t>=21});BOSS.m.rotation.z=0;tagAt(BOSS,true)}
- else if(t>=33&&t<37){place(BOSS,-.7,0,.5,{t,mood:'smile',wave:true});BOSS.m.rotation.z=0;tagAt(BOSS,true)}else hide(BOSS);
+ if(t<.45)hide(BOSS);else if(t<2){const a=t-.45;place(BOSS,-.7-a*4,Math.max(0,2.5*a-3*a*a)*2,1.2+a*2,{t,mood:'shock'});BOSS.m.rotation.z=a*9;tagAt(BOSS,false)}
+ else if(t<4)hide(BOSS);else if(t<6){place(BOSS,-.7,0,.5,{t,mood:'smile',wave:true});BOSS.m.rotation.z=0;tagAt(BOSS,true)}
+ else if(t<12){place(BOSS,-.7,0,.5,{t,mood:'shock'});BOSS.m.rotation.z=0;tagAt(BOSS,true)}
+ else if(t<14){place(BOSS,1.1,0,1.8,{t,mood:'shock'});BOSS.m.rotation.z=-.16;tagAt(BOSS,true)}
+ else if(t<23){place(BOSS,-.7,0,.9,{t,mood:t<19?'shock':'laugh',wave:t>=20});BOSS.m.rotation.z=0;tagAt(BOSS,t>=17)}
+ else if(t>=31&&t<34){place(BOSS,-.7,0,.9,{t,mood:'smile',wave:true});BOSS.m.rotation.z=0;tagAt(BOSS,true)}else hide(BOSS);
  hide(NEW);
- // новый дом: кран опускает его между бульдозером и домом Прораба
- const MH=CRANE.userData.MH;CRANE.position.set(6.3,0,-10.5);CRANE.rotation.y=Math.PI/2;CRANE.visible=t>=16.5&&t<21;CABLE.visible=t>=16.5&&t<18.6;HOUSE.visible=t>=16.5;
- if(HOUSE.visible){const k2=sm(16.8,18.4,t);HOUSE.position.set(6.3,(1-k2)*10,-3);HOUSE.rotation.y=Math.sin(t*3)*.05*(1-k2);HOUSE.rotation.z=t>=19.3&&t<20?.06*(1-(t-19.3)/.7)*Math.sin(t*60):0;const top=HOUSE.position.y+3.7;CABLE.scale.y=Math.max(.01,MH+.6-top);CABLE.position.set(6.3,top+(MH+.6-top)/2,-3)}
- // пыль и щепки на ударах
- PUFF.forEach(p=>{let a=-1,cx=0;if(t>=10.2&&t<11.1){a=t-10.2;cx=3.3}else if(t>=18.4&&t<19.3){a=t-18.4;cx=6.3}else if(t>=19.3&&t<20.2){a=t-19.3;cx=8.9}p.m.visible=a>=0;if(a>=0){const r=1+a*4*p.s;p.m.position.set(cx+Math.cos(p.a)*r*.5,.3+a*1.2,-3+Math.sin(p.a)*r);p.m.material.opacity=.8*(1-a/.9);p.m.scale.setScalar(.6+a*1.6)}});
- DEB.forEach(d=>{let a=-1,cx=0;if(t>=10.2&&t<11.4){a=t-10.2;cx=3}else if(t>=19.3&&t<20.5){a=t-19.3;cx=8.6}d.m.visible=a>=0;if(a>=0){d.m.position.set(cx+d.vx*a,1+d.vy*a-4.9*a*a,-3+d.vz*a);d.m.rotation.set(d.r*a*3,d.r*a*2,0)}});
+ // кран + дом зрителя
+ const MH=CRANE.userData.MH;CRANE.position.set(6.3,0,DZ-7.5);CRANE.rotation.y=Math.PI/2;CRANE.visible=t>=16.5&&t<20;CABLE.visible=t>=16.5&&t<18.4;HOUSE.visible=t>=16.5&&t<37;
+ if(HOUSE.visible){const k2=sm(16.8,18.3,t);HOUSE.position.set(6.3,(1-k2)*10,DZ);HOUSE.rotation.y=Math.sin(t*3)*.05*(1-k2);HOUSE.rotation.z=t>=19&&t<19.7?.06*(1-(t-19)/.7)*Math.sin(t*60):0;const top=HOUSE.position.y+3.7;CABLE.scale.y=Math.max(.01,MH+.6-top);CABLE.position.set(6.3,top+(MH+.6-top)/2,DZ)}
+ // пыль, щепки, выхлоп
+ PUFF.forEach(p=>{let a=-1,cx=0;for(const [h0,x0] of [[.45,1.8],[9.1,2.3],[10.6,1.6],[18.3,6.3],[19,8.6]])if(t>=h0&&t<h0+.9){a=t-h0;cx=x0}
+  p.m.visible=a>=0;if(a>=0){const r=1+a*4*p.s;p.m.position.set(cx+Math.cos(p.a)*r*.5,.3+a*1.2,DZ+Math.sin(p.a)*r);p.m.material.opacity=.8*(1-a/.9);p.m.scale.setScalar(.6+a*1.6)}});
+ DEB.forEach(d=>{let a=-1,cx=0;for(const [h0,x0] of [[.45,1.8],[9.1,2.3],[10.6,1.6],[19,8.6]])if(t>=h0&&t<h0+1.2){a=t-h0;cx=x0}d.m.visible=a>=0;if(a>=0){d.m.position.set(cx+d.vx*a,1+d.vy*a-4.9*a*a,DZ+d.vz*a);d.m.rotation.set(d.r*a*3,d.r*a*2,0)}});
+ SMK.forEach(m=>{const on=(t>=28&&t<31)||(t>=34);m.m.visible=on;if(on){const a=(t*1.5+m.ph)%1;m.m.position.set(dx+2.6+a*1.5,4.1+a*3,0);m.m.scale.setScalar(.5+a*2);m.m.material.opacity=.7*(1-a)}});
  CONF.forEach(c=>c.m.visible=false);
- PLOTS.forEach((p,i)=>{p.visible=t>=25&&t<29&&i<PLOTPOS.length;if(p.visible){p.position.set(PLOTPOS[i][0],.08,PLOTPOS[i][1]);const pu=.5+.5*Math.sin(t*6+i);p.material.color.setHSL(.13,1,.5+.3*pu);p.scale.setScalar(1+.08*pu)}});
- // таймер
- let tsec=24*3600-t*37;if(t>=21)tsec+=3600*sm(21.3,22.3,t);$('tm').textContent=clock(tsec);$('timer').style.transform=`translateX(-50%) scale(${t>=21&&t<22.5?1+.15*Math.sin((t-21)*8):1})`;$('timer').style.display=t<13||t>=17?'block':'none';
- const ti=TITLES.find(x=>t>=x[0]&&t<x[1]);$('title').innerHTML=ti?ti[2]:'';$('title').style.transform=`scale(${ti?1+.12*(1-sm(ti[0],ti[0]+.25,t)):1})`;$('title').style.top='260px';
+ PLOTS.forEach((p,i)=>{p.visible=t>=23&&t<25&&i<PLOTPOS.length;if(p.visible){p.position.set(PLOTPOS[i][0],.08,PLOTPOS[i][1]);const pu=.5+.5*Math.sin(t*6+i);p.material.color.setHSL(.13,1,.5+.3*pu);p.scale.setScalar(1+.08*pu)}});
+ // таймер: в хуке 00:00:00 мигает
+ if(t<2.7){$('tm').textContent='00:00:00';$('timer').style.opacity=Math.sin(t*20)>0?1:.35}else{let tsec=24*3600-(t-2.7)*37;if(t>=20)tsec+=3600*sm(20.3,21.3,t);$('tm').textContent=clock(tsec);$('timer').style.opacity=1}
+ $('timer').style.transform=`translateX(-50%) scale(${t>=20&&t<21.5?1+.15*Math.sin((t-20)*8):1})`;$('timer').style.display=t<14||t>=17?'block':'none';
+ const ti=TITLES.find(x=>t>=x[0]&&t<x[1]);$('title').innerHTML=ti?ti[2]:'';$('title').style.transform=`scale(${ti?1+.25*(1-sm(ti[0],ti[0]+.2,t)):1})`;$('title').style.top='260px';
  const li=LINES.find(x=>t>=x[0]&&t<x[1]);$('sub').innerHTML=li?li[2]:'';
  $('cnt').style.display='none';$('steps').style.display='none';$('card').style.display='none';
- $('bell').style.display=t>=33&&t<37?'block':'none';$('bell').style.transform=`translate(-50%,0) rotate(${Math.sin(t*14)*18}deg)`;
- const ph=t>=13&&t<17;$('phone').style.top=(ph?lerp(1920,1380,sm(13,13.5,t)):1920)+'px';const nick='@ТВОЙ_НИК';$('inp').textContent=ph?nick.slice(0,Math.floor(cl((t-13.6)/1.6,0,1)*nick.length)):'';$('send').style.transform=`scale(${t>=16&&t<16.3?.85:1})`;
+ $('bell').style.display=t>=31&&t<34?'block':'none';$('bell').style.transform=`translate(-50%,0) rotate(${Math.sin(t*14)*18}deg)`;
+ const ph=t>=14&&t<17;$('phone').style.top=(ph?lerp(1920,1380,sm(14,14.4,t)):1920)+'px';const nick='@ТВОЙ_НИК';$('inp').textContent=ph?nick.slice(0,Math.floor(cl((t-14.5)/1.5,0,1)*nick.length)):'';$('send').style.transform=`scale(${t>=16.3&&t<16.6?.85:1})`;
  $('sub').style.top=ph?'1180px':'1400px';
  WORLD.tick(t);R.render(sc,cam)}
+// план звука: события и обороты двигателя (для генератора SFX)
+window.audioPlan=()=>{const ev=[];HITS.forEach(h=>ev.push([h,'crash',1]));CUTS.forEach(c=>ev.push([c,'whoosh',.5]));ev.push([18.3,'thud',.9],[20.3,'ding',.7],[31,'ding',.8],[26.3,'sting',.8],[28.2,'horn',.9],[34,'horn',.9]);
+ for(let s=3;s<37;s++)ev.push([s,'tick',.25]);const eng=[];for(let t=0;t<DUR;t+=.05){const v=Math.abs(dozX(t+.05)-dozX(t))/.05;eng.push(+(Math.min(1,.25+v/8)*(dozX(t)<29?1:0)).toFixed(3))}return {dur:DUR,events:ev,engine:eng,step:.05}};
 window.seek=seek;window.DUR=DUR;seek(.5);window.READY=true;
 }catch(e){window.SCENE_ERR=e.stack||String(e)}
 </script></body></html>
