@@ -56,3 +56,21 @@ window.drawHero=function(x,o){const W=512,H=1280;x.clearRect(0,0,W,H);x.lineJoin
  if(o.type==='thief'){x.fillStyle='#15161a';x.beginPath();x.ellipse(HX,HY-HR*.5,HR*.98,HR*.58,0,Math.PI,0);x.closePath();x.fill();x.stroke();x.beginPath();x.ellipse(HX+HR*.5,HY-HR*.5,HR*.62,HR*.11,0,0,7);x.fill();x.stroke()}
 };
 })();
+
+// «Рисованный» вид поверх векторной фигуры: дрожащая неровная линия (SVG feTurbulence + feDisplacementMap),
+// мягкость 0,7 px, бумажно-гуашевая фактура и мягкий объём (свет слева-сверху, тень справа) только внутри фигуры.
+(function(){
+let off=null,tex=null;
+function ensureFilter(){if(document.getElementById('heroWob'))return;const ns='http://www.w3.org/2000/svg',s=document.createElementNS(ns,'svg');s.setAttribute('width','0');s.setAttribute('height','0');s.style.position='absolute';
+ s.innerHTML='<filter id="heroWob" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="3" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="5" xChannelSelector="R" yChannelSelector="G" result="d"/><feGaussianBlur in="d" stdDeviation="0.7"/></filter>';document.body.appendChild(s)}
+function makeTex(){const c=document.createElement('canvas');c.width=512;c.height=1280;const g=c.getContext('2d'),im=g.createImageData(512,1280);let sd=7;
+ for(let i=0;i<im.data.length;i+=4){sd=(sd*16807)%2147483647;const v=128+((sd&255)-128)*0.35;im.data[i]=im.data[i+1]=im.data[i+2]=v;im.data[i+3]=255}g.putImageData(im,0,0);
+ g.globalCompositeOperation='overlay';for(let k=0;k<60;k++){sd=(sd*16807)%2147483647;g.fillStyle=`rgba(${sd%2?255:0},${sd%2?255:0},${sd%2?255:0},.05)`;g.beginPath();g.ellipse(sd%512,(sd>>9)%1280,20+sd%40,8+sd%20,(sd%31)/10,0,7);g.fill()}return c}
+window.drawHeroStyled=function(x,o){ensureFilter();if(!off){off=document.createElement('canvas');off.width=512;off.height=1280}if(!tex)tex=makeTex();
+ const g=off.getContext('2d');drawHero(g,o);
+ // объём: свет слева-сверху, тень справа-снизу — только по непрозрачным пикселям
+ g.save();g.globalCompositeOperation='source-atop';
+ const lg=g.createLinearGradient(80,0,440,0);lg.addColorStop(0,'rgba(255,250,220,.16)');lg.addColorStop(.55,'rgba(0,0,0,0)');lg.addColorStop(1,'rgba(30,10,0,.22)');g.fillStyle=lg;g.fillRect(0,0,512,1280);
+ g.globalAlpha=.35;g.globalCompositeOperation='source-atop';g.drawImage(tex,0,0);g.restore();
+ x.clearRect(0,0,512,1280);x.save();x.filter='url(#heroWob)';x.drawImage(off,0,0);x.restore()};
+})();
