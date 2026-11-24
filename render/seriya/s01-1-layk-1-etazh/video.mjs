@@ -20,15 +20,15 @@ const C=await p.evaluate(()=>({dur:window.DUR}));
 if(KADRY){const dir=path.join(ROOT,'render/_istochniki/s01');fs.mkdirSync(dir,{recursive:true});for(const t of KADRY.split(',').map(Number)){await p.evaluate(t=>seek(t),t);await p.waitForTimeout(150);await p.screenshot({path:path.join(dir,`k-${String(t).replace('.','_')}.png`)})}
  console.log('кадры →',dir);await b.close();srv.close();process.exit(0)}
 fs.mkdirSync(path.dirname(OUT),{recursive:true});
-let AUD=null;const VOICE=null;
+let AUD=null;const VOICE=path.join(ROOT,'golos/s01-1-layk-1-etazh.mp3');
 if(!process.argv.includes('--bez-zvuka')){// звук: голос + музыка (muzyka/rost-96bpm.mp3, своя) + SFX сцены → одна дорожка
  const tmp=path.join(ROOT,'render/_istochniki/s01');fs.mkdirSync(tmp,{recursive:true});
  fs.writeFileSync(path.join(tmp,'sfx.json'),JSON.stringify(await p.evaluate(()=>sfxList())));
  execFileSync('python3',[path.join(HERE,'../13-vse-niki/zvuk.py'),path.join(tmp,'sfx.json'),String(C.dur),path.join(tmp,'sfx.wav')],{stdio:'inherit'});
  const MUS=path.join(ROOT,'muzyka/rost-96bpm.mp3'),ins=[],fl=[];let k=0;
  if(VOICE){ins.push('-i',VOICE);fl.push(`[${k}:a]aresample=44100,aformat=channel_layouts=stereo,volume=1.0[v]`);k++}
- if(fs.existsSync(MUS)){ins.push('-stream_loop','-1','-i',MUS);fl.push(`[${k}:a]aresample=44100,aformat=channel_layouts=stereo,atrim=0:${C.dur},afade=t=in:d=0.02,afade=t=out:st=${(C.dur-.03).toFixed(2)}:d=0.03,volume=0.55[m]`);k++}
- ins.push('-i',path.join(tmp,'sfx.wav'));fl.push(`[${k}:a]volume=0.6[s]`);k++;
+ if(fs.existsSync(MUS)){ins.push('-stream_loop','-1','-i',MUS);fl.push(`[${k}:a]aresample=44100,aformat=channel_layouts=stereo,atrim=0:${C.dur},afade=t=in:d=0.02,afade=t=out:st=${(C.dur-.03).toFixed(2)}:d=0.03,volume=0.22[m]`);k++}
+ ins.push('-i',path.join(tmp,'sfx.wav'));fl.push(`[${k}:a]volume=0.45[s]`);k++;
  const tags=fl.map(x=>x.match(/\[(\w)\]$/)[0]).join('');
  AUD=path.join(tmp,'mix.wav');execFileSync('ffmpeg',['-v','error','-y',...ins,'-filter_complex',fl.join(';')+`;${tags}amix=inputs=${k}:normalize=0,loudnorm=I=-14:TP=-1.5:LRA=9`,'-t',String(C.dur),'-ar','44100',AUD],{stdio:'inherit'});
  console.log('звук:',VOICE?'голос + ':'',fs.existsSync(MUS)?'музыка + ':'','SFX →',AUD)}

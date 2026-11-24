@@ -29,12 +29,15 @@ html,body{margin:0;height:100%;background:#000;overflow:hidden}
 </div>
 <script>
 // Шортс «1 лайк = 1 этаж» (≈12,5 с = 20 долей при 96 BPM, петля). Карта render/karta/index.html не меняется — башня добавляется в её сцену из iframe.
-const W=1080,H=1920,BEAT=60/96,DUR=20*BEAT,CX=162,CZ=-84,FH=3.1,FW=9;
+const W=1080,H=1920,BEAT=60/96,DUR=13.3,CX=162,CZ=-84,FH=3.1,FW=9;
 const $=id=>document.getElementById(id);
 let cw,THREE,sc,cam,R,TOWER,FLOORS=[],TOP,SIGN,NICKS=[];
 // расписание этажей: доли 1–4 по одному, 5–8 по 2, 9–13 по 4, 14–17 по 8 → ровно в ритм
-const TF=[];{let b=0;const add=(n,per)=>{for(let i=0;i<n;i++)for(let k=0;k<per;k++)TF.push(.05+(b+i+k/per)*BEAT);b+=n};add(4,1);add(4,2);add(5,4);add(4,8)}
-const NF=TF.length,T_END=.05+17*BEAT;// после 17-й доли — верхушка «ТВОЙ ЭТАЖ?»
+// голос: 0–1.07 «…будет твоим!» · 1.43–3.23 «Каждый лайк — новый этаж» · 3.50–5.49 «На каждом — ник подписчика» · 5.81–8.61 «Быстрее… быстрее… ещё быстрее!»
+//        8.92 «Стоп…» · 9.73–11.05 «на крыше кто-то сидит…» · 11.46–13.29 «Пиши ник — и этот этаж…» → петля в «…будет твоим!»
+const V={stop:8.92,roof:9.73,write:11.46};
+const TF=[1.55,2.6,3.65,4.75];for(let k=1;k<=60;k++)TF.push(5.85+2.7*Math.pow(k/60,.62));
+const NF=TF.length,T_END=V.stop;// после 17-й доли — верхушка «ТВОЙ ЭТАЖ?»
 const cl=(x,a,b)=>Math.max(a,Math.min(b,x)),sm=(a,b,x)=>{const k=cl((x-a)/(b-a),0,1);return k*k*(3-2*k)},lerp=(a,b,k)=>a+(b-a)*k;
 let SEED=7;const rnd=()=>{SEED=(SEED*16807)%2147483647;return (SEED-1)/2147483646};
 const PAL=['#f4efe6','#ffd23a','#6ab3f3','#e8503a','#5dff8a','#c58cff','#ff9a3c','#f7f7f7'];
@@ -103,18 +106,18 @@ function seek(t){t=((t%DUR)+DUR)%DUR;let n=0;
  if(window.DUST){let lt=-9,li=0;TF.forEach((x,i)=>{if(t>=x&&i<12){lt=x;li=i}});const a=t-lt;DUST.forEach(d=>{const on=a>=0&&a<.6;d.m.visible=on;if(on){const r=FW*.55+a*7;d.m.position.set(CX+Math.cos(d.a)*r,li*FH+.4+a*1.2,CZ+Math.sin(d.a)*r);d.m.scale.setScalar(.6+a*2.2);d.m.material.opacity=.45*(1-a/.6)}})}
  const end=t>=T_END;TOP.visible=end;if(end){const k=cl((t-T_END)/.18,0,1);TOP.position.y=NF*FH+(1-k)*(1-k)*FH*2;}
  // камера: следит за верхушкой, плавно отъезжает и облетает
- const ty=Math.max(0,topY(t)-FH*.5),k1=sm(0,T_END,t),yaw=lerp(-.25,.55,k1)+Math.sin(t*.9)*.03,dist=lerp(34,58,sm(2.2,T_END,t))-sm(T_END,T_END+.8,t)*30+(1-sm(.5,2.8,t))*26,up=dist*.6;
+ const ty=Math.max(0,topY(t)-FH*.5),k1=sm(0,T_END,t),yaw=lerp(-.25,.55,k1)+Math.sin(t*.9)*.03,dist=lerp(34,58,sm(2.2,T_END,t))+(1-sm(.5,2.8,t))*26,up=dist*.6;
  let sy=0;if(n>0){const lt=TF[n-1],a=cl((t-lt)/.15,0,1);sy=(1-a)*(n<5?.5:.18)*Math.sin(a*20)}
  const T_UP=DUR-.55,kin=1-sm(0,.45,t),kup=sm(T_UP,DUR,t);
  cam.position.set(CX+Math.sin(yaw)*dist,ty+up+sy+kin*14+kup*10,CZ+Math.cos(yaw)*dist);cam.fov=lerp(55,50,k1);cam.updateProjectionMatrix();cam.lookAt(CX,ty+1+kup*60+(1-sm(2.5,4.5,t))*13,CZ);
- if(end&&TOP.userData.paw)TOP.userData.paw.rotation.z=t>T_END+.5?-2.2+Math.sin(t*14)*.5:0;
- $('cloud').style.opacity=Math.max(kin,kup).toFixed(3);$('bait').style.display=t<T_END?'block':'none';
+ if(end&&TOP.userData.paw)TOP.userData.paw.rotation.z=t>V.roof+.6?-2.2+Math.sin(t*14)*.5:0;
+ $('cloud').style.opacity=Math.max(kin,kup).toFixed(3);$('bait').style.display=t<V.roof?'block':'none';
  R.render(sc,cam);
  // надписи
  const shown=end?NF:n;$('cn').textContent=shown;const pul=n>0?cl((t-TF[n-1])/.12,0,1):1;$('cnt').style.transform=`translate(-50%,0) scale(${1+(1-pul)*.12})`;
  $('nick').textContent=(!end&&n>0)?'@'+NICKS[n-1]:'';$('nick').style.display=n>0&&n<=12&&!end?'block':'none';
- const yk=sm(T_END,T_END+.25,t);$('you').style.transform=`translate(-50%,-50%) scale(${yk*(1+Math.sin(t*10)*.03*yk)})`;$('cnt').style.display=end?'none':'block'}
-function sfxList(){const L=[];TF.forEach((x,i)=>L.push([x+(i<4?.2:i<12?.12:.08),i<12?'pop':'tick',i<4?1:i<12?.8:.5]));L.push([T_END,'whoosh',.8]);L.push([T_END+.18,'ding',1]);L.push([T_END+.5,'pop',.7]);L.push([DUR-.5,'swish',.8]);return L}
+ const yk=sm(V.write,V.write+.25,t);$('you').style.transform=`translate(-50%,-50%) scale(${yk*(1+Math.sin(t*10)*.03*yk)})`;$('cnt').style.display=end?'none':'block'}
+function sfxList(){const L=[];TF.forEach((x,i)=>L.push([x+(i<4?.2:i<12?.12:.08),i<12?'pop':'tick',i<4?1:i<12?.8:.5]));L.push([T_END,'whoosh',.8]);L.push([T_END+.18,'ding',1]);L.push([V.roof+.6,'pop',.7]);L.push([V.write,'ding',.6]);L.push([DUR-.5,'swish',.8]);return L}
 function fit(){if(document.body.classList.contains('render'))return;const k=Math.min(innerWidth/W,innerHeight/H);$('stage').style.transform=`scale(${k})`;$('stage').style.left=(innerWidth-W*k)/2+'px'}
 addEventListener('resize',fit);fit();if(/[?&]render/.test(location.search)){document.body.classList.add('render');$('stage').style.transform='none'}
 $('map').addEventListener('load',()=>{cw=$('map').contentWindow;const iv=setInterval(()=>{if(!cw.MP)return;clearInterval(iv);
