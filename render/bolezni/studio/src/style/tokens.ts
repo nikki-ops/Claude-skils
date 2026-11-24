@@ -1,14 +1,16 @@
-import { loadFont as loadUnbounded } from "@remotion/google-fonts/Unbounded";
-import { loadFont as loadMontserrat } from "@remotion/google-fonts/Montserrat";
-import { loadFont as loadRusso } from "@remotion/google-fonts/RussoOne";
-import { loadFont as loadDela } from "@remotion/google-fonts/DelaGothicOne";
-import { loadFont as loadRubikMono } from "@remotion/google-fonts/RubikMonoOne";
-
-export const FONT_TITLE = loadUnbounded("normal", { weights: ["800", "900"], subsets: ["cyrillic", "latin"] }).fontFamily;
-export const FONT_HUD = loadMontserrat("normal", { weights: ["700", "800", "900"], subsets: ["cyrillic", "latin"] }).fontFamily;
-export const FONT_RUSSO = loadRusso("normal", { subsets: ["cyrillic", "latin"] }).fontFamily;
-export const FONT_DELA = loadDela("normal", { subsets: ["cyrillic", "latin"] }).fontFamily;
-export const FONT_RUBIKMONO = loadRubikMono("normal", { subsets: ["cyrillic", "latin"] }).fontFamily;
+import { loadFont } from "@remotion/fonts";
+import { staticFile } from "remotion";
+// Шрифты локально (public/fonts, из @fontsource) — без запросов к Google Fonts при рендере.
+const face = (family: string, file: string, weight: string, range: string) =>
+  loadFont({ family, url: staticFile(`fonts/${file}`), weight, format: "woff2", unicodeRange: range });
+const CYR = "U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116", LAT = "U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD";
+for (const w of ["800", "900"]) { face("Unbounded", `unbounded-cyrillic-${w}-normal.woff2`, w, CYR); face("Unbounded", `unbounded-latin-${w}-normal.woff2`, w, LAT); }
+for (const w of ["700", "800", "900"]) { face("Montserrat", `montserrat-cyrillic-${w}-normal.woff2`, w, CYR); face("Montserrat", `montserrat-latin-${w}-normal.woff2`, w, LAT); }
+export const FONT_TITLE = "Unbounded";
+export const FONT_HUD = "Montserrat";
+export const FONT_RUSSO = "Unbounded";
+export const FONT_DELA = "Unbounded";
+export const FONT_RUBIKMONO = "Unbounded";
 
 // Цвета сняты пипеткой с оригиналов (см. analysis/)
 export const C = {

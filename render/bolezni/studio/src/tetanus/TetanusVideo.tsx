@@ -18,9 +18,10 @@ import { OldHand, WOUND } from "../hands/OldHand";
 import { HandsWithGlass } from "../hands/HandsWithGlass";
 import { OfferedGlass } from "../hands/OfferedGlass";
 import { XrayShot } from "../xray3d/XrayShot";
+import { ShedWire, ArchBody } from "./TetanusScenes";
 import { FoxEnterShot, FoxAttackShot, FoxCloseUpShot, GardenDayShot } from "../fox3d/Shots";
 
-// Ролик 01 «Бешенство», версия 2: 36 тактов @96 BPM = 90 с, у каждого такта свой план.
+// Ролик b01 «Столбняк» (на основе образца «Бешенство»): 36 тактов @96 BPM = 90 с, у каждого такта свой план.
 const g = grid(DATA.bpm);
 const B = g.bar; // 75 кадров
 export const TETANUS_FRAMES = DATA.bars * B;
@@ -37,7 +38,7 @@ const faceProps = (s: Shot, f: number) => {
   let blink = Math.max(p.blink || 0, blinkBase);
   let spasm = p.spasm || 0;
   if (p.spasmPulse) spasm = Math.max(0, Math.sin((f / B) * Math.PI * 4)) * 0.8;
-  let pallor = 0, erase = 0;
+  let pallor = p.pallor || 0, erase = 0;
   if (p.dying) {
     pallor = interpolate(f, [0, B], [0.35, 1], clamp);
     blink = interpolate(f, [5, 40], [0.4, 1], clamp);
@@ -56,7 +57,7 @@ const FaceShot: React.FC<{ s: Shot; f: number }> = ({ s, f }) => {
       <WarmPortraitBG />
       <AbsoluteFill style={{ transform: `scale(${scale * (1 + Math.sin(f / 22) * 0.004)})`, transformOrigin: origin }}>
         <FaceOld {...fp} />
-        {s.kind === "hook" && <HandsWithGlass frame={f} shake={1} />}
+
         {s.offered && <OfferedGlass frame={f} progress={interpolate(f, [0, 28], [0, 1], { ...clamp, easing: Easing.out(Easing.cubic) })} />}
       </AbsoluteFill>
       {s.wind && <><Wind frame={f} /><Curtain frame={f} /></>}
@@ -105,7 +106,7 @@ const NeuroShot: React.FC<{ s: Shot; f: number }> = ({ s, f }) => {
         </group>
       </ThreeCanvas>
       {idx === 1 && <AbsoluteFill style={{ background: "radial-gradient(ellipse 60% 50% at 50% 50%, rgba(255,40,10,0.0), rgba(255,40,10,0.35))", opacity: 0.6 + 0.4 * Math.sin(f / 5) }} />}
-      <Note text={`ЗАРАЖЕНО НЕЙРОНОВ: ${Math.round(interpolate(T, [10, 2 * B], [3, 87], clamp))}%`} y={1680} color={idx === 1 ? C.red : C.yellow} size={40} />
+      <Note text={`ТОРМОЗНЫХ НЕЙРОНОВ ВЫКЛЮЧЕНО: ${Math.round(interpolate(T, [10, 2 * B], [3, 87], clamp))}%`} y={1680} color={idx === 1 ? C.red : C.yellow} size={38} />
     </>
   );
 };
@@ -113,11 +114,14 @@ const NeuroShot: React.FC<{ s: Shot; f: number }> = ({ s, f }) => {
 const XrayView: React.FC<{ s: Shot; f: number }> = ({ s, f }) => {
   const [a, b] = s.xray;
   const p = interpolate(f, [0, B], [a, b], clamp);
-  const hit = b >= 1 ? interpolate(f, [B - 22, B - 4], [0, 1], clamp) : 0;
+  const hit = 0;
+  const SPINE = 0.8; // точка пути, где нерв входит в спинной мозг (художественно)
   return (
     <>
       <XrayShot frame={f} p={p} brainHit={hit} />
-      <Note text={`ДО МОЗГА: ${Math.max(0, Math.round(92 * (1 - p)))} СМ`} y={1700} color={p >= 0.99 ? C.red : C.yellow} size={44} />
+      {s.spine && <AbsoluteFill style={{ background: "radial-gradient(ellipse 30% 45% at 50% 45%, rgba(244,42,16,0.35), rgba(0,0,0,0))", opacity: interpolate(f, [B - 30, B - 10], [0, 1], clamp) * (0.7 + 0.3 * Math.sin(f / 3)), mixBlendMode: "screen" }} />}
+      {s.chest && <AbsoluteFill style={{ background: "radial-gradient(ellipse 45% 25% at 50% 52%, rgba(244,42,16,0.45), rgba(0,0,0,0))", opacity: 0.6 + 0.4 * Math.sin(f / 4), mixBlendMode: "screen" }} />}
+      <Note text={s.chest ? "ДИАФРАГМА И МЫШЦЫ ГРУДИ — В СПАЗМЕ" : `ДО СПИННОГО МОЗГА: ${Math.max(0, Math.round(70 * (1 - Math.min(1, p / SPINE))))} СМ`} y={1700} color={s.chest || p >= SPINE ? C.red : C.yellow} size={44} />
     </>
   );
 };
@@ -134,7 +138,7 @@ const MonitorShot: React.FC<{ f: number }> = ({ f }) => (
 const CardBG: React.FC<{ kind: string; f: number }> = ({ kind, f }) => (
   <>
     <AbsoluteFill style={{ filter: "blur(14px) brightness(0.75) saturate(0.85)", transform: `scale(${interpolate(f, [0, B], [1.12, 1.2])})` }}>
-      {kind === "fox" && <FoxCloseUpShot frame={30} />}
+      {kind === "shed" && <ShedWire frame={f} />}
       {kind === "micro" && <MicroscopeDrop frame={f} />}
       {kind === "eye" && <EyeMacro frame={f} pupil={1} red={0.7} />}
       {kind === "xray" && <XrayShot frame={f} p={0.55} overlay={false} />}
@@ -152,12 +156,14 @@ const ShotView: React.FC<{ s: Shot }> = ({ s }) => {
   return (
     <AbsoluteFill>
       {(k === "face" || k === "hook" || k === "mouth") && <FaceShot s={s} f={f} />}
+      {k === "shed" && <ShedWire frame={f} />}
+      {k === "arch" && <ArchBody frame={f} />}
       {k === "foxEnter" && <FoxEnterShot frame={f} />}
       {k === "foxAttack" && <FoxAttackShot frame={f} />}
       {k === "foxClose" && <FoxCloseUpShot frame={f} />}
       {k === "gardenDay" && <GardenDayShot frame={f} />}
       {k === "hand" && <HandShot s={s} f={f} />}
-      {k === "micro" && <MicroscopeDrop frame={f} />}
+      {k === "micro" && <MicroscopeDrop frame={f} density={s.dense ? 1 : 0.5} />}
       {k === "nerve" && <NerveShot f={f} />}
       {k === "xray" && <XrayView s={s} f={f} />}
       {k === "cross" && <NerveCross frame={f} />}
@@ -170,7 +176,7 @@ const ShotView: React.FC<{ s: Shot }> = ({ s }) => {
       {k === "card" && <CardBG kind={s.cardBg} f={f} />}
       {s.watch && <Stopwatch frame={f} />}
       <Grain amount={k === "xray" || k === "nerve" || k === "neuro" ? 0.07 : 0.1} vignette={0.6} />
-      {hud && <HUD left={hud[0]} label="ШАНС" value={interpolate(f, [0, B], [hud[1], hud[2]], clamp)} />}
+      {hud && <HUD left={hud[0]} label="ДЫХАНИЕ" value={interpolate(f, [0, B], [hud[1], hud[2]], clamp)} />}
       {s.note && <Note text={s.note[0]} y={1690} color={s.note[1] === "r" ? C.red : C.yellow} size={40} />}
       {s.cap && <Caption text={s.cap} from={2} dur={B - 2} top={262} base={s.cap.length > 26 ? 74 : 90} />}
       {s.card && <StatCard big={s.card[0]} sub={s.card[1]} src={s.card[2]} color={s.card[3] as "y" | "r"} from={0} dur={B} />}
