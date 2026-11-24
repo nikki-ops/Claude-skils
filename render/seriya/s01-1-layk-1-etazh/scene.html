@@ -51,6 +51,29 @@ function build(){TOWER=new THREE.Group();sc.add(TOWER);
  const L=cw.MP.L.filter(h=>h.n&&!h.site&&!h.bld&&!h.anon&&/^[A-Za-zА-Яа-яЁё0-9_.\-]{4,14}$/.test(h.n));const pick=[];const used=new Set();while(pick.length<NF){const h=L[Math.floor(rnd()*L.length)];if(!used.has(h.n)){used.add(h.n);pick.push(h.n)}}NICKS=pick;
  const base=new THREE.Mesh(new THREE.BoxGeometry(FW*2,.3,FW*2),new THREE.MeshLambertMaterial({color:0xe6dcc4}));base.position.set(CX,.15,CZ);sc.add(base);
  for(let i=0;i<NF;i++)FLOORS.push(floor(i,NICKS[i]));
+ const PRE=new Set(sc.children);
+ // ---- стройка: башенный кран, забор «СТРОЙКА», конусы, пыль ----
+ const Y=new THREE.MeshLambertMaterial({color:0xf2b705}),DKM=new THREE.MeshLambertMaterial({color:0x2b2b30});
+ const CR=new THREE.Group();CR.position.set(CX-FW-6,0,CZ-FW-4);sc.add(CR);const cdx=CX-CR.position.x,cdz=CZ-CR.position.z,cL=Math.hypot(cdx,cdz);CR.rotation.y=Math.atan2(cdz,-cdx);const MH=30;
+ const mast=new THREE.Mesh(new THREE.BoxGeometry(1.6,MH,1.6),Y);mast.position.y=MH/2;CR.add(mast);
+ const lat=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(1.62,MH,1.62,1,12,1)),new THREE.LineBasicMaterial({color:0x6a5000}));lat.position.y=MH/2;CR.add(lat);
+ for(let k=0;k<12;k++){const d=new THREE.Mesh(new THREE.BoxGeometry(.12,MH/12*1.4,.12),DKM);d.position.set(.82,MH/24+k*MH/12,0);d.rotation.x=k%2?.6:-.6;CR.add(d)}
+ const cab=new THREE.Mesh(new THREE.BoxGeometry(2.2,1.8,2.2),new THREE.MeshLambertMaterial({color:0xffffff}));cab.position.set(0,MH+.9,1.2);CR.add(cab);
+ const jibL=cL+6,jib=new THREE.Mesh(new THREE.BoxGeometry(jibL,1.0,1.0),Y);jib.position.set(-jibL/2,MH+2.2,0);CR.add(jib);
+ const cj=new THREE.Mesh(new THREE.BoxGeometry(8,1.0,1.0),Y);cj.position.set(4,MH+2.2,0);CR.add(cj);const cw2=new THREE.Mesh(new THREE.BoxGeometry(2.4,2,1.6),new THREE.MeshLambertMaterial({color:0x8a8a90}));cw2.position.set(7,MH+1.2,0);CR.add(cw2);
+ const peak=new THREE.Mesh(new THREE.ConeGeometry(.9,4,4),Y);peak.position.set(0,MH+4.6,0);CR.add(peak);
+ const trol=new THREE.Mesh(new THREE.BoxGeometry(1.2,.5,1.2),DKM);trol.position.set(-cL,MH+1.5,0);CR.add(trol);
+ const cable=new THREE.Mesh(new THREE.CylinderGeometry(.05,.05,1,6),DKM);sc.add(cable);const hook=new THREE.Mesh(new THREE.TorusGeometry(.35,.1,6,12,Math.PI*1.4),DKM);sc.add(hook);
+ window.CRANE={CR,cable,hook,top:MH+1.3};
+ // забор с табличкой
+ const ft=cw.document.createElement('canvas');ft.width=512;ft.height=128;{const x=ft.getContext('2d');for(let i=0;i<16;i++){x.fillStyle=i%2?'#f2b705':'#1d1d22';x.save();x.translate(i*40,0);x.transform(1,0,.5,1,0,0);x.fillRect(-60,0,20,128);x.restore()}x.fillStyle='#f2b705';x.fillRect(0,0,512,128);for(let i=-2;i<14;i++){x.fillStyle='#1d1d22';x.beginPath();x.moveTo(i*44,128);x.lineTo(i*44+22,128);x.lineTo(i*44+62,0);x.lineTo(i*44+40,0);x.fill()}}
+ const ftex=new THREE.CanvasTexture(ft);const fm=new THREE.MeshLambertMaterial({map:ftex});
+ for(const [x,z,ry,len] of [[0,FW+.2,0,FW*2],[0,-FW-.2,0,FW*2],[FW+.2,0,Math.PI/2,FW*2],[-FW-.2,0,Math.PI/2,FW*2]]){if(z>0){for(const sx of[-1,1]){const p=new THREE.Mesh(new THREE.BoxGeometry(FW*.6,1.6,.15),fm);p.position.set(CX+sx*FW*.7,.95,CZ+z);sc.add(p)}continue}const p=new THREE.Mesh(new THREE.BoxGeometry(len,1.6,.15),fm);p.position.set(CX+x,.95,CZ+z);p.rotation.y=ry;sc.add(p)}
+ const sgc=cw.document.createElement('canvas');sgc.width=512;sgc.height=160;{const x=sgc.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,512,160);x.strokeStyle='#d8202a';x.lineWidth=14;x.strokeRect(7,7,498,146);x.fillStyle='#d8202a';x.font='900 82px Rubik, Arial Black, Arial';x.textAlign='center';x.textBaseline='middle';x.fillText('СТРОЙКА',256,84)}
+ const sign=new THREE.Mesh(new THREE.PlaneGeometry(5,1.56),new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(sgc)}));sign.position.set(CX-FW*.7,2.55,CZ+FW+.32);sc.add(sign);
+ const cone=new THREE.ConeGeometry(.35,.9,10),com=new THREE.MeshLambertMaterial({color:0xff6a1a});for(const [a,b] of [[-3,FW+2],[-1.5,FW+2.6],[1.5,FW+2.6],[3,FW+2],[FW+2,FW-1]]){const c=new THREE.Mesh(cone,com);c.position.set(CX+a,.45,CZ+b);sc.add(c)}
+ // пыль при посадке этажа
+ window.DUST=[];for(let i=0;i<14;i++){const m=new THREE.Mesh(new THREE.SphereGeometry(.9,8,6),new THREE.MeshBasicMaterial({color:0xe8dcc4,transparent:true,opacity:.5,depthWrite:false}));m.visible=false;sc.add(m);DUST.push({m,a:i/14*Math.PI*2})}
  // верхушка: пустая площадка с пунктиром и табличкой
  TOP=new THREE.Group();const pad=new THREE.Mesh(new THREE.BoxGeometry(FW+.6,.35,FW+.6),new THREE.MeshLambertMaterial({color:0x5a5560}));pad.position.y=.17;TOP.add(pad);
  const ed=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(FW,FH-.4,FW)),new THREE.LineDashedMaterial({color:0x5dff8a,dashSize:.8,gapSize:.5}));ed.computeLineDistances();ed.position.y=.35+(FH-.4)/2;TOP.add(ed);
@@ -66,18 +89,24 @@ function build(){TOWER=new THREE.Group();sc.add(TOWER);
  // убрать всё, что стоит на месте башни (только мелкие объекты, склеенные районы не трогаем)
  const fb=new THREE.Box3(new THREE.Vector3(CX-FW,-1,CZ-FW),new THREE.Vector3(CX+FW,60,CZ+FW)),bb=new THREE.Box3(),sz=new THREE.Vector3();let hid=0;
  sc.updateMatrixWorld(true);const skip=new Set([TOWER,TOP,base,...FLOORS]);
- sc.traverse(o=>{if(!o.visible||skip.has(o)||o===sc)return;let p=o;while(p){if(skip.has(p))return;p=p.parent}if(!(o.isMesh||o.isGroup))return;bb.setFromObject(o);if(bb.isEmpty())return;bb.getSize(sz);if(sz.x>30||sz.z>30)return;if(bb.intersectsBox(fb)&&bb.min.y<40){o.visible=false;hid++}});
+ sc.traverse(o=>{if(!o.visible||skip.has(o)||o===sc)return;let p=o;while(p){if(skip.has(p))return;if(p.parent===sc&&!PRE.has(p))return;p=p.parent}if(!(o.isMesh||o.isGroup))return;bb.setFromObject(o);if(bb.isEmpty())return;bb.getSize(sz);if(sz.x>30||sz.z>30)return;if(bb.intersectsBox(fb)&&bb.min.y<40){o.visible=false;hid++}});
  console.log('[башня] убрано объектов:',hid)}
 // высота верхушки к моменту t
 function topY(t){let n=0;for(const x of TF)if(t>=x)n++;return n*FH}
 function seek(t){t=((t%DUR)+DUR)%DUR;let n=0;
- FLOORS.forEach((f,i)=>{const t0=TF[i],on=t>=t0;f.visible=on;if(on){n++;const d=i<4?.22:i<12?.14:.09,k=cl((t-t0)/d,0,1);const bo=(1-k)*(1-k);f.position.y=i*FH+bo*FH*2.2;const sq=k<1?1+.12*Math.sin(k*Math.PI):1;f.scale.set(sq,1/sq,sq)}});
+ const CRT=.6;let craneY=null;
+ FLOORS.forEach((f,i)=>{const t0=TF[i];if(i<4&&t>=t0-CRT&&t<t0){f.visible=true;const k=(t-(t0-CRT))/CRT,e=1-(1-k)*(1-k);f.position.y=i*FH+(1-e)*9;f.scale.set(1,1,1);f.rotation.y=Math.sin(k*5)*.04*(1-k);craneY=f.position.y+FH;return}
+  f.rotation.y=0;const on=t>=t0;f.visible=on;if(on){n++;const d=i<4?.22:i<12?.14:.09,k=cl((t-t0)/d,0,1);const bo=(1-k)*(1-k);f.position.y=i*FH+bo*FH*2.2;const sq=k<1?1+.12*Math.sin(k*Math.PI):1;f.scale.set(sq,1/sq,sq)}});
+ // кран: трос до крюка (с этажом или пустой)
+ if(window.CRANE){const C=CRANE,hy=craneY!=null?craneY+.4:Math.max(topY(t)+6,C.top-10);const len=C.top-hy;C.cable.visible=C.hook.visible=len>.5&&topY(t)<C.top-4;C.cable.scale.y=Math.max(.01,len);C.cable.position.set(CX,hy+len/2,CZ);C.hook.position.set(CX,hy,CZ)}
+ // пыль после посадки
+ if(window.DUST){let lt=-9,li=0;TF.forEach((x,i)=>{if(t>=x&&i<12){lt=x;li=i}});const a=t-lt;DUST.forEach(d=>{const on=a>=0&&a<.6;d.m.visible=on;if(on){const r=FW*.55+a*7;d.m.position.set(CX+Math.cos(d.a)*r,li*FH+.4+a*1.2,CZ+Math.sin(d.a)*r);d.m.scale.setScalar(.6+a*2.2);d.m.material.opacity=.45*(1-a/.6)}})}
  const end=t>=T_END;TOP.visible=end;if(end){const k=cl((t-T_END)/.18,0,1);TOP.position.y=NF*FH+(1-k)*(1-k)*FH*2;}
  // камера: следит за верхушкой, плавно отъезжает и облетает
- const ty=Math.max(0,topY(t)-FH*.5),k1=sm(0,T_END,t),yaw=lerp(-.25,.55,k1)+Math.sin(t*.9)*.03,dist=lerp(34,58,sm(2.2,T_END,t))-sm(T_END,T_END+.8,t)*30,up=dist*.6;
+ const ty=Math.max(0,topY(t)-FH*.5),k1=sm(0,T_END,t),yaw=lerp(-.25,.55,k1)+Math.sin(t*.9)*.03,dist=lerp(34,58,sm(2.2,T_END,t))-sm(T_END,T_END+.8,t)*30+(1-sm(.5,2.8,t))*26,up=dist*.6;
  let sy=0;if(n>0){const lt=TF[n-1],a=cl((t-lt)/.15,0,1);sy=(1-a)*(n<5?.5:.18)*Math.sin(a*20)}
  const T_UP=DUR-.55,kin=1-sm(0,.45,t),kup=sm(T_UP,DUR,t);
- cam.position.set(CX+Math.sin(yaw)*dist,ty+up+sy+kin*14+kup*10,CZ+Math.cos(yaw)*dist);cam.fov=lerp(55,50,k1);cam.updateProjectionMatrix();cam.lookAt(CX,ty+1+kup*60,CZ);
+ cam.position.set(CX+Math.sin(yaw)*dist,ty+up+sy+kin*14+kup*10,CZ+Math.cos(yaw)*dist);cam.fov=lerp(55,50,k1);cam.updateProjectionMatrix();cam.lookAt(CX,ty+1+kup*60+(1-sm(2.5,4.5,t))*13,CZ);
  if(end&&TOP.userData.paw)TOP.userData.paw.rotation.z=t>T_END+.5?-2.2+Math.sin(t*14)*.5:0;
  $('cloud').style.opacity=Math.max(kin,kup).toFixed(3);$('bait').style.display=t<T_END?'block':'none';
  R.render(sc,cam);
