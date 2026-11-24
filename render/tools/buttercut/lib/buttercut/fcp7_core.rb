@@ -1,0 +1,398 @@
+require_relative 'editor_base'
+require 'nokogiri'
+
+class ButterCut
+  # Final Cut Pro 7 XML Interchange Format (version 5).
+  # This structure can be imported by legacy FCP as well as Adobe Premiere Pro.
+  class FCP7 < EditorBase
+    def to_xml
+      raise ArgumentError, "No clips provided" if clips.empty?
+
+      asset_map = build_asset_map
+      timeline_frame_duration = format_frame_duration
+      timeline_clips, sequence_duration_fraction = build_timeline_clips(asset_map, timeline_frame_duration)
+
+      rate_num, rate_denom = format_frame_rate.split('/').map(&:to_i)
+      timebase = format_nominal_frame_rate
+      ntsc_flag = ntsc_flag_for(rate_denom)
+      drop_frame = ntsc_drop_frame_rate?(rate_num, rate_denom)
+      display_format = drop_frame ? 'DF' : 'NDF'
+
+      sequence_duration_frames = frames_for_fraction(sequence_duration_fraction, timeline_frame_duration)
+      sequence_uuid = generate_uuid
+      sequence_id = "sequence-#{sequence_uuid}"
+
+      sequence_rate = { timebase: timebase, ntsc: ntsc_flag, display: display_format }
+      clip_payloads = build_clip_payloads(timeline_clips, timeline_frame_duration, sequence_rate)
+      sequence_audio_rate = format_audio_rate || '48000'
+
+      # xmeml defines each <file> once, in the first clipitem that uses it;
+      # later clipitems reference it with an empty <file id="..."/> stub —
+      # the convention FCP7's own exports follow.
+      @emitted_file_ids = {}
+
+      builder = Nokogiri::XML::Builder.new(encoding: 'UTF-8') do |xml|
+        xml.doc.create_internal_subset('xmeml', nil, nil)
+        xml.xmeml(version: '5') do
+          xml.sequence(id: sequence_id) do
+            xml.uuid sequence_uuid
+            xml.name timeline_name
+            xml.duration sequence_duration_frames
+            xml.rate do
+              xml.timebase timebase
+              xml.ntsc ntsc_flag
+            end
+            xml.in 0
+            xml.out sequence_duration_frames
+            xml.timecode do
+              xml.rate do
+                xml.timebase timebase
+                xml.ntsc ntsc_flag
+              end
+              xml.frame 0
+              xml.displayformat display_format
+            end
+            xml.media do
+              xml.video do
+                xml.format do
+                  xml.samplecharacteristics do
+                    xml.rate do
+                      xml.timebase timebase
+                      xml.ntsc ntsc_flag
+                    end
+                    xml.width format_width
+                    xml.height format_height
+                    xml.anamorphic 'FALSE'
+                    xml.pixelaspectratio 'square'
+                    xml.fielddominance 'none'
+                  end
+                end
+                emit_video_tracks(xml, clip_payloads)
+              end
+              xml.audio do
+                xml.numOutputChannels 2
+                xml.format do
+                  xml.samplecharacteristics do
+                    xml.samplerate sequence_audio_rate
+                    xml.depth 16
+                  end
+                end
+                emit_audio_tracks(xml, clip_payloads)
+              end
+            end
+          end
+        end
+      end
+
+      builder.to_xml
+    end
+
+    private
+
+    def ntsc_flag_for(rate_denom)
+      rate_denom == 1 ? 'FALSE' : 'TRUE'
+    end
+
+    # Emit the video clipitems as sequence <track> elements. The single-track
+    # engine writes exactly one; these two methods (and build_clip_payloads)
+    # are the seam a multi-track edition overrides to write one per timeline
+    # track while inheriting the rest of to_xml unchanged.
+    def emit_video_tracks(xml, clip_payloads)
+      xml.track do
+        clip_payloads.each do |payload|
+          build_video_clipitem(xml, payload)
+        end
+      end
+    end
+
+    def emit_audio_tracks(xml, clip_payloads)
+      xml.track do
+        clip_payloads.each do |payload|
+          build_audio_clipitem(xml, payload) unless payload[:still]
+        end
+      end
+    end
+
+    def build_clip_payloads(timeline_clips, timeline_frame_duration, sequence_rate)
+      audio_index = 0
+      timeline_clips.each_with_index.map do |clip, index|
+        audio_index += 1 unless clip[:asset][:type] == 'image'
+        build_clip_payload(clip, timeline_frame_duration, sequence_rate,
+                           index: index + 1, id_index: index + 1, audio_index: audio_index)
+      end
+    end
+
+    # The payload for one clipitem pair. `id_index` numbers the clipitem ids;
+    # `index`/`audio_index` are the clip's position within its video/audio
+    # track (the audio track skips stills, so the caller counts them apart);
+    # `track_index` is the sequence track the clip lands on — always 1 in the
+    # single-track engine.
+    def build_clip_payload(clip, timeline_frame_duration, sequence_rate, index:, id_index:, audio_index:, track_index: 1)
+      asset = clip[:asset]
+      still = asset[:type] == 'image'
+
+      timeline_duration_frames = frames_for_fraction(clip[:duration], timeline_frame_duration)
+      timeline_start_frames = frames_for_fraction(clip[:timeline_offset], timeline_frame_duration)
+      timeline_end_frames = timeline_start_frames + timeline_duration_frames
+
+      payload = {
+        index: index,
+        track_index: track_index,
+        still: still,
+        clip: clip,
+        asset: asset,
+        video_clip_id: "clipitem-video-#{id_index}",
+        file_id: "file-#{asset[:asset_id]}",
+        timeline_start: timeline_start_frames,
+        timeline_end: timeline_end_frames,
+        timeline_duration: timeline_duration_frames
+      }
+
+      if still
+        # Stills have no native rate or timecode: the file adopts the
+        # sequence rate, in/out span the timeline duration, and the file
+        # duration matches the cut (settled empirically in the editors).
+        payload.merge!(
+          asset_timebase: sequence_rate[:timebase],
+          asset_ntsc: sequence_rate[:ntsc],
+          asset_display: sequence_rate[:display],
+          source_in: 0,
+          source_out: timeline_duration_frames,
+          source_duration_frames: timeline_duration_frames,
+          asset_duration_frames: timeline_duration_frames,
+          asset_timecode_start: 0
+        )
+      else
+        asset_rate_num, asset_rate_denom = asset[:frame_rate].split('/').map(&:to_i)
+        # Clipitem <in>/<out> count on the SEQUENCE's frame grid, not the
+        # source's: Premiere and Resolve both decode them as source seconds ×
+        # sequence rate, whatever the clipitem/file rate declarations say
+        # (verified frame-by-frame in both editors with a 25 fps source in a
+        # 30 fps timeline). Identical numbers when the rates match; only the
+        # file-level <duration> and <timecode> stay in media-native frames.
+        source_in_frames = frames_for_fraction(clip[:source_in], timeline_frame_duration)
+        source_duration_frames = frames_for_fraction(clip[:source_duration], timeline_frame_duration)
+
+        payload.merge!(
+          audio_clip_id: "clipitem-audio-#{id_index}",
+          audio_index: audio_index,
+          asset_timebase: (asset_rate_num.to_f / asset_rate_denom).round,
+          asset_ntsc: ntsc_flag_for(asset_rate_denom),
+          asset_display: ntsc_drop_frame_rate?(asset_rate_num, asset_rate_denom) ? 'DF' : 'NDF',
+          source_in: source_in_frames,
+          source_out: source_in_frames + source_duration_frames,
+          source_duration_frames: source_duration_frames,
+          asset_duration_frames: frames_for_fraction(asset[:asset_duration], asset[:frame_duration]),
+          asset_timecode_start: frames_for_fraction(asset[:timecode], asset[:frame_duration])
+        )
+      end
+
+      payload
+    end
+
+    def build_video_clipitem(xml, payload)
+      asset = payload[:asset]
+      still = payload[:still]
+
+      xml.clipitem(id: payload[:video_clip_id]) do
+        xml.name asset[:basename]
+        xml.enabled xmeml_enabled(payload.dig(:clip, :clip_definition, :video_enabled))
+        xml.duration payload[:timeline_duration]
+        xml.start payload[:timeline_start]
+        xml.end_ payload[:timeline_end]
+        xml.in_ payload[:source_in]
+        xml.out payload[:source_out]
+        # The clipitem's own rate declares the source's native timebase (the
+        # conform metadata). It does NOT change how in/out are read — both
+        # Premiere and Resolve count them on the sequence grid regardless,
+        # which is why build_clip_payload writes them in sequence frames.
+        emit_clipitem_rate(xml, payload)
+        # Documented still marker: "Photoshop PSD files, jpeg files, tiff
+        # files, or other still images imported into Final Cut have
+        # stillframe set to TRUE."
+        xml.stillframe 'TRUE' if still
+        emit_file_definition(xml, payload) do
+          xml.name asset[:filename]
+          xml.pathurl asset[:file_url]
+          xml.rate do
+            xml.timebase payload[:asset_timebase]
+            xml.ntsc payload[:asset_ntsc]
+          end
+          xml.duration payload[:asset_duration_frames]
+          unless still
+            xml.timecode do
+              xml.rate do
+                xml.timebase payload[:asset_timebase]
+                xml.ntsc payload[:asset_ntsc]
+              end
+              xml.frame payload[:asset_timecode_start]
+              xml.displayformat payload[:asset_display]
+            end
+          end
+          xml.media do
+            xml.video do
+              xml.samplecharacteristics do
+                xml.rate do
+                  xml.timebase payload[:asset_timebase]
+                  xml.ntsc payload[:asset_ntsc]
+                end
+                xml.width asset[:width]
+                xml.height asset[:height]
+                xml.anamorphic 'FALSE'
+                xml.pixelaspectratio 'square'
+                xml.fielddominance 'none'
+              end
+            end
+            unless still
+              xml.audio do
+                xml.samplecharacteristics do
+                  xml.samplerate asset_audio_rate(asset)
+                  xml.depth 16
+                end
+                xml.channelcount asset_audio_channels(asset)
+              end
+            end
+          end
+        end
+        # FCP7/xmeml orders <filter> after <file> and before <sourcetrack>;
+        # Premiere ignores filters that appear out of order.
+        add_video_filters(xml, payload)
+        # sourcetrack is the stream INSIDE the source file (always 1 for our
+        # single-stream footage), not the sequence track — that lives in <link>.
+        xml.sourcetrack do
+          xml.mediatype 'video'
+          xml.trackindex 1
+        end
+        # Stills have no audio counterpart to link to.
+        build_link_entries(xml, payload) unless still
+      end
+    end
+
+    # Hook for subclasses to inject <filter> elements into a video clipitem.
+    # No-op in the base FCP7 format (and therefore in Resolve, which reads the
+    # source rotation flag itself). Premiere overrides this to bake in rotation.
+    def add_video_filters(xml, payload); end
+
+    def build_audio_clipitem(xml, payload)
+      asset = payload[:asset]
+
+      xml.clipitem(id: payload[:audio_clip_id]) do
+        xml.name asset[:basename]
+        xml.enabled xmeml_enabled(payload.dig(:clip, :clip_definition, :audio_enabled))
+        xml.duration payload[:timeline_duration]
+        xml.start payload[:timeline_start]
+        xml.end_ payload[:timeline_end]
+        xml.in_ payload[:source_in]
+        xml.out payload[:source_out]
+        emit_clipitem_rate(xml, payload)
+        emit_file_definition(xml, payload) do
+          xml.name asset[:filename]
+          xml.pathurl asset[:file_url]
+          xml.rate do
+            xml.timebase payload[:asset_timebase]
+            xml.ntsc payload[:asset_ntsc]
+          end
+          xml.duration payload[:asset_duration_frames]
+          xml.media do
+            xml.audio do
+              xml.samplecharacteristics do
+                xml.samplerate asset_audio_rate(asset)
+                xml.depth 16
+              end
+              xml.channelcount asset_audio_channels(asset)
+            end
+          end
+        end
+        # Filters sit after <file> and before <sourcetrack> (Premiere ignores
+        # out-of-order filters). A muted clip gets a level-0 cut here.
+        add_audio_filters(xml, payload)
+        xml.sourcetrack do
+          xml.mediatype 'audio'
+          xml.trackindex 1
+        end
+        build_link_entries(xml, payload)
+      end
+    end
+
+    # First use of a file id gets the full <file> definition; every later
+    # clipitem referencing the same source gets an empty <file id="..."/>
+    # stub, matching FCP7's own exports (xmeml resolves stubs by id).
+    def emit_file_definition(xml, payload)
+      file_id = payload[:file_id]
+      if @emitted_file_ids[file_id]
+        xml.file(id: file_id)
+        return
+      end
+      @emitted_file_ids[file_id] = true
+      xml.file(id: file_id) { yield }
+    end
+
+    # Channel count from the probe, defaulting to stereo. Never 0 or blank —
+    # <channelcount>0</channelcount> is a documented Premiere import breaker.
+    def asset_audio_channels(asset)
+      channels = asset[:audio_channels].to_i
+      channels.positive? ? channels : 2
+    end
+
+    def emit_clipitem_rate(xml, payload)
+      xml.rate do
+        xml.timebase payload[:asset_timebase]
+        xml.ntsc payload[:asset_ntsc]
+      end
+    end
+
+    # A clipitem plays unless the timeline clip explicitly disables that
+    # component (nil — the usual case — means enabled). Stacked alternate
+    # takes use this to sit on the timeline without rendering.
+    def xmeml_enabled(flag)
+      flag == false ? 'FALSE' : 'TRUE'
+    end
+
+    # Emit an Audio Levels filter when a clip needs a non-unity level. A clip
+    # marked `mute` is silenced outright (level 0); unmarked clips play at unity
+    # with no filter. FCP7 levels are a linear gain: 1.0 = unity, 0 = silent.
+    def add_audio_filters(xml, payload)
+      return unless payload.dig(:clip, :clip_definition, :mute)
+
+      xml.filter do
+        xml.effect do
+          xml.name 'Audio Levels'
+          xml.effectid 'audiolevels'
+          xml.effectcategory 'audiolevels'
+          xml.effecttype 'audiolevels'
+          xml.mediatype 'audio'
+          xml.parameter do
+            xml.parameterid 'level'
+            xml.name 'Level'
+            xml.valuemin 0
+            xml.valuemax 3.98109
+            xml.value 0
+          end
+        end
+      end
+    end
+
+    # clipindex is the clip's position within its own track: the video track
+    # holds every clip (stills included), the audio track only the clips with
+    # sound — hence the separate audio_index counter.
+    def build_link_entries(xml, payload)
+      xml.link do
+        xml.linkclipref payload[:video_clip_id]
+        xml.mediatype 'video'
+        xml.trackindex payload[:track_index]
+        xml.clipindex payload[:index]
+      end
+      xml.link do
+        xml.linkclipref payload[:audio_clip_id]
+        xml.mediatype 'audio'
+        xml.trackindex payload[:track_index]
+        xml.clipindex payload[:audio_index]
+        xml.groupindex 1
+      end
+    end
+
+    def asset_audio_rate(asset)
+      asset[:audio_rate] || format_audio_rate || '48000'
+    end
+  end
+end

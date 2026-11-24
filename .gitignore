@@ -4,3 +4,9 @@ render/remotion/out/
 __pycache__/
 render/kommentarii/out/
 gotovo/*-chernovik.mp4
+# тяжёлые медиа навыка directing-stickman-videos (~500 МБ): восстановить — git clone --depth 1 https://github.com/kaomei/stickman-video-director, скопировать skills/directing-stickman-videos/assets
+.claude/skills/directing-stickman-videos/assets/**/*.mp4
+.claude/skills/directing-stickman-videos/assets/**/*.wav
+.claude/skills/directing-stickman-videos/assets/**/*.mov
+.claude/skills/directing-stickman-videos/assets/**/*.mp3
+.claude/skills/directing-stickman-videos/assets/**/*.webm

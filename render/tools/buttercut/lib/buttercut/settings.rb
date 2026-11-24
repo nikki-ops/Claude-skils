@@ -1,0 +1,87 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require 'yaml'
+require_relative 'platform'
+
+# Read-only accessor for libraries/settings.yaml — the user's global ButterCut
+# preferences (editor, whisper model, parallelism, …). Centralizes the path so
+# callers don't re-parse the file.
+#
+# settings.yaml is hand-edited and always present once setup has run. Values
+# that ship in the template (whisper_model) are read straight from it with no
+# code-side default — a blank/missing one is a broken file worth surfacing, not
+# something to paper over with a different value than the user configured.
+# parallel_jobs is newer and may be absent from an already-created settings.yaml
+# (git pull doesn't touch libraries/), so it alone carries a fallback default.
+class Settings
+  PATH = File.expand_path('../../libraries/settings.yaml', __dir__)
+
+  DEFAULT_PARALLEL_JOBS = 2 # WhisperX is RAM-hungry; 2 is the safe default.
+
+  # What the user told us to do with error reports. Absent from settings.yaml
+  # means we haven't asked yet — the report-bug skill asks and writes it.
+  ERROR_REPORTING_CHOICES = %w[always ask never].freeze
+
+  def self.load(path: PATH) = new(path: path)
+
+  def initialize(path: PATH)
+    @data = File.exist?(path) ? (YAML.safe_load_file(path) || {}) : {}
+  end
+
+  # How many mechanical jobs (transcription, contact sheets) to run in parallel.
+  # Blank / missing / non-positive / non-numeric → DEFAULT_PARALLEL_JOBS.
+  def parallel_jobs
+    n = Integer(@data['parallel_jobs'], exception: false)
+    n && n >= 1 ? n : DEFAULT_PARALLEL_JOBS
+  end
+
+  # WhisperX model size, straight from settings.yaml — no code default. The
+  # template ships `whisper_model` and setup writes it, so a blank/missing value
+  # means a broken settings.yaml.
+  def whisper_model
+    value = @data['whisper_model'].to_s.strip
+    raise 'whisper_model is not set in libraries/settings.yaml (expected tiny/base/small/medium/turbo)' if value.empty?
+
+    value
+  end
+
+  # Opt-in flags for features still in testing, as a name→bool map. Which
+  # features exist is the edition's business — Settings only stores and reports.
+  def beta_features
+    map = @data['beta_features']
+    map.is_a?(Hash) ? map : {}
+  end
+
+  # Is a beta feature on? A missing map, an unlisted feature, or any falsey value
+  # all read as off, so a fresh (or pre-feature) settings.yaml has every beta off.
+  def beta_feature?(name) = truthy?(beta_features[name.to_s])
+
+  # "always" / "ask" / "never", or nil when ButterCut hasn't asked the user yet.
+  # An unrecognized value also reads as nil: a typo should send us back to the
+  # question, never quietly upload something the user didn't agree to.
+  def error_reporting
+    value = @data['error_reporting'].to_s.strip.downcase
+    value if ERROR_REPORTING_CHOICES.include?(value)
+  end
+
+  # Address to attach to reports so we can follow up, or nil. Separate from the
+  # send/don't-send choice — the user answers the two questions independently.
+  def error_report_email
+    email = @data['error_report_email'].to_s.strip
+    email unless email.empty?
+  end
+
+  private
+
+  # A hand-written flag: on for any spelling of "on"; "off", "0", a blank, or a
+  # word it doesn't know all read as off. The one vocabulary for settings.yaml
+  # and the cut YAML alike (Export#truthy_flag?).
+  def self.truthy?(value)
+    return value if [true, false].include?(value)
+
+    %w[true yes 1 on].include?(value.to_s.strip.downcase)
+  end
+
+  def truthy?(value) = Settings.truthy?(value)
+end
