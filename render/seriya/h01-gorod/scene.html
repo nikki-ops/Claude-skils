@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><title>Город подписчиков — серия 1</title>
+<style>
+html,body{margin:0;background:#000;overflow:hidden}
+#stage{position:relative;width:1080px;height:1920px;overflow:hidden;font-family:Inter,Arial,sans-serif}
+#gl{position:absolute;inset:0;width:1080px;height:1920px}
+#vig{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 50%,rgba(0,0,0,0) 55%,rgba(0,0,0,.35) 100%)}
+.ov{position:absolute;pointer-events:none}
+#title{left:0;right:0;top:250px;text-align:center;font-weight:900;font-size:96px;line-height:1;color:#fff;-webkit-text-stroke:16px #1f1414;paint-order:stroke fill;letter-spacing:-1px}
+#title b{color:#ffd23a}
+#sub{left:60px;right:60px;top:1330px;text-align:center;font-weight:900;font-size:72px;line-height:1.08;color:#fff;-webkit-text-stroke:13px #1f1414;paint-order:stroke fill}
+#sub y{color:#ffd23a}
+#cnt{left:50%;top:150px;transform:translateX(-50%);background:#1d2a44;border:7px solid #ffd23a;border-radius:40px;color:#fff;font-weight:900;font-size:60px;padding:6px 36px;white-space:nowrap}
+#cnt b{color:#ffd23a}
+.nick{transform:translate(-50%,-100%);background:#1d2a44;color:#ffd23a;font-weight:900;font-size:40px;padding:4px 18px;border-radius:14px;border:4px solid #fff;white-space:nowrap}
+#phone{left:190px;width:700px;height:420px;top:1920px;background:#fff;border-radius:40px;box-shadow:0 30px 60px rgba(0,0,0,.4);padding:30px;box-sizing:border-box;font-size:38px;color:#111}
+#phone .row{display:flex;align-items:center;gap:18px;margin-bottom:24px}
+#phone .av{width:70px;height:70px;border-radius:50%;background:#4f8fe8;flex:none}
+#phone .inp{flex:1;border-bottom:4px solid #ddd;padding:10px 0;font-weight:700;min-height:48px}
+#phone .send{background:#e8303a;color:#fff;font-weight:900;padding:14px 28px;border-radius:30px;font-size:34px;display:inline-block}
+#card{left:50%;top:330px;transform:translate(-50%,0) rotate(-2deg);background:#fff6dc;border:8px solid #1f1414;border-radius:24px;padding:26px 40px;text-align:center;font-weight:900;color:#1f1414;box-shadow:0 20px 40px rgba(0,0,0,.35)}
+#card .h{font-size:54px;color:#e8402a}#card .t{font-size:44px;margin-top:10px;line-height:1.15}
+#bell{left:50%;top:600px;transform:translate(-50%,0);font-size:200px}
+#steps{left:50%;top:430px;transform:translateX(-50%);display:flex;gap:16px}
+#steps div{background:#1d2a44;color:#fff;font-weight:900;font-size:34px;padding:10px 18px;border-radius:16px;border:4px solid #ffd23a;opacity:.35}
+#steps div.on{opacity:1;background:#e8402a}
+</style></head><body>
+<div id="stage"><canvas id="gl"></canvas><div id="vig"></div><div id="nicks" class="ov" style="inset:0"></div>
+<div id="cnt" class="ov">ЖИТЕЛЕЙ: <b id="cn">0</b></div><div id="title" class="ov"></div><div id="steps" class="ov"><div>1 · ПАЛАТКА</div><div>2 · ДОМ</div><div>3 · ДОМ МЕЧТЫ</div></div>
+<div id="card" class="ov"></div><div id="bell" class="ov">🔔</div>
+<div id="phone" class="ov"><div class="row"><div class="av"></div><div class="inp" id="inp"></div></div><div style="text-align:right"><span class="send" id="send">ОТПРАВИТЬ</span></div></div>
+<div id="sub" class="ov"></div></div>
+<script src="zhiteli.js"></script>
+<script type="importmap">{"imports":{"three":"/render/_istochniki/three/build/three.module.js"}}</script>
+<script type="module">
+// Серия 1 нового города подписчиков. Таймлайн — stsenarii/ng01-pustoy-gorod.md (хук Б). seek(t) рисует кадр.
+import * as THREE from 'three';
+try{
+const W=1080,H=1920;let SEED=11;const rnd=()=>{SEED=(SEED*16807)%2147483647;return (SEED-1)/2147483646};
+const cl=(x,a,b)=>Math.max(a,Math.min(b,x)),sm=(a,b,x)=>{const k=cl((x-a)/(b-a),0,1);return k*k*(3-2*k)},lerp=(a,b,k)=>a+(b-a)*k,V=(x,y,z)=>new THREE.Vector3(x,y,z);
+const R=new THREE.WebGLRenderer({canvas:document.getElementById('gl'),antialias:true,preserveDrawingBuffer:true});R.setPixelRatio(1);R.setSize(W,H,false);R.outputColorSpace=THREE.SRGBColorSpace;R.shadowMap.enabled=true;R.shadowMap.type=THREE.PCFSoftShadowMap;
+const sc=new THREE.Scene();const cam=new THREE.PerspectiveCamera(48,W/H,.1,500);sc.fog=new THREE.Fog(0xd6ecff,45,170);
+function ctex(w,h,draw,o={}){const c=document.createElement('canvas');c.width=w;c.height=h;draw(c.getContext('2d'),w,h);const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;if(o.px){t.magFilter=THREE.NearestFilter;t.minFilter=THREE.NearestMipmapLinearFilter}if(o.rep){t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(o.rep[0],o.rep[1])}t.anisotropy=8;return t}
+const L=(c,o={})=>new THREE.MeshLambertMaterial({color:c,...o});
+// небо, свет
+sc.add(new THREE.Mesh(new THREE.SphereGeometry(300,24,12),new THREE.ShaderMaterial({side:THREE.BackSide,depthWrite:false,fog:false,vertexShader:'varying vec3 p;void main(){p=normalize(position);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',fragmentShader:'varying vec3 p;void main(){float h=clamp(p.y*1.4,0.,1.);gl_FragColor=vec4(mix(vec3(.82,.93,1.),vec3(.2,.52,.95),pow(h,.55)),1.);}'})));
+sc.add(new THREE.HemisphereLight(0xeaf6ff,0x7ab040,1.4));const sun=new THREE.DirectionalLight(0xfff3dc,2.0);sun.position.set(-25,40,30);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);Object.assign(sun.shadow.camera,{left:-30,right:30,top:30,bottom:-30,far:120});sun.shadow.bias=-.0004;sc.add(sun);
+// земля: пиксельная трава + пучки
+const hgt=(x,z)=>(z<-35?Math.pow(sm(-35,-90,z),1.3)*(10+Math.sin(x*.05)*5):0);
+{const t=ctex(32,32,(x)=>{for(let i=0;i<32;i++)for(let j=0;j<32;j++){const v=rnd();x.fillStyle=`hsl(${86+rnd()*10},${76+rnd()*10}%,${v<.1?34:v<.35?44:51+rnd()*6}%)`;x.fillRect(i,j,1,1)}for(let k=0;k<5;k++){x.fillStyle=['#fff','#ffe34a','#ff9ac0','#ff8a3d','#c9a0ff'][k];x.fillRect(Math.floor(rnd()*32),Math.floor(rnd()*32),1,1)}},{px:1,rep:[240,240]});
+ const g=new THREE.PlaneGeometry(320,320,120,120);g.rotateX(-Math.PI/2);const p=g.attributes.position;for(let i=0;i<p.count;i++)p.setY(i,hgt(p.getX(i),p.getZ(i)));g.computeVertexNormals();const m=new THREE.Mesh(g,L(0xffffff,{map:t}));m.receiveShadow=true;sc.add(m)}
+{const bt=ctex(32,32,(x)=>{x.clearRect(0,0,32,32);for(let k=0;k<9;k++){const bx=3+k*3,hh=10+Math.floor(rnd()*18);for(let y=0;y<hh;y++){x.fillStyle=`hsl(${88+rnd()*8},70%,${36+y*1.2}%)`;x.fillRect(bx+Math.floor(y/9*(k%2?1:-1)),31-y,1,1)}}},{px:1});
+ const a=new THREE.PlaneGeometry(.9,.9);a.translate(0,.45,0);const b2=a.clone();b2.rotateY(Math.PI/2);const geo=new THREE.BufferGeometry();
+ geo.setAttribute('position',new THREE.Float32BufferAttribute([...a.attributes.position.array,...b2.attributes.position.array],3));geo.setAttribute('uv',new THREE.Float32BufferAttribute([...a.attributes.uv.array,...b2.attributes.uv.array],2));geo.setAttribute('normal',new THREE.Float32BufferAttribute(new Array(24).fill(0).map((v,i)=>i%3===1?1:0),3));geo.setIndex([...a.index.array,...[...b2.index.array].map(i=>i+4)]);
+ const N=5000,im=new THREE.InstancedMesh(geo,L(0xffffff,{map:bt,alphaTest:.5,side:THREE.DoubleSide}),N);const m4=new THREE.Matrix4(),q=new THREE.Quaternion(),v=new THREE.Vector3(),s=new THREE.Vector3();
+ for(let i=0;i<N;i++){const x=-30+rnd()*60,z=-40+rnd()*55;q.setFromAxisAngle(V(0,1,0),rnd()*3);v.set(x,hgt(x,z),z);const k=.3+rnd()*.35;s.set(k,k,k);m4.compose(v,q,s);im.setMatrixAt(i,m4)}sc.add(im)}
+// деревья, облака, дальние холмы
+const LEAF=ctex(64,64,(x)=>{for(let i=0;i<64;i++)for(let j=0;j<64;j++){x.fillStyle=`hsl(${100+rnd()*12},55%,${34+rnd()*14}%)`;x.fillRect(i,j,1,1)}},{px:1});
+function tree(x,z,s=1){const g=new THREE.Group();const tr=new THREE.Mesh(new THREE.CylinderGeometry(.22*s,.3*s,3*s,8),L(0x6d4a2e));tr.position.y=1.5*s;tr.castShadow=true;g.add(tr);for(let k=0;k<4;k++){const b=new THREE.Mesh(new THREE.SphereGeometry((1.3+rnd()*.5)*s,14,10),L(0xffffff,{map:LEAF}));b.position.set((rnd()-.5)*1.8*s,(3.6+rnd()*1.3)*s,(rnd()-.5)*1.4*s);b.castShadow=true;g.add(b)}g.position.set(x,hgt(x,z),z);sc.add(g)}
+for(let i=0;i<16;i++)tree(-45+rnd()*90,-45-rnd()*40,.9+rnd()*.6);
+for(let i=0;i<8;i++){const g=new THREE.Group();for(let k=0;k<5;k++){const b=new THREE.Mesh(new THREE.SphereGeometry(2.2+rnd()*2,16,12),new THREE.MeshBasicMaterial({color:0xffffff,fog:false}));b.position.set(k*2.8-5.6,rnd()*1.6,rnd());b.scale.y=.68;g.add(b)}g.position.set(-70+i*22,34+rnd()*14,-130-rnd()*20);sc.add(g)}
+// ---------- объекты сюжета ----------
+// табличка «ГОРОД ПОДПИСЧИКОВ»
+const SIGN=new THREE.Group();sc.add(SIGN);{const wood=L(0x8a5a32);for(const px of[-1.7,1.7]){const post=new THREE.Mesh(new THREE.BoxGeometry(.3,4.2,.3),wood);post.position.set(px,2.1,-.3);post.castShadow=true;SIGN.add(post)}
+ const bt=ctex(1024,512,(x,w,h)=>{x.fillStyle='#c98a4e';x.fillRect(0,0,w,h);for(let i=0;i<6;i++){x.fillStyle=i%2?'#b87a40':'#d2965a';x.fillRect(0,i*h/6,w,h/6)}x.lineWidth=24;x.strokeStyle='#5a3418';x.strokeRect(12,12,w-24,h-24);x.fillStyle='#2a1a10';x.font='900 120px Inter, Arial';x.textAlign='center';x.fillText('ГОРОД',w/2,215);x.fillText('ПОДПИСЧИКОВ',w/2,370)});
+ const board=new THREE.Mesh(new THREE.BoxGeometry(4.4,2.2,.22),[wood,wood,wood,wood,L(0xffffff,{map:bt}),wood]);board.position.y=3.6;board.castShadow=true;SIGN.add(board)}
+SIGN.position.set(0,0,-2);
+// перекати-поле
+const TUMB=new THREE.Mesh(new THREE.IcosahedronGeometry(.6,1),new THREE.MeshLambertMaterial({color:0x9a7040,wireframe:true}));sc.add(TUMB);
+// ящик
+const CRATE=new THREE.Mesh(new THREE.BoxGeometry(1.1,.8,1.1),L(0xa87444));CRATE.castShadow=true;CRATE.position.set(-2.4,.4,0);sc.add(CRATE);
+// палатка
+const TENT=new THREE.Group();{const sh=new THREE.Shape();sh.moveTo(-1.4,0);sh.lineTo(1.4,0);sh.lineTo(0,2.1);sh.closePath();const g=new THREE.ExtrudeGeometry(sh,{depth:2.4,bevelEnabled:false});g.translate(0,0,-1.2);const m=new THREE.Mesh(g,L(0x4f8fe8));m.castShadow=true;TENT.add(m);
+ const door=new THREE.Mesh(new THREE.PlaneGeometry(1.1,1.4),new THREE.MeshBasicMaterial({color:0x1d2a44}));door.position.set(0,.6,1.21);TENT.add(door)}
+TENT.position.set(3.2,0,.5);sc.add(TENT);
+// домик
+const HOUSE=new THREE.Group();{const b=new THREE.Mesh(new THREE.BoxGeometry(2.8,2.2,2.6),L(0xf2e2c4));b.position.y=1.1;b.castShadow=true;HOUSE.add(b);const r=new THREE.Mesh(new THREE.ConeGeometry(2.3,1.5,4),L(0x4f8fe8));r.rotation.y=Math.PI/4;r.position.y=2.95;r.castShadow=true;HOUSE.add(r);
+ const d=new THREE.Mesh(new THREE.PlaneGeometry(.7,1.2),new THREE.MeshBasicMaterial({color:0x6a4326}));d.position.set(0,.6,1.31);HOUSE.add(d);const w=new THREE.Mesh(new THREE.PlaneGeometry(.6,.6),new THREE.MeshBasicMaterial({color:0x9fd8ff}));w.position.set(.85,1.4,1.31);HOUSE.add(w)}
+HOUSE.position.set(3.2,0,.5);sc.add(HOUSE);
+// дом мечты — ракета
+const ROCKET=new THREE.Group();{const b=new THREE.Mesh(new THREE.CylinderGeometry(1.1,1.2,5,20),L(0xf4f1ea));b.position.y=3;b.castShadow=true;ROCKET.add(b);const n=new THREE.Mesh(new THREE.ConeGeometry(1.1,2.2,20),L(0xe8402a));n.position.y=6.6;ROCKET.add(n);
+ for(let k=0;k<3;k++){const f=new THREE.Mesh(new THREE.BoxGeometry(.15,1.6,1.2),L(0xe8402a));const a=k*Math.PI*2/3;f.position.set(Math.cos(a)*1.2,1.2,Math.sin(a)*1.2);f.rotation.y=-a;ROCKET.add(f)}
+ const w=new THREE.Mesh(new THREE.CircleGeometry(.45,20),new THREE.MeshBasicMaterial({color:0x6ac8ff}));w.position.set(0,4,1.12);ROCKET.add(w);const d=new THREE.Mesh(new THREE.PlaneGeometry(.8,1.3),new THREE.MeshBasicMaterial({color:0x1d2a44}));d.position.set(0,1.15,1.18);ROCKET.add(d)}
+ROCKET.position.set(-4,0,-4);sc.add(ROCKET);
+// кран
+const CRANE=new THREE.Group();{const Y=L(0xf2b705),DK=L(0x2b2b30);const MH=11;const m=new THREE.Mesh(new THREE.BoxGeometry(.6,MH,.6),Y);m.position.y=MH/2;m.castShadow=true;CRANE.add(m);
+ const lat=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(.62,MH,.62,1,10,1)),new THREE.LineBasicMaterial({color:0x6a5000}));lat.position.y=MH/2;CRANE.add(lat);
+ const j=new THREE.Mesh(new THREE.BoxGeometry(9,.45,.45),Y);j.position.set(-3,MH+.7,0);CRANE.add(j);const cab=new THREE.Mesh(new THREE.BoxGeometry(1,1,1),L(0xffffff));cab.position.set(0,MH+.3,.6);CRANE.add(cab);
+ const cw=new THREE.Mesh(new THREE.BoxGeometry(1.2,.9,.8),L(0x8a8a90));cw.position.set(2.6,MH+.4,0);CRANE.add(cw);CRANE.userData={MH,DK}}
+CRANE.position.set(10.2,0,.5);sc.add(CRANE);
+const CABLE=new THREE.Mesh(new THREE.CylinderGeometry(.04,.04,1,6),L(0x2b2b30));sc.add(CABLE);
+// частицы: пыль/хлопок, конфетти
+const PUFF=[];for(let i=0;i<18;i++){const m=new THREE.Mesh(new THREE.SphereGeometry(.4,8,6),new THREE.MeshBasicMaterial({color:0xf4efe6,transparent:true,depthWrite:false}));m.visible=false;sc.add(m);PUFF.push({m,a:i/18*Math.PI*2,s:.6+rnd()*.6})}
+const CONF=[];for(let i=0;i<80;i++){const m=new THREE.Mesh(new THREE.PlaneGeometry(.18,.3),new THREE.MeshBasicMaterial({color:new THREE.Color().setHSL(rnd(),.9,.6),side:THREE.DoubleSide}));m.visible=false;sc.add(m);CONF.push({m,x:(rnd()-.5)*8,z:(rnd()-.5)*6,v:2+rnd()*4,ph:rnd()*6})}
+// ---------- персонажи (билборды) ----------
+const CH=[];function person(nick,look){const c=document.createElement('canvas');c.width=512;c.height=1280;const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;
+ const m=new THREE.Mesh(new THREE.PlaneGeometry(1.55,3.9),new THREE.MeshBasicMaterial({map:t,alphaTest:.5,side:THREE.DoubleSide}));m.castShadow=true;sc.add(m);
+ const sh=new THREE.Mesh(new THREE.CircleGeometry(.45,20),new THREE.MeshBasicMaterial({color:0x103000,transparent:true,opacity:.25,depthWrite:false}));sh.rotation.x=-Math.PI/2;sc.add(sh);
+ const tag=document.createElement('div');tag.className='ov nick';tag.textContent='@'+nick;document.getElementById('nicks').appendChild(tag);
+ const P={nick,look,c,t,m,sh,tag,ctx:c.getContext('2d')};CH.push(P);return P}
+const BOSS=person('Прораб',{hair:'hardhat',body:['#f28a2e','#c4601a'],skin:['#fbe3c8','#e7a466'],acc:'none'});BOSS.tag.textContent='ПРОРАБ';
+const NEW=person('ТВОЙ_НИК',{body:['#4f8fe8','#2c5fb8'],hair:'spiky',hairColor:'#5a3420',acc:'none'});
+function place(P,x,y,z,o){P.m.visible=P.sh.visible=true;P.m.position.set(x,y+1.95,z);P.m.lookAt(cam.position.x,y+1.95,cam.position.z);P.sh.position.set(x,.03,z);drawCitizen(P.ctx,{nick:P.nick,look:P.look,...o});P.t.needsUpdate=true}
+function hide(P){P.m.visible=P.sh.visible=false;P.tag.style.display='none'}
+function tagAt(P,show){if(!show){P.tag.style.display='none';return}const v=P.m.position.clone();v.y+=2.15;v.project(cam);P.tag.style.display='block';P.tag.style.left=((v.x*.5+.5)*W)+'px';P.tag.style.top=((-v.y*.5+.5)*H)+'px'}
+// ---------- текст озвучки (черновой тайминг до записи голоса) ----------
+const LINES=[[0,2.5,'В этом городе <y>0 жителей</y>.'],[2.5,5,'Первым будешь <y>ты</y>!'],[5,8,'Знакомься — это <y>Прораб</y>.'],[8,11,'Он тут совсем <y>один</y>… и ему скучно.'],[11,14,'Но есть <y>правило</y>.'],[14,18,'Пишешь свой <y>ник</y> в комментариях…'],[18,21,'…и ты <y>появляешься</y> в городе!'],[21,25,'Сначала — <y>палатка</y>.'],[25,29,'Пишешь под следующим роликом — кран строит <y>дом</y>.'],[29,33,'Самые залайканные заказы — <y>дом мечты</y>.'],[33,36,'Первые <y>десять</y> — дом сразу!'],[36,39,'Подпишись, чтобы найти <y>себя</y> в следующей серии.'],[39,42,'Ну что… кто будет <y>первым</y>?']];
+const TITLES=[[0,2.5,'В ЭТОМ ГОРОДЕ<br><b>0 ЖИТЕЛЕЙ</b>'],[2.5,5,'ПЕРВЫЙ — <b>ТЫ</b>'],[11,14,''],[14,18,'ПИШИ <b>НИК</b> 👇'],[33,36,'ПЕРВЫЕ <b>10</b> —<br>ДОМ СРАЗУ'],[36,39,'<b>ПОДПИШИСЬ</b>'],[39,42,'КТО <b>ПЕРВЫЙ</b>?']];
+const DUR=42;const $=id=>document.getElementById(id);
+// ---------- камера по планам ----------
+const SH=[[0,2.5,V(0,3.5,9),V(0,3,6.5),V(0,3.2,-2),V(0,3.6,-2)],[2.5,5,V(0,4,10),V(0,9,22),V(0,2,-2),V(0,2,-4)],[5,8,V(-1.5,2.9,8.5),V(-1.2,2.9,7.6),V(-.6,2.7,-1),V(-.6,2.7,-1)],[8,11,V(-3.2,2.6,8),V(-3,2.6,7.2),V(-2.4,2.4,0),V(-2.4,2.4,0)],[11,14,V(-2,3,8),V(-1.8,3,7.2),V(-1.6,2.8,0),V(-1.6,2.8,0)],
+ [14,18,V(1,3,9),V(1,3,8.5),V(1,2.4,0),V(1,2.4,0)],[18,21,V(1.5,2.9,8.2),V(1.6,2.9,7.4),V(1.4,2.6,.3),V(1.4,2.6,.3)],[21,25,V(5.5,3,7),V(5,3,6.2),V(2.6,1.6,.3),V(2.6,1.6,.3)],[25,29,V(6,6,12),V(5.5,5,10),V(4,4,.3),V(3.4,2,.3)],[29,33,V(-1,4,8),V(-2,6,10),V(-3.6,3.5,-4),V(-3.6,4,-4)],
+ [33,36,V(-1.2,3,8),V(-1,3,7.2),V(-.8,2.8,0),V(-.8,2.8,0)],[36,39,V(-.5,3,8),V(-.4,3,7.4),V(-.6,2.8,0),V(-.6,2.8,0)],[39,42,V(0,6,18),V(0,4,10),V(0,2.5,-2),V(0,3,-2)]];
+function seek(t){t=((t%DUR)+DUR)%DUR;const s=SH.find(x=>t>=x[0]&&t<x[1])||SH[SH.length-1];const k=sm(s[0],s[1],t);
+ cam.position.lerpVectors(s[2],s[3],k);cam.position.y+=Math.sin(t*1.3)*.03;cam.lookAt(new THREE.Vector3().lerpVectors(s[4],s[5],k));cam.updateProjectionMatrix();
+ // табличка падает в хуке и в петле
+ const fall=t<1.1?sm(0,1.1,t):1;SIGN.position.y=(1-fall)*14;SIGN.rotation.z=(1-fall)*.4;
+ PUFF.forEach(p=>{const a=t-1.05;const on=a>0&&a<.9;p.m.visible=on;if(on){const r=1+a*4*p.s;p.m.position.set(SIGN.position.x+Math.cos(p.a)*r,.3+a*.8,SIGN.position.z+Math.sin(p.a)*r*.6);p.m.material.opacity=.8*(1-a/.9);p.m.scale.setScalar(.6+a*1.6)}});
+ // перекати-поле
+ const tx=t>=2.5&&t<5?lerp(-12,12,(t-2.5)/2.5):t>=39?lerp(-12,10,(t-39)/3):99;TUMB.position.set(tx,.6+Math.abs(Math.sin(t*6))*.4,1.5);TUMB.rotation.z=-t*6;
+ // Прораб
+ let bossOn=t>=5&&t<17||t>=33||t>=2.5&&t<5;
+ if(bossOn){let bx=-.6,bz=-.6,mood='smile',wave=false,y=0;
+  if(t<5){bx=-6;bz=-6} if(t>=5&&t<8){const k2=sm(5,5.8,t);bx=lerp(.6,-.6,k2);wave=t>5.6}
+  if(t>=8&&t<11){bx=-2.4;bz=0;y=.62;mood='sly'} if(t>=11&&t<17){bx=-1.6;bz=0;mood='smile'} if(t>=33){bx=-.8;bz=0;mood=t>=36&&t<39?'laugh':'smile';wave=t>=39}
+  place(BOSS,bx,y,bz,{t,mood,wave,talk:true});tagAt(BOSS,t>=5)}else hide(BOSS);
+ // новый житель
+ const newOn=t>=18.4&&t<33;if(newOn){place(NEW,1.4,0,.4,{t,mood:t<19.5?'shock':'laugh',wave:t>=19.5&&t<21});tagAt(NEW,true)}else hide(NEW);
+ // хлопок появления
+ if(t>=18&&t<19){PUFF.forEach(p=>{const a=t-18;p.m.visible=true;const r=.3+a*2.5*p.s;p.m.position.set(1.4+Math.cos(p.a)*r,1.5+Math.sin(p.a)*r,.4);p.m.material.opacity=.9*(1-a);p.m.scale.setScalar(.8+a*1.5)})}
+ // палатка → дом краном
+ TENT.visible=t>=21&&t<27.5;if(TENT.visible){const k2=sm(21,21.6,t);TENT.scale.set(1,k2,1)}
+ const MH=CRANE.userData.MH;CRANE.visible=t>=25&&t<29;CABLE.visible=CRANE.visible;HOUSE.visible=t>=25&&t<33;
+ if(HOUSE.visible){const k2=sm(25.3,27.6,t);HOUSE.position.y=(1-k2)*9;HOUSE.rotation.y=Math.sin(t*3)*.05*(1-k2);const top=HOUSE.position.y+3.7;CABLE.scale.y=Math.max(.01,MH+.6-top);CABLE.position.set(3.2,top+(MH+.6-top)/2,.5)}
+ PUFF.forEach(p=>{if(t>=27.6&&t<28.5){const a=t-27.6;p.m.visible=true;const r=1.5+a*4*p.s;p.m.position.set(3.2+Math.cos(p.a)*r,.3+a,.5+Math.sin(p.a)*r*.6);p.m.material.opacity=.8*(1-a/.9);p.m.scale.setScalar(.6+a*1.6)}});
+ // дом мечты
+ ROCKET.visible=t>=29&&t<42;if(ROCKET.visible){const k2=sm(29.3,30.2,t);ROCKET.scale.set(1,Math.max(.01,k2*(1+.1*Math.sin(k2*Math.PI))),1)}
+ CONF.forEach(c=>{const a=t-29.6;const on=a>0&&a<3;c.m.visible=on;if(on){c.m.position.set(-4+c.x,9-((a*c.v)%9),-4+c.z);c.m.rotation.set(a*4+c.ph,a*3,0)}});
+ // оверлеи
+ const ti=TITLES.find(x=>t>=x[0]&&t<x[1]);$('title').innerHTML=ti?ti[2]:'';$('title').style.transform=`scale(${ti?1+.12*(1-sm(ti[0],ti[0]+.25,t)):1})`;
+ const li=LINES.find(x=>t>=x[0]&&t<x[1]);$('sub').innerHTML=li?li[2]:'';
+ $('cn').textContent='0';$('cnt').style.display=(t<5||t>=39)?'block':'none';
+ $('steps').style.display=t>=21&&t<33?'flex':'none';[...$('steps').children].forEach((d,i)=>d.classList.toggle('on',(i===0&&t<25)||(i===1&&t>=25&&t<29)||(i===2&&t>=29)));
+ const ci=t>=11&&t<14;$('card').style.display=ci?'block':'none';$('card').innerHTML='<div class="h">ПРАВИЛО ГОРОДА</div><div class="t">Пишешь ник в комментариях —<br>появляешься в городе</div>';$('card').style.transform=`translate(-50%,0) rotate(-2deg) scale(${ci?sm(11,11.3,t):0})`;
+ $('bell').style.display=t>=36&&t<39?'block':'none';$('bell').style.transform=`translate(-50%,0) rotate(${Math.sin(t*14)*18}deg)`;
+ const ph=t>=14&&t<18;$('phone').style.top=(ph?lerp(1920,1380,sm(14,14.5,t)):1920)+'px';const nick='@ТВОЙ_НИК';$('inp').textContent=ph?nick.slice(0,Math.floor(cl((t-14.6)/1.6,0,1)*nick.length)):'';$('send').style.transform=`scale(${t>=17&&t<17.3?.85:1})`;
+ $('sub').style.top=ph?'1180px':'1330px';
+ R.render(sc,cam)}
+window.seek=seek;window.DUR=DUR;seek(.5);window.READY=true;
+}catch(e){window.SCENE_ERR=e.stack||String(e)}
+</script></body></html>
