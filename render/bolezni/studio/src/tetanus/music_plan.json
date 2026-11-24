@@ -1,0 +1,191 @@
+{
+ "bpm": 96,
+ "bars": 36,
+ "sections": [
+  {
+   "from": 0,
+   "chords": [
+    "Am"
+   ],
+   "sec": "hook"
+  },
+  {
+   "from": 1,
+   "chords": [
+    "Am",
+    "F",
+    "C",
+    "G",
+    "E"
+   ],
+   "sec": "intro"
+  },
+  {
+   "from": 6,
+   "chords": [
+    "Am",
+    "F",
+    "C",
+    "G",
+    "Am",
+    "F",
+    "Dm",
+    "E"
+   ],
+   "sec": "dropA"
+  },
+  {
+   "from": 14,
+   "chords": [
+    "Dm",
+    "Am",
+    "E",
+    "Am",
+    "Dm",
+    "Am",
+    "E7",
+    "E",
+    "F",
+    "Dm",
+    "E"
+   ],
+   "sec": "tension"
+  },
+  {
+   "from": 25,
+   "chords": [
+    "F",
+    "Fmaj7"
+   ],
+   "sec": "break"
+  },
+  {
+   "from": 27,
+   "chords": [
+    "C",
+    "G",
+    "Am"
+   ],
+   "sec": "lift"
+  },
+  {
+   "from": 30,
+   "chords": [
+    "Am",
+    "F",
+    "C",
+    "G",
+    "E"
+   ],
+   "sec": "final"
+  },
+  {
+   "from": 35,
+   "chords": [
+    "Am"
+   ],
+   "sec": "outro"
+  }
+ ],
+ "melodies": [
+  {
+   "bars": [
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13
+   ],
+   "theme": "THEME",
+   "vel": 0.55,
+   "inst": "lead"
+  },
+  {
+   "bars": [
+    1,
+    2,
+    3,
+    4
+   ],
+   "theme": "THEME",
+   "vel": 0.5,
+   "inst": "piano"
+  },
+  {
+   "bars": [
+    15,
+    16,
+    17,
+    18
+   ],
+   "theme": "THEME_T",
+   "oct": -12,
+   "vel": 0.5,
+   "inst": "lead"
+  },
+  {
+   "bars": [
+    20,
+    21,
+    22,
+    23
+   ],
+   "theme": "THEME_T",
+   "vel": 0.5,
+   "inst": "lead"
+  },
+  {
+   "bars": [
+    27,
+    28,
+    29
+   ],
+   "theme": "THEME",
+   "phrases": [
+    2,
+    3,
+    4
+   ],
+   "vel": 0.5,
+   "inst": "piano"
+  },
+  {
+   "bars": [
+    30,
+    31,
+    32,
+    33
+   ],
+   "theme": "THEME",
+   "phrases": [
+    4,
+    5,
+    6,
+    7
+   ],
+   "vel": 0.6,
+   "inst": "lead"
+  },
+  {
+   "bars": [
+    30,
+    31,
+    32,
+    33
+   ],
+   "theme": "THEME",
+   "phrases": [
+    4,
+    5,
+    6,
+    7
+   ],
+   "oct": 12,
+   "vel": 0.35,
+   "inst": "piano"
+  }
+ ]
+}

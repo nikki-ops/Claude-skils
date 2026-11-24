@@ -1,0 +1,27 @@
+{
+  "name": "bolezni-style",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "studio": "remotion studio",
+    "render": "remotion render"
+  },
+  "dependencies": {
+    "remotion": "4.0.544",
+    "@remotion/cli": "4.0.544",
+    "@remotion/three": "4.0.544",
+    "@remotion/google-fonts": "4.0.544",
+    "@react-three/fiber": "9.8.2",
+    "three": "0.187.0",
+    "react": "19.2.0",
+    "react-dom": "19.2.0"
+  },
+  "devDependencies": {
+    "typescript": "5.9.3",
+    "@types/react": "19.2.2",
+    "@types/three": "0.187.0"
+  },
+  "allowScripts": {
+    "esbuild@0.28.1": true
+  }
+}
