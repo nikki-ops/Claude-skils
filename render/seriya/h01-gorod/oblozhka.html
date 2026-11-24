@@ -1,0 +1,39 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><title>Обложка — снос</title>
+<style>html,body{margin:0;background:#000}#st{position:relative;width:1080px;height:1920px;overflow:hidden;font-family:Inter,Arial,sans-serif;font-weight:900}
+#gl{position:absolute;inset:0;width:1080px;height:1920px}#pr{position:absolute}
+.t{position:absolute;left:0;right:0;text-align:center;line-height:.9;-webkit-text-stroke:22px #120808;paint-order:stroke fill}</style></head><body>
+<div id="st"><canvas id="gl"></canvas><canvas id="pr" width="512" height="1280"></canvas><div id="ov"></div></div>
+<script src="zhiteli.js"></script>
+<script type="importmap">{"imports":{"three":"/render/_istochniki/three/build/three.module.js"}}</script>
+<script type="module">
+// Обложка серии 1: низкий ракурс, огромный ковш бульдозера сверху, Прораб крупно в шоке, 1–2 слова. ?v=snos | kot
+import * as THREE from 'three';
+try{const W=1080,H=1920,v=new URLSearchParams(location.search).get('v')||'snos';
+const R=new THREE.WebGLRenderer({canvas:document.getElementById('gl'),antialias:true,preserveDrawingBuffer:true});R.setSize(W,H,false);R.outputColorSpace=THREE.SRGBColorSpace;
+const sc=new THREE.Scene();const cam=new THREE.PerspectiveCamera(60,W/H,.1,300);
+// небо: тревожный закат
+sc.add(new THREE.Mesh(new THREE.SphereGeometry(200,24,12),new THREE.ShaderMaterial({side:THREE.BackSide,depthWrite:false,vertexShader:'varying vec3 p;void main(){p=normalize(position);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',fragmentShader:'varying vec3 p;void main(){float h=clamp(p.y*1.3+.1,0.,1.);gl_FragColor=vec4(mix(vec3(1.,.55,.15),vec3(.55,.05,.25),pow(h,.7)),1.);}'})));
+sc.add(new THREE.HemisphereLight(0xffd0a0,0x402010,1.2));const key=new THREE.DirectionalLight(0xffe0b0,2.4);key.position.set(6,10,12);sc.add(key);const rim=new THREE.DirectionalLight(0xff3020,2.5);rim.position.set(-8,4,-6);sc.add(rim);
+const ground=new THREE.Mesh(new THREE.PlaneGeometry(200,200),new THREE.MeshLambertMaterial({color:0x5aa02a}));ground.rotation.x=-Math.PI/2;sc.add(ground);
+const Y=new THREE.MeshLambertMaterial({color:0xffc20a}),DK=new THREE.MeshLambertMaterial({color:0x22222a});
+// бульдозер: огромный отвал над камерой, ковш с зубьями
+const D=new THREE.Group();sc.add(D);
+const bs=new THREE.Shape();bs.moveTo(-6,-2.2);bs.lineTo(6,-2.2);bs.lineTo(6,2.6);bs.quadraticCurveTo(0,1.2,-6,2.6);bs.closePath();
+const blade=new THREE.Mesh(new THREE.ExtrudeGeometry(bs,{depth:.8,bevelEnabled:true,bevelSize:.15,bevelThickness:.15}),Y);D.add(blade);
+for(let i=-5;i<=5;i++){const t=new THREE.Mesh(new THREE.ConeGeometry(.35,1,4),new THREE.MeshLambertMaterial({color:0xc8c8cc}));t.rotation.x=Math.PI;t.position.set(i*1.08,-2.7,.4);D.add(t)}
+const body=new THREE.Mesh(new THREE.BoxGeometry(8,4,6),Y);body.position.set(0,1.5,-4.5);D.add(body);const cab=new THREE.Mesh(new THREE.BoxGeometry(5,4,4),Y);cab.position.set(0,5.4,-5.5);D.add(cab);
+const win=new THREE.Mesh(new THREE.PlaneGeometry(4,2.6),new THREE.MeshBasicMaterial({color:0x101820}));win.position.set(0,5.7,-3.48);D.add(win);
+const cat=document.createElement('canvas');cat.width=cat.height=256;{const x=cat.getContext('2d');x.fillStyle='#000';x.beginPath();x.arc(128,150,72,0,7);x.fill();x.beginPath();x.moveTo(66,110);x.lineTo(78,26);x.lineTo(118,86);x.fill();x.beginPath();x.moveTo(190,110);x.lineTo(178,26);x.lineTo(138,86);x.fill();x.fillStyle='#ffe23a';x.shadowColor='#ffe23a';x.shadowBlur=30;x.beginPath();x.ellipse(98,146,17,11,0,0,7);x.ellipse(158,146,17,11,0,0,7);x.fill()}
+const ct=new THREE.CanvasTexture(cat);ct.colorSpace=THREE.SRGBColorSpace;const catM=new THREE.Mesh(new THREE.PlaneGeometry(2.4,2.4),new THREE.MeshBasicMaterial({map:ct,transparent:true}));catM.position.set(0,5.6,-3.4);D.add(catM);catM.visible=v==='kot';
+for(const s of[-1,1]){const tr=new THREE.Mesh(new THREE.BoxGeometry(1.8,2.4,8),DK);tr.position.set(s*4.6,1.2,-4.5);D.add(tr)}
+const bc=new THREE.Mesh(new THREE.SphereGeometry(.6,16,10),new THREE.MeshBasicMaterial({color:0xff6a00}));bc.position.set(0,7.8,-5.5);D.add(bc);
+D.position.set(0,v==='kot'?0:6.2,v==='kot'?-6:-2);D.rotation.x=v==='kot'?0:-.15;
+if(v==='kot'){cam.position.set(0,5.4,4.5);cam.lookAt(0,5.6,-6)}else{cam.position.set(0,1.2,9);cam.lookAt(0,4.6,0)}
+cam.updateProjectionMatrix();R.render(sc,cam);
+// Прораб крупно
+const pr=document.getElementById('pr');drawCitizen(pr.getContext('2d'),{nick:'Прораб',look:{hair:'hardhat',body:['#2f7ae8','#1c4fb0'],skin:['#fbe3c8','#e7a466'],acc:'none'},mood:'shock',t:.3});
+const ov=document.getElementById('ov'),T=(txt,top,sz,c)=>`<div class="t" style="top:${top}px;font-size:${sz}px;color:${c}">${txt}</div>`;
+if(v==='kot'){pr.style.cssText='left:-80px;top:1020px;width:680px;height:1700px;transform:rotate(-6deg);filter:drop-shadow(0 0 30px rgba(0,0,0,.55))';ov.innerHTML=T('КТО<br>ЗА РУЛЁМ?',170,190,'#ffe23a')}
+else{pr.style.cssText='left:160px;top:880px;width:760px;height:1900px;filter:drop-shadow(0 0 30px rgba(0,0,0,.55))';ov.innerHTML=T('СНОС!',300,300,'#ff2a1a')+`<div style="position:absolute;left:0;right:0;top:1600px;text-align:center"><span style="display:inline-block;background:#ffe23a;color:#120808;font-size:96px;padding:10px 40px;border-radius:26px;border:10px solid #120808;transform:rotate(-3deg)">24 ЧАСА</span></div>`}
+window.READY=true}catch(e){window.SCENE_ERR=e.stack||String(e)}
+</script></body></html>
