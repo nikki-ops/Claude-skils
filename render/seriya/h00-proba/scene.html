@@ -1,108 +1,147 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><title>History toon test</title>
+<html lang="en"><head><meta charset="utf-8"><title>History toon test v2</title>
 <style>
 html,body{margin:0;background:#000;overflow:hidden}
 #stage{position:relative;width:1080px;height:1920px;overflow:hidden}
 #gl{position:absolute;inset:0;width:1080px;height:1920px}
-#w{position:absolute;left:0;right:0;top:1180px;text-align:center;font-family:Inter,Arial,sans-serif;font-weight:900;font-size:92px;color:#fff;-webkit-text-stroke:16px #111;paint-order:stroke fill;letter-spacing:-1px;transform-origin:50% 50%}
+#w{position:absolute;left:0;right:0;top:1230px;text-align:center;font-family:Inter,Arial,sans-serif;font-weight:900;font-size:88px;color:#fff;-webkit-text-stroke:15px #141414;paint-order:stroke fill;letter-spacing:-1px;transform-origin:50% 50%}
 </style></head><body>
 <div id="stage"><canvas id="gl"></canvas><div id="w"></div></div>
 <script type="importmap">{"imports":{"three":"/render/_istochniki/three/build/three.module.js","three/addons/":"/render/_istochniki/three/examples/jsm/"}}</script>
 <script type="module">
-// Проба стиля «мультяшная история»: плоский персонаж-фасолинка (рисуется на холсте) в объёмном тун-мире.
+// Проба стиля v2: 3D-мир с чернильной обводкой (по глубине и нормалям), пиксельная трава, детальный танк,
+// плоский персонаж-фасолинка, свечение + насыщенность + виньетка + размытие краёв (эффект миниатюры).
 import * as THREE from 'three';
 import {EffectComposer} from 'three/addons/postprocessing/EffectComposer.js';
 import {RenderPass} from 'three/addons/postprocessing/RenderPass.js';
+import {ShaderPass} from 'three/addons/postprocessing/ShaderPass.js';
+import {UnrealBloomPass} from 'three/addons/postprocessing/UnrealBloomPass.js';
 import {BokehPass} from 'three/addons/postprocessing/BokehPass.js';
 import {OutputPass} from 'three/addons/postprocessing/OutputPass.js';
 try{
 const W=1080,H=1920,DUR=6;
-let SEED=3;const rnd=()=>{SEED=(SEED*16807)%2147483647;return (SEED-1)/2147483646};
+let SEED=5;const rnd=()=>{SEED=(SEED*16807)%2147483647;return (SEED-1)/2147483646};
 const cl=(x,a,b)=>Math.max(a,Math.min(b,x)),sm=(a,b,x)=>{const k=cl((x-a)/(b-a),0,1);return k*k*(3-2*k)},lerp=(a,b,k)=>a+(b-a)*k;
 const R=new THREE.WebGLRenderer({canvas:document.getElementById('gl'),antialias:true,preserveDrawingBuffer:true});R.setPixelRatio(1);R.setSize(W,H,false);R.outputColorSpace=THREE.SRGBColorSpace;R.shadowMap.enabled=true;R.shadowMap.type=THREE.PCFSoftShadowMap;
-const sc=new THREE.Scene();const cam=new THREE.PerspectiveCamera(58,W/H,.1,500);
-sc.fog=new THREE.Fog(0xc6e6ff,40,140);
-// небо
-{const m=new THREE.ShaderMaterial({side:THREE.BackSide,depthWrite:false,fog:false,vertexShader:'varying vec3 p;void main(){p=normalize(position);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',fragmentShader:'varying vec3 p;void main(){float h=clamp(p.y*1.6,0.,1.);gl_FragColor=vec4(mix(vec3(.78,.9,1.),vec3(.22,.55,.93),pow(h,.6)),1.);}'});sc.add(new THREE.Mesh(new THREE.SphereGeometry(300,24,12),m))}
-// тун-градиент
-const grad=(()=>{const d=new Uint8Array([90,170,255]);const t=new THREE.DataTexture(d,3,1,THREE.RedFormat);t.minFilter=t.magFilter=THREE.NearestFilter;t.needsUpdate=true;return t})();
-const T=(c,o={})=>new THREE.MeshToonMaterial({color:c,gradientMap:grad,...o});
-const INK=new THREE.MeshBasicMaterial({color:0x1a1a1a,side:THREE.BackSide});
-function ink(mesh,w=.045){const o=new THREE.Mesh(mesh.geometry,INK);o.scale.setScalar(1+w/Math.max(.2,mesh.geometry.boundingSphere?.radius||1));mesh.add(o);return mesh}
-sc.add(new THREE.HemisphereLight(0xdff2ff,0x6a9a40,1.1));
-const sun=new THREE.DirectionalLight(0xfff6e0,2.2);sun.position.set(20,40,25);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);Object.assign(sun.shadow.camera,{left:-25,right:25,top:25,bottom:-25});sun.shadow.bias=-.0005;sc.add(sun);
-// поле: холмы
-const hgt=(x,z)=>Math.sin(x*.05)*1.2+Math.cos(z*.04+x*.02)*1.5+(z<-40?Math.sin(x*.03+1)*6*sm(-40,-90,z):0);
-{const g=new THREE.PlaneGeometry(300,300,150,150);g.rotateX(-Math.PI/2);const p=g.attributes.position;const col=[];const c=new THREE.Color();
- for(let i=0;i<p.count;i++){const x=p.getX(i),z=p.getZ(i);p.setY(i,hgt(x,z)-(Math.abs(x+8)<2.2?.15:0));const n=Math.sin(x*.7)*Math.cos(z*.6)+Math.sin(x*.21+z*.3);
-  if(Math.abs(x+8)<2.2)c.set(0xc8955a);else c.setHSL(.27+n*.012,.62,.47+n*.03);col.push(c.r,c.g,c.b)}
- g.setAttribute('color',new THREE.Float32BufferAttribute(col,3));g.computeVertexNormals();const m=new THREE.Mesh(g,T(0xffffff,{vertexColors:true}));m.receiveShadow=true;sc.add(m)}
-// трава пучками + цветы
-{const blade=new THREE.ConeGeometry(.05,.5,3);blade.translate(0,.25,0);const N=11000;const im=new THREE.InstancedMesh(blade,T(0xffffff),N);const m4=new THREE.Matrix4(),q=new THREE.Quaternion(),e=new THREE.Euler(),v=new THREE.Vector3(),s=new THREE.Vector3(),c=new THREE.Color();
- for(let i=0;i<N;i++){const x=-16+rnd()*32,z=-26+rnd()*(i%3?30:40);if(Math.abs(x+8)<2.4||Math.hypot(x+1.2,z-2.6)<.9){i--;continue}e.set((rnd()-.5)*.5,rnd()*6,(rnd()-.5)*.5);q.setFromEuler(e);v.set(x,hgt(x,z),z);const k=(.5+rnd()*.9)*(z>0?.7:1);s.set(k,k,k);m4.compose(v,q,s);im.setMatrixAt(i,m4);c.setHSL(.26+rnd()*.05,.65,.38+rnd()*.18);im.setColorAt(i,c)}sc.add(im);
- const fl=new THREE.SphereGeometry(.07,6,4);const F=900;const fm=new THREE.InstancedMesh(fl,new THREE.MeshBasicMaterial({color:0xffffff}),F);const FC=[0xffffff,0xffe04a,0xff8fb8,0xb48cff,0xff7a3c];
- for(let i=0;i<F;i++){const x=-16+rnd()*32,z=-26+rnd()*30;if(Math.abs(x+8)<2.4){i--;continue}v.set(x,hgt(x,z)+.35+rnd()*.2,z);s.set(1,1,1);q.identity();m4.compose(v,q,s);fm.setMatrixAt(i,m4);fm.setColorAt(i,c.set(FC[Math.floor(rnd()*FC.length)]))}sc.add(fm)}
-// деревья вдали + облака
-for(let i=0;i<26;i++){const x=-40+rnd()*80,z=-45-rnd()*40;const g=new THREE.Group();const tr=new THREE.Mesh(new THREE.CylinderGeometry(.25,.35,2.4,7),T(0x7a5232));tr.position.y=1.2;g.add(tr);for(let k=0;k<3;k++){const b=new THREE.Mesh(new THREE.IcosahedronGeometry(1.6+rnd(),1),T(new THREE.Color().setHSL(.28+rnd()*.05,.55,.38)));b.position.set((rnd()-.5)*1.6,3+rnd()*1.2,(rnd()-.5)*1.2);b.castShadow=true;g.add(b)}g.position.set(x,hgt(x,z),z);sc.add(g)}
-for(let i=0;i<7;i++){const g=new THREE.Group();for(let k=0;k<5;k++){const b=new THREE.Mesh(new THREE.SphereGeometry(2+rnd()*2,14,10),new THREE.MeshBasicMaterial({color:0xffffff,fog:false}));b.position.set(k*2.6-5,rnd()*1.5,rnd());b.scale.y=.7;g.add(b)}g.position.set(-60+i*22+rnd()*8,30+rnd()*14,-120-rnd()*30);sc.add(g)}
-// ---------- танк (надувной) ----------
-const OL=T(0x6f7f3a),OL2=T(0x56662c),DK=T(0x2d3a5a),GR=T(0x8a8f98);
-const TANK=new THREE.Group();TANK.position.set(2.2,hgt(2.2,-3),-3);TANK.rotation.y=-.55;sc.add(TANK);
-const PARTS=[];const add=(geo,mat,x,y,z,ol=true)=>{const m=new THREE.Mesh(geo,mat);m.position.set(x,y,z);m.castShadow=true;geo.computeBoundingSphere();if(ol)ink(m,.05);TANK.add(m);PARTS.push({m,x,y,z});return m};
-add(new THREE.BoxGeometry(5.2,1.3,2.8),OL,0,1.45,0);
-add(new THREE.BoxGeometry(4.2,.6,2.4),OL2,.2,2.35,0);
-const tur=add(new THREE.CylinderGeometry(1.05,1.25,1.0,16),OL,.4,3.15,0);
-const bar=add(new THREE.CylinderGeometry(.13,.15,3.4,10),OL,-1.6,3.25,0);bar.rotation.z=Math.PI/2+.06;
-for(const s of[-1,1]){add(new THREE.BoxGeometry(5.6,1.0,.7),DK,0,.6,s*1.55);for(let k=0;k<5;k++)add(new THREE.CylinderGeometry(.42,.42,.74,14),GR,-2+k,.55,s*1.58).rotation.x=Math.PI/2}
-// надпись и звезда
-{const c=document.createElement('canvas');c.width=512;c.height=128;const x=c.getContext('2d');x.fillStyle='#e8ecef';x.font='900 72px Inter, Arial';x.fillText('USA 30621',20,90);const t=new THREE.CanvasTexture(c);const p=new THREE.Mesh(new THREE.PlaneGeometry(2.2,.55),new THREE.MeshBasicMaterial({map:t,transparent:true}));p.position.set(-.3,1.5,1.41);TANK.add(p);PARTS.push({m:p,x:-.3,y:1.5,z:1.41})}
-// ---------- солдат-фасолинка (плоский, рисуется каждый кадр) ----------
-const sc2=document.createElement('canvas');sc2.width=512;sc2.height=1024;const sx=sc2.getContext('2d');const stex=new THREE.CanvasTexture(sc2);stex.colorSpace=THREE.SRGBColorSpace;
-const SOL=new THREE.Mesh(new THREE.PlaneGeometry(2.0,4.0),new THREE.MeshBasicMaterial({map:stex,transparent:true,alphaTest:.05,side:THREE.DoubleSide}));sc.add(SOL);
-// тень персонажа
-const sh=new THREE.Mesh(new THREE.CircleGeometry(.55,24),new THREE.MeshBasicMaterial({color:0x000000,transparent:true,opacity:.22,depthWrite:false}));sh.rotation.x=-Math.PI/2;sc.add(sh);
-function drawSoldier(t,mood,wave){const x=sx;x.clearRect(0,0,512,1024);x.lineWidth=10;x.strokeStyle='#161616';x.lineJoin=x.lineCap='round';
- const by=Math.sin(t*6)*4;// дыхание
- // ноги
- x.beginPath();x.moveTo(215,760);x.lineTo(205,1000);x.moveTo(297,760);x.lineTo(307,1000);x.lineWidth=12;x.strokeStyle='#3a2a1a';x.stroke();x.lineWidth=10;x.strokeStyle='#161616';
- // тело-фасолинка
- x.fillStyle='#6f7f3a';x.beginPath();x.ellipse(256,560+by,118,240,0,0,Math.PI*2);x.fill();x.stroke();
- x.fillStyle='#5b6a2e';x.beginPath();x.ellipse(290,600+by,70,190,0,-.3,Math.PI*.6);x.fill();
- x.fillStyle='#3a4320';for(let i=0;i<4;i++){x.beginPath();x.arc(256,440+i*70+by,9,0,7);x.fill()}
- // руки
- x.beginPath();x.moveTo(145,520+by);x.quadraticCurveTo(120,620,140,700);x.stroke();
- const wa=wave?Math.sin(t*14)*.35:0;x.save();x.translate(366,500+by);x.rotate(wave?-2.3+wa:.3);x.beginPath();x.moveTo(0,0);x.quadraticCurveTo(20,90,0,180);x.stroke();x.fillStyle='#161616';x.beginPath();x.arc(0,184,14,0,7);x.fill();x.restore();
- // голова
- const hy=250+by;x.fillStyle='#f3d2a8';x.beginPath();x.arc(256,hy,118,0,Math.PI*2);x.fill();x.stroke();
- // каска
- x.fillStyle='#6f7f3a';x.beginPath();x.arc(256,hy-20,124,Math.PI*1.03,Math.PI*1.97);x.closePath();x.fill();x.stroke();x.beginPath();x.ellipse(256,hy-28,160,26,0,0,Math.PI*2);x.fill();x.stroke();
- // лицо
- x.fillStyle='#161616';x.strokeStyle='#161616';
- if(mood==='happy'){x.lineWidth=9;for(const s of[-1,1]){x.beginPath();x.arc(256+s*46,hy+30,20,Math.PI*1.1,Math.PI*1.9);x.stroke()}x.fillStyle='#7a1c1c';x.beginPath();x.arc(256,hy+62,46,0,Math.PI);x.fill();x.lineWidth=8;x.stroke();x.fillStyle='#fff';x.fillRect(222,hy+62,68,12)}
- else{for(const s of[-1,1]){x.fillStyle='#fff';x.beginPath();x.arc(256+s*48,hy+24,32,0,7);x.fill();x.lineWidth=7;x.stroke();x.fillStyle='#161616';x.beginPath();x.arc(256+s*48,hy+28,12,0,7);x.fill()}
-  x.fillStyle='#7a1c1c';x.beginPath();x.ellipse(256,hy+84,22,30,0,0,7);x.fill();x.lineWidth=7;x.stroke();
-  x.fillStyle='#8fd3ff';x.beginPath();x.moveTo(372,hy-40);x.quadraticCurveTo(392,hy,372,hy+6);x.quadraticCurveTo(352,hy,372,hy-40);x.fill();x.lineWidth=5;x.stroke()}
- stex.needsUpdate=true}
-// ---------- шипение (частицы) ----------
-const PUF=[];for(let i=0;i<40;i++){const m=new THREE.Mesh(new THREE.SphereGeometry(.12,8,6),new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.8,depthWrite:false}));sc.add(m);PUF.push({m,a:rnd()*6.28,s:.6+rnd(),d:rnd()})}
-// ---------- пост ----------
-const comp=new EffectComposer(R);comp.addPass(new RenderPass(sc,cam));const bokeh=new BokehPass(sc,cam,{focus:9,aperture:.0035,maxblur:.008});comp.addPass(bokeh);comp.addPass(new OutputPass());
-const WORDS=[[0,'This'],[.45,'tank'],[1.0,'weighs'],[1.6,'NOTHING'],[2.7,'Watch'],[3.4,'pssssh'],[4.6,'Rubber!']];
+const sc=new THREE.Scene();const cam=new THREE.PerspectiveCamera(50,W/H,.1,400);cam.layers.enableAll();
+sc.fog=new THREE.Fog(0xcfe8ff,35,160);
+const LINE=0,NOLINE=1;// слой 1 — без обводки (трава, персонаж, частицы, небо, облака)
+const noline=o=>{o.traverse(x=>x.layers.set(NOLINE));return o};
+function ctex(w,h,draw,o={}){const c=document.createElement('canvas');c.width=w;c.height=h;draw(c.getContext('2d'),w,h);const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;if(o.px){t.magFilter=THREE.NearestFilter;t.minFilter=THREE.NearestMipmapLinearFilter}if(o.rep){t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(o.rep[0],o.rep[1])}t.anisotropy=8;return t}
+const L=(c,o={})=>new THREE.MeshLambertMaterial({color:c,...o});
+// ---------- небо ----------
+{const s=new THREE.Mesh(new THREE.SphereGeometry(300,24,12),new THREE.ShaderMaterial({side:THREE.BackSide,depthWrite:false,fog:false,vertexShader:'varying vec3 p;void main(){p=normalize(position);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',fragmentShader:'varying vec3 p;void main(){float h=clamp(p.y*1.4,0.,1.);gl_FragColor=vec4(mix(vec3(.80,.92,1.),vec3(.13,.47,.92),pow(h,.55)),1.);}'}));noline(s);sc.add(s)}
+sc.add(new THREE.HemisphereLight(0xeaf6ff,0x7ab040,1.35));
+const sun=new THREE.DirectionalLight(0xfff3dc,2.1);sun.position.set(-25,40,30);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);Object.assign(sun.shadow.camera,{left:-30,right:30,top:30,bottom:-30,far:120});sun.shadow.bias=-.0004;sun.shadow.normalBias=.02;sc.add(sun);
+// ---------- земля: пиксельная трава ----------
+const hgt=(x,z)=>(z<-30?Math.pow(sm(-30,-80,z),1.3)*(9+Math.sin(x*.05)*5):0)+Math.sin(x*.07+z*.05)*.25;
+const GTEX=ctex(32,32,(x)=>{for(let i=0;i<32;i++)for(let j=0;j<32;j++){const v=rnd();const h=86+rnd()*10,s=78+rnd()*10,l=v<.08?34:v<.3?44+rnd()*4:50+rnd()*6;x.fillStyle=`hsl(${h},${s}%,${l}%)`;x.fillRect(i,j,1,1)}
+ for(let k=0;k<6;k++){x.fillStyle=['#fff','#ffe34a','#ff9ac0','#ff8a3d','#c9a0ff'][k%5];x.fillRect(Math.floor(rnd()*32),Math.floor(rnd()*32),1,1)}},{px:1,rep:[260,260]});
+{const g=new THREE.PlaneGeometry(320,320,160,160);g.rotateX(-Math.PI/2);const p=g.attributes.position;for(let i=0;i<p.count;i++)p.setY(i,hgt(p.getX(i),p.getZ(i)));g.computeVertexNormals();const m=new THREE.Mesh(g,L(0xffffff,{map:GTEX}));m.receiveShadow=true;sc.add(m)}
+// дорога
+{const t=ctex(32,32,(x)=>{for(let i=0;i<32;i++)for(let j=0;j<32;j++){x.fillStyle=`hsl(30,${45+rnd()*10}%,${50+rnd()*10}%)`;x.fillRect(i,j,1,1)}},{px:1,rep:[3,60]});const g=new THREE.PlaneGeometry(4,240);g.rotateX(-Math.PI/2);const m=new THREE.Mesh(g,L(0xffffff,{map:t}));m.position.set(-6,.02,-60);m.receiveShadow=true;sc.add(m)}
+// пучки травы (без обводки)
+{const bt=ctex(32,32,(x)=>{x.clearRect(0,0,32,32);for(let k=0;k<9;k++){const bx=3+k*3+Math.floor(rnd()*2),hh=10+Math.floor(rnd()*18);for(let y=0;y<hh;y++){x.fillStyle=`hsl(${88+rnd()*8},70%,${36+y*1.2}%)`;x.fillRect(bx+Math.floor(y/9*(k%2?1:-1)),31-y,1,1)}}},{px:1});
+ const a=new THREE.PlaneGeometry(.9,.9);a.translate(0,.45,0);const b=a.clone();b.rotateY(Math.PI/2);const geo=new THREE.BufferGeometry();
+ geo.setAttribute('position',new THREE.Float32BufferAttribute([...a.attributes.position.array,...b.attributes.position.array],3));geo.setAttribute('uv',new THREE.Float32BufferAttribute([...a.attributes.uv.array,...b.attributes.uv.array],2));geo.setAttribute('normal',new THREE.Float32BufferAttribute([...a.attributes.normal.array,...b.attributes.normal.array].map((v,i)=>i%3===1?1:0),3));geo.setIndex([...a.index.array,...[...b.index.array].map(i=>i+4)]);
+ const N=6000,im=new THREE.InstancedMesh(geo,L(0xffffff,{map:bt,alphaTest:.5,side:THREE.DoubleSide}),N);const m4=new THREE.Matrix4(),qu=new THREE.Quaternion(),v=new THREE.Vector3(),s=new THREE.Vector3();
+ for(let i=0;i<N;i++){const x=-20+rnd()*40,z=-40+rnd()*52;if(Math.abs(x+6)<2.3){i--;continue}qu.setFromAxisAngle(new THREE.Vector3(0,1,0),rnd()*3);v.set(x,hgt(x,z),z);const k=.28+rnd()*.32;s.set(k,k*1.1,k);m4.compose(v,qu,s);im.setMatrixAt(i,m4)}noline(im);sc.add(im)}
+// ---------- текстура брони: швы и заклёпки ----------
+function armor(base){return ctex(512,512,(x,w,h)=>{x.fillStyle=base;x.fillRect(0,0,w,h);const gr=x.createLinearGradient(0,0,0,h);gr.addColorStop(0,'rgba(255,255,220,.16)');gr.addColorStop(1,'rgba(0,0,0,.12)');x.fillStyle=gr;x.fillRect(0,0,w,h);
+ x.strokeStyle='rgba(20,22,10,.6)';x.lineWidth=2;for(const yy of[120,300,430]){x.beginPath();x.moveTo(0,yy);x.lineTo(w,yy+(rnd()-.5)*6);x.stroke()}for(const xx of[170,350]){x.beginPath();x.moveTo(xx,0);x.lineTo(xx+(rnd()-.5)*6,h);x.stroke()}
+ x.fillStyle='rgba(20,22,10,.7)';for(const yy of[100,140,280,320,410,450])for(let xx=12;xx<w;xx+=22){x.beginPath();x.arc(xx,yy,2,0,7);x.fill()}
+ x.fillStyle='rgba(255,255,220,.18)';x.fillRect(0,0,w,26)})}
+const OLV=armor('#77873e'),OLV2=armor('#67762f');
+const MO=L(0xffffff,{map:OLV}),MO2=L(0xffffff,{map:OLV2}),MWH=L(0x7d838c),MRB=L(0x2a2c30),MLI=new THREE.MeshBasicMaterial({color:0xfff8e0});
+const TTEX=ctex(256,64,(x)=>{x.fillStyle='#3a3e45';x.fillRect(0,0,256,64);x.fillStyle='#25282d';for(let i=0;i<256;i+=16)x.fillRect(i,0,6,64)},{rep:[6,1]});const MTR=L(0xffffff,{map:TTEX});
+function decal(txt,w,h,font,col='#eef2f2'){return new THREE.MeshBasicMaterial({map:ctex(512,Math.round(512*h/w),(x,W,H)=>{x.clearRect(0,0,W,H);x.fillStyle=col;x.font=font;x.textAlign='center';x.textBaseline='middle';x.fillText(txt,W/2,H/2)}),transparent:true,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-4})}
+const STAR=new THREE.MeshBasicMaterial({map:ctex(256,256,(x)=>{x.clearRect(0,0,256,256);x.strokeStyle='#eef2f2';x.lineWidth=14;x.beginPath();x.arc(128,128,110,0,7);x.stroke();x.fillStyle='#eef2f2';x.beginPath();for(let i=0;i<10;i++){const r=i%2?38:96,a=-Math.PI/2+i*Math.PI/5;x.lineTo(128+Math.cos(a)*r,128+Math.sin(a)*r)}x.fill()}),transparent:true,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-4});
+function sherman(num='USA 30621',tnum='695'){const g=new THREE.Group();const A=(geo,m,x,y,z,rx=0,ry=0,rz=0)=>{const o=new THREE.Mesh(geo,m);o.position.set(x,y,z);o.rotation.set(rx,ry,rz);o.castShadow=o.receiveShadow=true;g.add(o);return o};
+ const sh=new THREE.Shape();sh.moveTo(-2.9,0);sh.lineTo(2.5,0);sh.lineTo(3.0,.35);sh.lineTo(2.0,1.25);sh.lineTo(-2.7,1.25);sh.lineTo(-2.95,.7);sh.closePath();
+ const hull=new THREE.ExtrudeGeometry(sh,{depth:2.5,bevelEnabled:true,bevelSize:.06,bevelThickness:.06,bevelSegments:1});hull.translate(0,0,-1.25);A(hull,MO,0,1.0,0);
+ A(new THREE.BoxGeometry(5.6,.18,3.3),MO2,-.1,1.35,0);
+ const tur=new THREE.Group();tur.position.set(-.2,2.3,0);g.add(tur);const T=(geo,m,x,y,z,rx=0,ry=0,rz=0)=>{const o=new THREE.Mesh(geo,m);o.position.set(x,y,z);o.rotation.set(rx,ry,rz);o.castShadow=true;tur.add(o);return o};
+ T(new THREE.CylinderGeometry(1.05,1.25,.95,24),MO,0,.47,0);T(new THREE.SphereGeometry(1.05,24,10,0,Math.PI*2,0,Math.PI/2),MO,0,.94,0).scale.y=.32;
+ T(new THREE.BoxGeometry(.5,.6,1.0),MO2,1.15,.45,0);const gun=T(new THREE.CylinderGeometry(.11,.13,3.6,12),MO,3.1,.5,0,0,0,Math.PI/2);T(new THREE.CylinderGeometry(.16,.16,.35,12),MO2,4.85,.5,0,0,0,Math.PI/2);
+ T(new THREE.CylinderGeometry(.32,.36,.3,14),MO2,-.35,1.2,.35);T(new THREE.CylinderGeometry(.015,.02,2.0,5),MRB,-.75,1.9,-.6);
+ const tn=new THREE.Mesh(new THREE.PlaneGeometry(1.0,.38),decal(tnum,1,.38,'900 160px Inter, Arial'));tn.position.set(0,.65,1.17);tur.add(tn);
+ g.userData.tur=tur;g.userData.gun=gun;
+ for(const s of[-1,1]){A(new THREE.BoxGeometry(5.8,.95,.62),MTR,0,.55,s*1.42);
+  for(let k=0;k<6;k++){A(new THREE.CylinderGeometry(.36,.36,.24,18),MWH,-2.2+k*.88,.42,s*1.78,Math.PI/2);A(new THREE.CylinderGeometry(.14,.14,.26,10),MRB,-2.2+k*.88,.42,s*1.8,Math.PI/2)}
+  for(let k=0;k<3;k++)A(new THREE.BoxGeometry(.7,.45,.2),MO2,-1.75+k*1.75,.72,s*1.72);
+  A(new THREE.CylinderGeometry(.5,.5,.26,12),MWH,2.75,.78,s*1.74,Math.PI/2);A(new THREE.CylinderGeometry(.42,.42,.26,14),MWH,-2.85,.62,s*1.74,Math.PI/2);
+  for(let k=0;k<3;k++)A(new THREE.CylinderGeometry(.12,.12,.2,10),MRB,-1.6+k*1.6,1.08,s*1.74,Math.PI/2);
+  A(new THREE.CylinderGeometry(.17,.19,.18,14),MRB,2.35,1.7,s*.95,0,0,Math.PI/2);A(new THREE.CircleGeometry(.15,14),MLI,2.45,1.7,s*.95,0,Math.PI/2);A(new THREE.TorusGeometry(.22,.025,6,16,Math.PI),MRB,2.4,1.72,s*.95,0,Math.PI/2)}
+ const st=new THREE.Mesh(new THREE.PlaneGeometry(.95,.95),STAR);st.position.set(-.2,1.75,1.335);g.add(st);
+ const nm=new THREE.Mesh(new THREE.PlaneGeometry(1.8,.34),decal(num,1.8,.34,'900 64px Inter, Arial'));nm.position.set(-1.6,1.55,1.335);g.add(nm);
+ g.scale.setScalar(.95);return g}
+// ---------- мир ----------
+const HERO=sherman();HERO.position.set(1.8,0,-3.2);HERO.rotation.y=-.35;sc.add(HERO);
+for(let r=0;r<3;r++)for(let c=0;c<5;c++){const t=sherman('USA '+(30000+Math.floor(rnd()*9999)),String(600+Math.floor(rnd()*99)));t.position.set(-18+c*8+r*2.5,0,-16-r*9);t.rotation.y=-.35+(rnd()-.5)*.1;sc.add(t)}
+const LEAF=ctex(64,64,(x)=>{for(let i=0;i<64;i++)for(let j=0;j<64;j++){x.fillStyle=`hsl(${100+rnd()*12},55%,${34+rnd()*14}%)`;x.fillRect(i,j,1,1)}},{px:1});
+function tree(x,z,s=1){const g=new THREE.Group();const tr=new THREE.Mesh(new THREE.CylinderGeometry(.22*s,.3*s,3*s,8),L(0x6d4a2e));tr.position.y=1.5*s;tr.castShadow=true;g.add(tr);
+ for(let k=0;k<4;k++){const b=new THREE.Mesh(new THREE.SphereGeometry((1.3+rnd()*.5)*s,14,10),L(0xffffff,{map:LEAF}));b.position.set((rnd()-.5)*1.8*s,(3.6+rnd()*1.3)*s,(rnd()-.5)*1.4*s);b.castShadow=true;g.add(b)}g.position.set(x,hgt(x,z),z);sc.add(g);return g}
+for(let i=0;i<14;i++)tree(-30+rnd()*60,-42-rnd()*35,.9+rnd()*.5);tree(-11,-9,1.1);
+for(let i=0;i<10;i++){const b=new THREE.Mesh(new THREE.BoxGeometry(2.2,1.2,1.1),L(0xffffff,{map:LEAF}));b.position.set(-30+i*2.6,.6,-38);b.castShadow=true;sc.add(b)}
+function house(x,z,ry){const g=new THREE.Group();const wt=ctex(256,256,(c,w,h)=>{c.fillStyle='#e9d2b4';c.fillRect(0,0,w,h);for(let i=0;i<3;i++)for(let j=0;j<2;j++){c.fillStyle='#4c6f9c';c.fillRect(30+i*75,40+j*110,40,56);c.strokeStyle='#fff';c.lineWidth=5;c.strokeRect(30+i*75,40+j*110,40,56);c.fillStyle='#355';c.fillRect(22+i*75,40+j*110,8,56);c.fillRect(70+i*75,40+j*110,8,56)}});
+ const b=new THREE.Mesh(new THREE.BoxGeometry(8,6,6),L(0xffffff,{map:wt}));b.position.y=3;b.castShadow=true;g.add(b);const rf=new THREE.Mesh(new THREE.ConeGeometry(6,3,4),L(0xd2643f));rf.rotation.y=Math.PI/4;rf.position.y=7.5;rf.scale.set(1,1,.78);g.add(rf);
+ const ch=new THREE.Mesh(new THREE.BoxGeometry(.7,1.6,.7),L(0x9a6a50));ch.position.set(2,8.2,0);g.add(ch);g.position.set(x,hgt(x,z),z);g.rotation.y=ry;sc.add(g)}
+house(-24,-55,.3);house(16,-60,-.2);
+for(let i=0;i<8;i++){const g=new THREE.Group();for(let k=0;k<5;k++){const b=new THREE.Mesh(new THREE.SphereGeometry(2.2+rnd()*2,16,12),new THREE.MeshBasicMaterial({color:0xffffff,fog:false}));b.position.set(k*2.8-5.6,rnd()*1.6,rnd());b.scale.y=.68;g.add(b)}g.position.set(-70+i*22,34+rnd()*14,-130-rnd()*20);noline(g);sc.add(g)}
+// ---------- персонаж-фасолинка ----------
+const pc=document.createElement('canvas');pc.width=512;pc.height=1280;const px=pc.getContext('2d');const ptex=new THREE.CanvasTexture(pc);ptex.colorSpace=THREE.SRGBColorSpace;ptex.anisotropy=8;
+const SOL=new THREE.Mesh(new THREE.PlaneGeometry(1.5,3.75),new THREE.MeshBasicMaterial({map:ptex,alphaTest:.5,side:THREE.DoubleSide}));SOL.layers.set(2);sc.add(SOL);const SOLM=new THREE.ShaderMaterial({side:THREE.DoubleSide,uniforms:{m:{value:ptex}},vertexShader:'varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',fragmentShader:'uniform sampler2D m;varying vec2 vUv;void main(){if(texture2D(m,vUv).a<.5)discard;gl_FragColor=vec4(1.);}'});
+const shd=new THREE.Mesh(new THREE.CircleGeometry(.42,24),new THREE.MeshBasicMaterial({color:0x103000,transparent:true,opacity:.28,depthWrite:false}));shd.rotation.x=-Math.PI/2;noline(shd);sc.add(shd);
+function drawSol(t,mood,wave){const x=px;x.clearRect(0,0,512,1280);x.lineJoin=x.lineCap='round';const K='#1b1b1b',by=Math.sin(t*5)*3;
+ x.strokeStyle='#4a3020';x.lineWidth=13;x.beginPath();x.moveTo(222,760);x.lineTo(214,1236);x.moveTo(290,760);x.lineTo(298,1236);x.stroke();
+ x.strokeStyle=K;x.lineWidth=12;x.beginPath();x.moveTo(214,1236);x.lineTo(186,1240);x.moveTo(298,1236);x.lineTo(326,1240);x.stroke();
+ x.lineWidth=9;x.fillStyle='#6e7f38';x.beginPath();x.ellipse(256,560+by,104,212,0,0,7);x.fill();x.strokeStyle=K;x.stroke();
+ x.save();x.beginPath();x.ellipse(256,560+by,100,208,0,0,7);x.clip();x.fillStyle='rgba(0,0,0,.14)';x.beginPath();x.ellipse(330,600+by,90,230,0,0,7);x.fill();x.fillStyle='rgba(255,255,210,.12)';x.beginPath();x.ellipse(200,470+by,40,120,0,0,7);x.fill();x.restore();
+ x.fillStyle='#2f3818';for(let i=0;i<4;i++){x.beginPath();x.arc(256,470+i*68+by,9,0,7);x.fill()}
+ x.lineWidth=8;x.strokeStyle=K;x.beginPath();x.moveTo(160,500+by);x.quadraticCurveTo(140,600,150,690);x.stroke();x.fillStyle=K;x.beginPath();x.arc(150,694,11,0,7);x.fill();
+ x.save();x.translate(352,490+by);x.rotate(wave?-2.4+Math.sin(t*13)*.3:-.25);x.beginPath();x.moveTo(0,0);x.quadraticCurveTo(14,100,0,200);x.stroke();x.beginPath();x.arc(0,204,11,0,7);x.fill();x.restore();
+ const hy=262+by;x.fillStyle='#f6d8b4';x.beginPath();x.arc(256,hy,108,0,7);x.fill();x.lineWidth=9;x.stroke();
+ x.fillStyle='rgba(230,120,90,.25)';x.beginPath();x.arc(190,hy+40,20,0,7);x.arc(322,hy+40,20,0,7);x.fill();
+ x.fillStyle='#6e7f38';x.beginPath();x.arc(256,hy-22,114,Math.PI,0);x.closePath();x.fill();x.stroke();x.beginPath();x.ellipse(256,hy-24,150,22,0,0,7);x.fill();x.stroke();
+ x.fillStyle='rgba(255,255,210,.2)';x.beginPath();x.ellipse(220,hy-80,40,14,-.3,0,7);x.fill();
+ x.strokeStyle=K;x.fillStyle=K;
+ if(mood==='happy'){x.lineWidth=8;for(const s of[-1,1]){x.beginPath();x.arc(256+s*42,hy+26,18,Math.PI*1.15,Math.PI*1.85);x.stroke()}x.fillStyle='#8a2420';x.beginPath();x.moveTo(214,hy+52);x.quadraticCurveTo(256,hy+118,298,hy+52);x.closePath();x.fill();x.lineWidth=7;x.stroke();x.fillStyle='#fff';x.beginPath();x.moveTo(222,hy+56);x.lineTo(290,hy+56);x.lineTo(284,hy+66);x.lineTo(228,hy+66);x.fill()}
+ else{for(const s of[-1,1]){x.fillStyle='#fff';x.beginPath();x.arc(256+s*44,hy+20,30,0,7);x.fill();x.lineWidth=7;x.stroke();x.fillStyle=K;x.beginPath();x.arc(256+s*44,hy+24,11,0,7);x.fill()}
+  x.fillStyle='#8a2420';x.beginPath();x.ellipse(256,hy+78,20,27,0,0,7);x.fill();x.lineWidth=7;x.stroke();
+  x.fillStyle='#9ad8ff';x.beginPath();x.moveTo(360,hy-48);x.quadraticCurveTo(380,hy-6,360,hy);x.quadraticCurveTo(340,hy-6,360,hy-48);x.fill();x.lineWidth=5;x.stroke()}
+ ptex.needsUpdate=true}
+// ---------- струи воздуха ----------
+const PUF=[];for(let i=0;i<36;i++){const m=new THREE.Mesh(new THREE.SphereGeometry(.1,8,6),new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.85,depthWrite:false}));noline(m);sc.add(m);PUF.push({m,a:rnd()*6.28,s:.6+rnd(),d:rnd()})}
+// ---------- пост: чернильная обводка по глубине и нормалям ----------
+const nrt=new THREE.WebGLRenderTarget(W,H,{depthTexture:new THREE.DepthTexture(W,H),type:THREE.HalfFloatType});const mrt=new THREE.WebGLRenderTarget(W/2,H/2);const NM=new THREE.MeshNormalMaterial();
+const VS='varying vec2 vUv;void main(){vUv=uv;gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}';
+const inkPass=new ShaderPass({uniforms:{tDiffuse:{value:null},tM:{value:mrt.texture},tN:{value:nrt.texture},tD:{value:nrt.depthTexture},res:{value:new THREE.Vector2(W,H)},near:{value:cam.near},far:{value:cam.far},ink:{value:new THREE.Color(0x16160f)}},vertexShader:VS,
+ fragmentShader:`uniform sampler2D tDiffuse,tN,tD,tM;uniform vec2 res;uniform float near,far;uniform vec3 ink;varying vec2 vUv;
+ float ld(vec2 u){float z=texture2D(tD,u).x;float n=2.*z-1.;return 2.*near*far/(far+near-n*(far-near));}
+ void main(){vec4 c=texture2D(tDiffuse,vUv);vec2 e=1.6/res;float d0=ld(vUv);vec3 n0=texture2D(tN,vUv).xyz;float ed=0.,en=0.;
+  for(int i=0;i<4;i++){vec2 o=i==0?vec2(e.x,0.):i==1?vec2(-e.x,0.):i==2?vec2(0.,e.y):vec2(0.,-e.y);float d=ld(vUv+o);ed+=abs(d-d0);en+=length(texture2D(tN,vUv+o).xyz-n0);}
+  float sky=step(far*.9,d0);float edge=clamp(smoothstep(.04*d0,.1*d0,ed)+smoothstep(.55,.95,en),0.,1.)*(1.-sky)*(1.-smoothstep(40.,120.,d0)*.7);
+  edge*=1.-texture2D(tM,vUv).r;gl_FragColor=vec4(mix(c.rgb,ink,edge*.92),c.a);}`});
+inkPass.uniforms.tM.value=mrt.texture;inkPass.uniforms.tN.value=nrt.texture;inkPass.uniforms.tD.value=nrt.depthTexture;
+const gradePass=new ShaderPass({uniforms:{tDiffuse:{value:null},sat:{value:1.32},vig:{value:.55},tint:{value:new THREE.Vector3(1.02,1.0,.96)}},vertexShader:VS,
+ fragmentShader:`uniform sampler2D tDiffuse;uniform float sat,vig;uniform vec3 tint;varying vec2 vUv;void main(){vec3 c=texture2D(tDiffuse,vUv).rgb;float l=dot(c,vec3(.299,.587,.114));c=mix(vec3(l),c,sat);c=(c-.5)*1.06+.5;c*=tint;vec2 q=vUv-.5;q.x*=.6;c*=1.-vig*smoothstep(.25,.75,length(q));gl_FragColor=vec4(c,1.);}`});
+const comp=new EffectComposer(R);comp.addPass(new RenderPass(sc,cam));comp.addPass(inkPass);const bokeh=new BokehPass(sc,cam,{focus:8,aperture:.006,maxblur:.012});comp.addPass(bokeh);
+comp.addPass(new UnrealBloomPass(new THREE.Vector2(W/2,H/2),.25,.5,.95));comp.addPass(gradePass);comp.addPass(new OutputPass());
+// ---------- кадры ----------
+const WORDS=[[0,'This'],[.4,'tank'],[.95,'weighs'],[1.5,'NOTHING'],[2.6,'Watch'],[3.3,'pssssh'],[4.6,'Rubber!']];
 const wEl=document.getElementById('w');
-function seek(t){
- // камера: медленный наезд снизу
- const k=sm(0,DUR,t);cam.position.set(lerp(-1.4,-.8,k),lerp(3.4,3.1,k),lerp(11,9.2,k));cam.lookAt(lerp(.6,.9,k),lerp(1.9,1.8,k),-3);
- // сдувание 3.2–5.2
- const d=sm(3.2,5.2,t),wob=Math.sin(t*30)*.03*(d>0&&d<1?1:0);
- TANK.scale.set(1+d*.18+wob,1-d*.72,1+d*.22-wob);TANK.position.y=hgt(2.2,-3)-d*.05;
- bar.rotation.z=Math.PI/2+.06-d*.55;tur.rotation.x=d*.2;
- PUF.forEach((p,i)=>{const ph=((t*1.6+p.d)%1);const on=t>3.1&&t<5.4;p.m.visible=on;if(on){const r=ph*2.4*p.s;p.m.position.set(TANK.position.x+.4+Math.cos(p.a)*r,TANK.position.y+3.3*(1-d*.7)+ph*1.4,TANK.position.z+Math.sin(p.a)*r);p.m.material.opacity=.8*(1-ph);p.m.scale.setScalar(.6+ph*1.6)}});
- // солдат
- const sxp=-1.2,szp=2.6;SOL.position.set(sxp,hgt(sxp,szp)+2.0,szp);SOL.lookAt(cam.position.x,SOL.position.y,cam.position.z);sh.position.set(sxp,hgt(sxp,szp)+.03,szp);
- drawSoldier(t,t<3.6?'happy':'shock',t<3.0);
- bokeh.uniforms.focus.value=cam.position.distanceTo(SOL.position);
- let wd='';WORDS.forEach(w=>{if(t>=w[0])wd=w[1]});wEl.textContent=wd;const wt=WORDS.filter(w=>t>=w[0]).pop();const pk=wt?cl((t-wt[0])/.12,0,1):1;wEl.style.transform=`scale(${1.18-.18*pk})`;
- comp.render()}
-window.seek=seek;window.DUR=DUR;seek(.5);window.READY=true;
+function seek(t){const d=sm(3.2,5.0,t),wob=Math.sin(t*28)*.03*(d>0&&d<1?1:0);
+ HERO.scale.set(.95*(1+d*.16+wob),.95*(1-d*.7),.95*(1+d*.2-wob));HERO.userData.gun.rotation.z=Math.PI/2-d*.5;HERO.userData.tur.rotation.x=d*.15;
+ let sp;
+ if(t<2.6){const k=sm(0,2.6,t);cam.fov=46;cam.position.set(lerp(-5.2,-4.6,k),lerp(1.5,1.6,k),lerp(9.5,8.7,k));cam.lookAt(lerp(-.4,0,k),lerp(2.4,2.3,k),-1.5);sp=[-2.6,3.4]}
+ else{const k=sm(2.6,DUR,t);cam.fov=44;cam.position.set(lerp(-8.5,-7.8,k),lerp(3.6,3.3,k),lerp(10,9.2,k));cam.lookAt(lerp(0,.4,k),lerp(1.6,1.4,k),-2.2);sp=[-3.4,3.6]}
+ cam.updateProjectionMatrix();
+ SOL.position.set(sp[0],1.87,sp[1]);SOL.lookAt(cam.position.x,1.87,cam.position.z);shd.position.set(sp[0],.03,sp[1]);drawSol(t,t<3.7?'happy':'shock',t<2.6);
+ PUF.forEach(p=>{const ph=((t*1.5+p.d)%1),on=t>3.1&&t<5.3;p.m.visible=on;if(on){const r=ph*2.2*p.s;p.m.position.set(HERO.position.x-.2+Math.cos(p.a)*r,2.9*(1-d*.65)+ph*1.3,HERO.position.z+Math.sin(p.a)*r);p.m.material.opacity=.85*(1-ph);p.m.scale.setScalar(.7+ph*1.6)}});
+ bokeh.uniforms.focus.value=cam.position.distanceTo(SOL.position)*.9;
+ cam.layers.set(LINE);sc.overrideMaterial=NM;R.setRenderTarget(nrt);R.setClearColor(0x000000,1);R.clear();R.render(sc,cam);sc.overrideMaterial=null;cam.layers.set(2);const om=SOL.material;SOL.material=SOLM;R.setRenderTarget(mrt);R.clear();R.render(sc,cam);SOL.material=om;R.setRenderTarget(null);sc.overrideMaterial=null;cam.layers.enableAll();
+ let wd='';WORDS.forEach(w=>{if(t>=w[0])wd=w[1]});wEl.textContent=wd;const wt=WORDS.filter(w=>t>=w[0]).pop();const pk=wt?cl((t-wt[0])/.1,0,1):1;wEl.style.transform=`scale(${1.15-.15*pk})`;
+ inkPass.enabled=window.DBG!=='noink';bokeh.enabled=window.DBG!=='nobokeh';comp.render()}
+window.seek=seek;window.DUR=DUR;window.__d={R,mrt,SOL,cam,inkPass};seek(.5);window.READY=true;
 }catch(e){window.SCENE_ERR=e.stack||String(e)}
 </script></body></html>
