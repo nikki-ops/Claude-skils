@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>History toon test</title>
+<style>
+html,body{margin:0;background:#000;overflow:hidden}
+#stage{position:relative;width:1080px;height:1920px;overflow:hidden}
+#gl{position:absolute;inset:0;width:1080px;height:1920px}
+#w{position:absolute;left:0;right:0;top:1180px;text-align:center;font-family:Inter,Arial,sans-serif;font-weight:900;font-size:92px;color:#fff;-webkit-text-stroke:16px #111;paint-order:stroke fill;letter-spacing:-1px;transform-origin:50% 50%}
+</style></head><body>
+<div id="stage"><canvas id="gl"></canvas><div id="w"></div></div>
+<script type="importmap">{"imports":{"three":"/render/_istochniki/three/build/three.module.js","three/addons/":"/render/_istochniki/three/examples/jsm/"}}</script>
+<script type="module">
+// Проба стиля «мультяшная история»: плоский персонаж-фасолинка (рисуется на холсте) в объёмном тун-мире.
+import * as THREE from 'three';
+import {EffectComposer} from 'three/addons/postprocessing/EffectComposer.js';
+import {RenderPass} from 'three/addons/postprocessing/RenderPass.js';
+import {BokehPass} from 'three/addons/postprocessing/BokehPass.js';
+import {OutputPass} from 'three/addons/postprocessing/OutputPass.js';
+try{
+const W=1080,H=1920,DUR=6;
+let SEED=3;const rnd=()=>{SEED=(SEED*16807)%2147483647;return (SEED-1)/2147483646};
+const cl=(x,a,b)=>Math.max(a,Math.min(b,x)),sm=(a,b,x)=>{const k=cl((x-a)/(b-a),0,1);return k*k*(3-2*k)},lerp=(a,b,k)=>a+(b-a)*k;
+const R=new THREE.WebGLRenderer({canvas:document.getElementById('gl'),antialias:true,preserveDrawingBuffer:true});R.setPixelRatio(1);R.setSize(W,H,false);R.outputColorSpace=THREE.SRGBColorSpace;R.shadowMap.enabled=true;R.shadowMap.type=THREE.PCFSoftShadowMap;
+const sc=new THREE.Scene();const cam=new THREE.PerspectiveCamera(58,W/H,.1,500);
+sc.fog=new THREE.Fog(0xc6e6ff,40,140);
+// небо
+{const m=new THREE.ShaderMaterial({side:THREE.BackSide,depthWrite:false,fog:false,vertexShader:'varying vec3 p;void main(){p=normalize(position);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);}',fragmentShader:'varying vec3 p;void main(){float h=clamp(p.y*1.6,0.,1.);gl_FragColor=vec4(mix(vec3(.78,.9,1.),vec3(.22,.55,.93),pow(h,.6)),1.);}'});sc.add(new THREE.Mesh(new THREE.SphereGeometry(300,24,12),m))}
+// тун-градиент
+const grad=(()=>{const d=new Uint8Array([90,170,255]);const t=new THREE.DataTexture(d,3,1,THREE.RedFormat);t.minFilter=t.magFilter=THREE.NearestFilter;t.needsUpdate=true;return t})();
+const T=(c,o={})=>new THREE.MeshToonMaterial({color:c,gradientMap:grad,...o});
+const INK=new THREE.MeshBasicMaterial({color:0x1a1a1a,side:THREE.BackSide});
+function ink(mesh,w=.045){const o=new THREE.Mesh(mesh.geometry,INK);o.scale.setScalar(1+w/Math.max(.2,mesh.geometry.boundingSphere?.radius||1));mesh.add(o);return mesh}
+sc.add(new THREE.HemisphereLight(0xdff2ff,0x6a9a40,1.1));
+const sun=new THREE.DirectionalLight(0xfff6e0,2.2);sun.position.set(20,40,25);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);Object.assign(sun.shadow.camera,{left:-25,right:25,top:25,bottom:-25});sun.shadow.bias=-.0005;sc.add(sun);
+// поле: холмы
+const hgt=(x,z)=>Math.sin(x*.05)*1.2+Math.cos(z*.04+x*.02)*1.5+(z<-40?Math.sin(x*.03+1)*6*sm(-40,-90,z):0);
+{const g=new THREE.PlaneGeometry(300,300,150,150);g.rotateX(-Math.PI/2);const p=g.attributes.position;const col=[];const c=new THREE.Color();
+ for(let i=0;i<p.count;i++){const x=p.getX(i),z=p.getZ(i);p.setY(i,hgt(x,z)-(Math.abs(x+8)<2.2?.15:0));const n=Math.sin(x*.7)*Math.cos(z*.6)+Math.sin(x*.21+z*.3);
+  if(Math.abs(x+8)<2.2)c.set(0xc8955a);else c.setHSL(.27+n*.012,.62,.47+n*.03);col.push(c.r,c.g,c.b)}
+ g.setAttribute('color',new THREE.Float32BufferAttribute(col,3));g.computeVertexNormals();const m=new THREE.Mesh(g,T(0xffffff,{vertexColors:true}));m.receiveShadow=true;sc.add(m)}
+// трава пучками + цветы
+{const blade=new THREE.ConeGeometry(.05,.5,3);blade.translate(0,.25,0);const N=11000;const im=new THREE.InstancedMesh(blade,T(0xffffff),N);const m4=new THREE.Matrix4(),q=new THREE.Quaternion(),e=new THREE.Euler(),v=new THREE.Vector3(),s=new THREE.Vector3(),c=new THREE.Color();
+ for(let i=0;i<N;i++){const x=-16+rnd()*32,z=-26+rnd()*(i%3?30:40);if(Math.abs(x+8)<2.4||Math.hypot(x+1.2,z-2.6)<.9){i--;continue}e.set((rnd()-.5)*.5,rnd()*6,(rnd()-.5)*.5);q.setFromEuler(e);v.set(x,hgt(x,z),z);const k=(.5+rnd()*.9)*(z>0?.7:1);s.set(k,k,k);m4.compose(v,q,s);im.setMatrixAt(i,m4);c.setHSL(.26+rnd()*.05,.65,.38+rnd()*.18);im.setColorAt(i,c)}sc.add(im);
+ const fl=new THREE.SphereGeometry(.07,6,4);const F=900;const fm=new THREE.InstancedMesh(fl,new THREE.MeshBasicMaterial({color:0xffffff}),F);const FC=[0xffffff,0xffe04a,0xff8fb8,0xb48cff,0xff7a3c];
+ for(let i=0;i<F;i++){const x=-16+rnd()*32,z=-26+rnd()*30;if(Math.abs(x+8)<2.4){i--;continue}v.set(x,hgt(x,z)+.35+rnd()*.2,z);s.set(1,1,1);q.identity();m4.compose(v,q,s);fm.setMatrixAt(i,m4);fm.setColorAt(i,c.set(FC[Math.floor(rnd()*FC.length)]))}sc.add(fm)}
+// деревья вдали + облака
+for(let i=0;i<26;i++){const x=-40+rnd()*80,z=-45-rnd()*40;const g=new THREE.Group();const tr=new THREE.Mesh(new THREE.CylinderGeometry(.25,.35,2.4,7),T(0x7a5232));tr.position.y=1.2;g.add(tr);for(let k=0;k<3;k++){const b=new THREE.Mesh(new THREE.IcosahedronGeometry(1.6+rnd(),1),T(new THREE.Color().setHSL(.28+rnd()*.05,.55,.38)));b.position.set((rnd()-.5)*1.6,3+rnd()*1.2,(rnd()-.5)*1.2);b.castShadow=true;g.add(b)}g.position.set(x,hgt(x,z),z);sc.add(g)}
+for(let i=0;i<7;i++){const g=new THREE.Group();for(let k=0;k<5;k++){const b=new THREE.Mesh(new THREE.SphereGeometry(2+rnd()*2,14,10),new THREE.MeshBasicMaterial({color:0xffffff,fog:false}));b.position.set(k*2.6-5,rnd()*1.5,rnd());b.scale.y=.7;g.add(b)}g.position.set(-60+i*22+rnd()*8,30+rnd()*14,-120-rnd()*30);sc.add(g)}
+// ---------- танк (надувной) ----------
+const OL=T(0x6f7f3a),OL2=T(0x56662c),DK=T(0x2d3a5a),GR=T(0x8a8f98);
+const TANK=new THREE.Group();TANK.position.set(2.2,hgt(2.2,-3),-3);TANK.rotation.y=-.55;sc.add(TANK);
+const PARTS=[];const add=(geo,mat,x,y,z,ol=true)=>{const m=new THREE.Mesh(geo,mat);m.position.set(x,y,z);m.castShadow=true;geo.computeBoundingSphere();if(ol)ink(m,.05);TANK.add(m);PARTS.push({m,x,y,z});return m};
+add(new THREE.BoxGeometry(5.2,1.3,2.8),OL,0,1.45,0);
+add(new THREE.BoxGeometry(4.2,.6,2.4),OL2,.2,2.35,0);
+const tur=add(new THREE.CylinderGeometry(1.05,1.25,1.0,16),OL,.4,3.15,0);
+const bar=add(new THREE.CylinderGeometry(.13,.15,3.4,10),OL,-1.6,3.25,0);bar.rotation.z=Math.PI/2+.06;
+for(const s of[-1,1]){add(new THREE.BoxGeometry(5.6,1.0,.7),DK,0,.6,s*1.55);for(let k=0;k<5;k++)add(new THREE.CylinderGeometry(.42,.42,.74,14),GR,-2+k,.55,s*1.58).rotation.x=Math.PI/2}
+// надпись и звезда
+{const c=document.createElement('canvas');c.width=512;c.height=128;const x=c.getContext('2d');x.fillStyle='#e8ecef';x.font='900 72px Inter, Arial';x.fillText('USA 30621',20,90);const t=new THREE.CanvasTexture(c);const p=new THREE.Mesh(new THREE.PlaneGeometry(2.2,.55),new THREE.MeshBasicMaterial({map:t,transparent:true}));p.position.set(-.3,1.5,1.41);TANK.add(p);PARTS.push({m:p,x:-.3,y:1.5,z:1.41})}
+// ---------- солдат-фасолинка (плоский, рисуется каждый кадр) ----------
+const sc2=document.createElement('canvas');sc2.width=512;sc2.height=1024;const sx=sc2.getContext('2d');const stex=new THREE.CanvasTexture(sc2);stex.colorSpace=THREE.SRGBColorSpace;
+const SOL=new THREE.Mesh(new THREE.PlaneGeometry(2.0,4.0),new THREE.MeshBasicMaterial({map:stex,transparent:true,alphaTest:.05,side:THREE.DoubleSide}));sc.add(SOL);
+// тень персонажа
+const sh=new THREE.Mesh(new THREE.CircleGeometry(.55,24),new THREE.MeshBasicMaterial({color:0x000000,transparent:true,opacity:.22,depthWrite:false}));sh.rotation.x=-Math.PI/2;sc.add(sh);
+function drawSoldier(t,mood,wave){const x=sx;x.clearRect(0,0,512,1024);x.lineWidth=10;x.strokeStyle='#161616';x.lineJoin=x.lineCap='round';
+ const by=Math.sin(t*6)*4;// дыхание
+ // ноги
+ x.beginPath();x.moveTo(215,760);x.lineTo(205,1000);x.moveTo(297,760);x.lineTo(307,1000);x.lineWidth=12;x.strokeStyle='#3a2a1a';x.stroke();x.lineWidth=10;x.strokeStyle='#161616';
+ // тело-фасолинка
+ x.fillStyle='#6f7f3a';x.beginPath();x.ellipse(256,560+by,118,240,0,0,Math.PI*2);x.fill();x.stroke();
+ x.fillStyle='#5b6a2e';x.beginPath();x.ellipse(290,600+by,70,190,0,-.3,Math.PI*.6);x.fill();
+ x.fillStyle='#3a4320';for(let i=0;i<4;i++){x.beginPath();x.arc(256,440+i*70+by,9,0,7);x.fill()}
+ // руки
+ x.beginPath();x.moveTo(145,520+by);x.quadraticCurveTo(120,620,140,700);x.stroke();
+ const wa=wave?Math.sin(t*14)*.35:0;x.save();x.translate(366,500+by);x.rotate(wave?-2.3+wa:.3);x.beginPath();x.moveTo(0,0);x.quadraticCurveTo(20,90,0,180);x.stroke();x.fillStyle='#161616';x.beginPath();x.arc(0,184,14,0,7);x.fill();x.restore();
+ // голова
+ const hy=250+by;x.fillStyle='#f3d2a8';x.beginPath();x.arc(256,hy,118,0,Math.PI*2);x.fill();x.stroke();
+ // каска
+ x.fillStyle='#6f7f3a';x.beginPath();x.arc(256,hy-20,124,Math.PI*1.03,Math.PI*1.97);x.closePath();x.fill();x.stroke();x.beginPath();x.ellipse(256,hy-28,160,26,0,0,Math.PI*2);x.fill();x.stroke();
+ // лицо
+ x.fillStyle='#161616';x.strokeStyle='#161616';
+ if(mood==='happy'){x.lineWidth=9;for(const s of[-1,1]){x.beginPath();x.arc(256+s*46,hy+30,20,Math.PI*1.1,Math.PI*1.9);x.stroke()}x.fillStyle='#7a1c1c';x.beginPath();x.arc(256,hy+62,46,0,Math.PI);x.fill();x.lineWidth=8;x.stroke();x.fillStyle='#fff';x.fillRect(222,hy+62,68,12)}
+ else{for(const s of[-1,1]){x.fillStyle='#fff';x.beginPath();x.arc(256+s*48,hy+24,32,0,7);x.fill();x.lineWidth=7;x.stroke();x.fillStyle='#161616';x.beginPath();x.arc(256+s*48,hy+28,12,0,7);x.fill()}
+  x.fillStyle='#7a1c1c';x.beginPath();x.ellipse(256,hy+84,22,30,0,0,7);x.fill();x.lineWidth=7;x.stroke();
+  x.fillStyle='#8fd3ff';x.beginPath();x.moveTo(372,hy-40);x.quadraticCurveTo(392,hy,372,hy+6);x.quadraticCurveTo(352,hy,372,hy-40);x.fill();x.lineWidth=5;x.stroke()}
+ stex.needsUpdate=true}
+// ---------- шипение (частицы) ----------
+const PUF=[];for(let i=0;i<40;i++){const m=new THREE.Mesh(new THREE.SphereGeometry(.12,8,6),new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.8,depthWrite:false}));sc.add(m);PUF.push({m,a:rnd()*6.28,s:.6+rnd(),d:rnd()})}
+// ---------- пост ----------
+const comp=new EffectComposer(R);comp.addPass(new RenderPass(sc,cam));const bokeh=new BokehPass(sc,cam,{focus:9,aperture:.0035,maxblur:.008});comp.addPass(bokeh);comp.addPass(new OutputPass());
+const WORDS=[[0,'This'],[.45,'tank'],[1.0,'weighs'],[1.6,'NOTHING'],[2.7,'Watch'],[3.4,'pssssh'],[4.6,'Rubber!']];
+const wEl=document.getElementById('w');
+function seek(t){
+ // камера: медленный наезд снизу
+ const k=sm(0,DUR,t);cam.position.set(lerp(-1.4,-.8,k),lerp(3.4,3.1,k),lerp(11,9.2,k));cam.lookAt(lerp(.6,.9,k),lerp(1.9,1.8,k),-3);
+ // сдувание 3.2–5.2
+ const d=sm(3.2,5.2,t),wob=Math.sin(t*30)*.03*(d>0&&d<1?1:0);
+ TANK.scale.set(1+d*.18+wob,1-d*.72,1+d*.22-wob);TANK.position.y=hgt(2.2,-3)-d*.05;
+ bar.rotation.z=Math.PI/2+.06-d*.55;tur.rotation.x=d*.2;
+ PUF.forEach((p,i)=>{const ph=((t*1.6+p.d)%1);const on=t>3.1&&t<5.4;p.m.visible=on;if(on){const r=ph*2.4*p.s;p.m.position.set(TANK.position.x+.4+Math.cos(p.a)*r,TANK.position.y+3.3*(1-d*.7)+ph*1.4,TANK.position.z+Math.sin(p.a)*r);p.m.material.opacity=.8*(1-ph);p.m.scale.setScalar(.6+ph*1.6)}});
+ // солдат
+ const sxp=-1.2,szp=2.6;SOL.position.set(sxp,hgt(sxp,szp)+2.0,szp);SOL.lookAt(cam.position.x,SOL.position.y,cam.position.z);sh.position.set(sxp,hgt(sxp,szp)+.03,szp);
+ drawSoldier(t,t<3.6?'happy':'shock',t<3.0);
+ bokeh.uniforms.focus.value=cam.position.distanceTo(SOL.position);
+ let wd='';WORDS.forEach(w=>{if(t>=w[0])wd=w[1]});wEl.textContent=wd;const wt=WORDS.filter(w=>t>=w[0]).pop();const pk=wt?cl((t-wt[0])/.12,0,1):1;wEl.style.transform=`scale(${1.18-.18*pk})`;
+ comp.render()}
+window.seek=seek;window.DUR=DUR;seek(.5);window.READY=true;
+}catch(e){window.SCENE_ERR=e.stack||String(e)}
+</script></body></html>
