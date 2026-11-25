@@ -24,7 +24,7 @@ const $=id=>document.getElementById(id);
 let cw,THREE,sc,cam,R,SKY=null,STARS=null,LABS=[],FOG0=null;
 const cl=(x,a,b)=>Math.max(a,Math.min(b,x)),sm=(a,b,x)=>{const k=cl((x-a)/(b-a),0,1);return k*k*(3-2*k)},lerp=(a,b,k)=>a+(b-a)*k,L3=(a,b,k)=>a.map((v,i)=>lerp(v,b[i],k));
 const BIG=[[0,3.2,'2 000 ЭТАЖЕЙ','<small>за одни сутки</small>'],[3.2,5.2,'УЛЕТЕЛА<br>В КОСМОС 🚀',''],[5.2,7.5,'РАЙОН БАШНИ','<small>новый район Марса</small>'],[7.5,10.5,'458 ДОМОВ','<small>дом каждому, кто написал</small>'],[10.5,12.5,'БАШНЯ-БЛИЗНЕЦ?',''],[12.5,14.5,'ПИШИ НИК 👇',''],[14.5,16.5,'КАРТА ГОРОДА','<small>ссылка в описании канала 👆</small>']];
-const LINES=[[0,3.2,'Вы построили <b>две тысячи этажей</b> за сутки…'],[3.2,5.2,'…и башня <b>улетела в космос</b>!'],[5.2,7.5,'А внизу вырос <b>новый район</b>.'],[7.5,10.5,'Каждый, кто написал коммент, получил <b>здесь дом</b>.'],[10.5,12.5,'А это место… для <b>второй башни</b>.'],[12.5,14.5,'Пиши ник — следующий дом <b>твой</b>.'],[14.5,16.5,'Найди себя на карте — ссылка <b>в описании канала</b>.']];
+const LINES=[[0,3.2,'Вы построили <b>две тысячи этажей</b> за сутки'],[3.2,5.2,'и башня <b>улетела в космос</b>!'],[5.2,7.5,'А внизу — <b>новый район</b>.'],[7.5,10.5,'Каждому, кто написал, — <b>свой дом</b>.'],[10.5,12.5,'А это — место для <b>второй башни</b>.'],[12.5,14.5,'Пиши ник — следующий дом <b>твой</b>.'],[14.5,16.5,'Карта — <b>в описании канала</b>.']];
 // камера: высота подъёма вдоль фасада с никами (ники — этажи 1…491), потом разгон к верху
 function climbY(t){if(t<3.2)return lerp(2,470,Math.pow(t/3.2,1.15));const k=sm(3.2,4.6,t);return lerp(470,TOPY+40,k)}
 function camAt(t){
@@ -53,7 +53,9 @@ addEventListener('resize',fit);fit();if(/[?&]render/.test(location.search)){docu
 $('map').addEventListener('load',()=>{cw=$('map').contentWindow;const iv=setInterval(()=>{if(!cw.MP)return;clearInterval(iv);
  try{THREE=cw.THREE;sc=cw.eval('sc');cam=cw.eval('cam');R=cw.eval('R');cw.requestAnimationFrame=()=>0;
   const st=cw.document.createElement('style');st.textContent='.o:not(canvas),.bub,.pn,.mp,#mpTop,#mpCtl,#mpBot,#mpEye,#sys,button{display:none!important}';cw.document.head.appendChild(st);
-  cw.MP.draw();sc.traverse(o=>{if(o.isSprite)o.visible=false});build();seek(0);window.READY=true}catch(e){console.error(e);window.SCENE_ERR=e.message+' '+(e.stack||'')}},200)});
+  cw.MP.draw();sc.traverse(o=>{if(o.isSprite)o.visible=false});build();window.seek(0);window.READY=true}catch(e){console.error(e);window.SCENE_ERR=e.message+' '+(e.stack||'')}},200)});
 let play=null;addEventListener('keydown',e=>{if(e.key!==' '||!window.READY)return;if(play){cancelAnimationFrame(play);play=null;return}const t0=performance.now();const lp=()=>{seek((performance.now()-t0)/1000);play=requestAnimationFrame(lp)};lp()});
-window.seek=seek;window.DUR=DUR;window.LINES=LINES;window.vkey=t=>'k'+Math.round(t*30);
+let W8=null;try{const x=new XMLHttpRequest();x.open('GET','/golos/rb01/warp.json',false);x.send();if(x.status===200)W8=JSON.parse(x.responseText)}catch(e){}
+const toScene=v=>{if(!W8)return v;const w=W8.warp.find(x=>v>=x[0]&&v<x[1])||W8.warp[W8.warp.length-1];return w[2]+(w[3]-w[2])*cl((v-w[0])/(w[1]-w[0]),0,1)};
+window.seek=v=>seek(toScene(v));window.DUR=W8?W8.dur:DUR;window.LINES=LINES;window.vkey=t=>'k'+Math.round(t*30);
 </script></body></html>
