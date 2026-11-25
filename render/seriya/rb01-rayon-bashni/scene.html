@@ -1,0 +1,58 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><title>Район башни</title>
+<style>
+html,body{margin:0;height:100%;background:#000;overflow:hidden}
+#stage{position:absolute;left:0;top:0;width:1080px;height:1920px;transform-origin:0 0;overflow:hidden;background:#0b0d1a;font-family:Rubik,'Arial Black',Arial,sans-serif;font-weight:900}
+#map{position:absolute;left:0;top:0;width:1080px;height:1920px;border:0}
+#shade{position:absolute;inset:0;pointer-events:none;background:linear-gradient(rgba(10,12,30,.5),rgba(10,12,30,0) 20%,rgba(10,12,30,0) 68%,rgba(10,12,30,.6))}
+.big{position:absolute;left:0;right:0;top:250px;text-align:center;font-size:112px;line-height:.95;color:#ffd23a;-webkit-text-stroke:20px #000;paint-order:stroke fill;white-space:nowrap;transform-origin:50% 50%}
+.big small{display:block;font-size:76px;color:#fff;-webkit-text-stroke:13px #000;margin-top:16px}
+#sub{position:absolute;left:60px;right:60px;top:1330px;text-align:center;color:#fff;font-size:66px;line-height:1.12;-webkit-text-stroke:12px #000;paint-order:stroke fill}
+#sub b{color:#ffd23a}
+#nick{position:absolute;left:50%;top:1560px;transform:translateX(-50%);background:#5dff8a;color:#0d2a14;border:8px solid #fff;border-radius:40px;padding:14px 44px;font-size:84px;white-space:nowrap;box-shadow:0 0 60px 16px rgba(93,255,138,.5);display:none}
+</style></head><body>
+<div id="stage">
+ <iframe id="map" src="../../karta/index.html?video"></iframe>
+ <div id="shade"></div>
+ <div class="big" id="big"></div>
+ <div id="sub"></div>
+ <div id="nick"></div>
+</div>
+<script>
+// Шортс «Район башни» (14 с, петля). Карта не меняется — дома и камера добавляются из iframe.
+const W=1080,H=1920,DUR=14,TX=22,TZ=534,TW=83,CXD=52;
+const $=id=>document.getElementById(id);
+let cw,THREE,sc,cam,R,TOWER=null,HOUSES=[];
+const cl=(x,a,b)=>Math.max(a,Math.min(b,x)),sm=(a,b,x)=>{const k=cl((x-a)/(b-a),0,1);return k*k*(3-2*k)},lerp=(a,b,k)=>a+(b-a)*k,L3=(a,b,k)=>a.map((v,i)=>lerp(v,b[i],k));
+// текст на экране и будущая озвучка (голос «Кастом мой», позже)
+const BIG=[[0,2,'2 132 ЭТАЖА','<small>столько вы лайкнули</small>'],[2,5,'РАЙОН БАШНИ','<small>новый район Марса</small>'],[5,9,'800 УЧАСТКОВ','<small>дом каждому комментатору</small>'],[9,12,'БАШНЯ-БЛИЗНЕЦ?',''],[12,14,'ПИШИ НИК 👇','']];
+const LINES=[[0,2,'Вы поставили <b>две тысячи</b> лайков…'],[2,5,'…и башня выросла. А вокруг — <b>новый район</b>.'],[5,9,'Каждый, кто написал коммент, получит <b>здесь дом</b>.'],[9,12,'А вот это место… для <b>второй башни</b>.'],[12,14,'Пиши ник — этот участок <b>твой</b>.']];
+// камера по кадрам: [t0,t1, позиция от, цель от, позиция до, цель до]
+const SH=[
+ [0,2,[TX+16,6,TZ+22],[TX,40,TZ],[TX+22,190,TZ+30],[TX,230,TZ]],
+ [2,5,[TX+22,190,TZ+30],[TX,230,TZ],[CXD+20,170,TZ+120],[CXD,0,TZ-70]],
+ [5,9,[CXD+20,170,TZ+120],[CXD,0,TZ-70],[CXD-10,70,TZ+20],[CXD,0,TZ-85]],
+ [9,12,[TW+60,60,TZ+70],[TW,20,TZ],[TW+28,26,TZ+34],[TW,12,TZ]],
+ [12,14,[TW+28,26,TZ+34],[TW,12,TZ],[TX+16,6,TZ+22],[TX,40,TZ]]];
+function nicks(){const L=cw.eval('MLIST').filter(h=>h.n&&!h.site&&!h.bld&&!h.anon&&/^[A-Za-zА-Яа-яЁё0-9_.\-]{4,13}$/.test(h.n));let s=11;const r=()=>{s=s*16807%2147483647;return s/2147483647};const out=[],u=new Set();while(out.length<60){const h=L[Math.floor(r()*L.length)];if(!u.has(h.n)){u.add(h.n);out.push(h.n)}}return out}
+function build(){const lab=cw.eval('lab'),box=cw.eval('box'),MAT=(c)=>new THREE.MeshLambertMaterial({color:c});
+ const ml=cw.eval('MLIST');const tw=ml.find(h=>h.district==='Район башни');if(tw){TOWER=tw.g;TOWER.scale.y=2.6}// в ролике башня выше (2 132 этажа)
+ const P=cw.RB_PLOTS.slice(0,60),N=nicks(),COL=[0xf4efe6,0xffd23a,0x6ab3f3,0xe8503a,0x5dff8a,0xc58cff,0xff9a3c];
+ P.forEach((p,i)=>{const g=new THREE.Group(),c=COL[i%COL.length];box(g,5.4,3.6,5.4,c,0,1.8,0);const rf=new THREE.Mesh(new THREE.ConeGeometry(4.4,2.6,4),MAT(0x3a2a44));rf.rotation.y=Math.PI/4;rf.position.y=4.9;g.add(rf);
+  const nm=i===17?'кот_мэр 🐱':N[i];lab(g,'@'+nm,9,1.9,i===17?'#f2a23a':'#1d2a44',i===17?'#1a1410':'#ffd23a',0,7.4,0);g.position.set(p[0],0,p[1]);g.visible=false;sc.add(g);HOUSES.push({g,t:5.2+i*.06})})}
+function seek(t){t=((t%DUR)+DUR)%DUR;
+ const s=SH.find(x=>t>=x[0]&&t<x[1])||SH[SH.length-1],k=sm(s[0],s[1],t),p=L3(s[2],s[4],k),q=L3(s[3],s[5],k);
+ cam.position.set(...p);cam.lookAt(...q);cam.fov=55;cam.updateProjectionMatrix();
+ HOUSES.forEach(h=>{const a=cl((t-h.t)/.18,0,1),on=t>=h.t&&t<13.6;h.g.visible=on;if(on){const b=a<1?1+.25*Math.sin(a*Math.PI):1;h.g.scale.set(b,a<1?a:1,b)}});
+ R.render(sc,cam);
+ const B=BIG.find(x=>t>=x[0]&&t<x[1]);$('big').innerHTML=B?B[2]+B[3]:'';const pk=B?cl((t-B[0])/.15,0,1):1;$('big').style.transform=`scale(${1.12-.12*pk})`;
+ const Ln=LINES.find(x=>t>=x[0]&&t<x[1]);$('sub').innerHTML=Ln?Ln[2]:'';
+ const ty=cl((t-12.2)/1.2,0,1),full='@ТВОЙ_НИК';$('nick').style.display=t>=12.2?'block':'none';$('nick').textContent=full.slice(0,Math.max(1,Math.round(ty*full.length)))}
+function fit(){if(document.body.classList.contains('render'))return;const k=Math.min(innerWidth/W,innerHeight/H);$('stage').style.transform=`scale(${k})`;$('stage').style.left=(innerWidth-W*k)/2+'px'}
+addEventListener('resize',fit);fit();if(/[?&]render/.test(location.search)){document.body.classList.add('render');$('stage').style.transform='none'}
+$('map').addEventListener('load',()=>{cw=$('map').contentWindow;const iv=setInterval(()=>{if(!cw.MP)return;clearInterval(iv);
+ try{THREE=cw.THREE;sc=cw.eval('sc');cam=cw.eval('cam');R=cw.eval('R');cw.requestAnimationFrame=()=>0;
+  const st=cw.document.createElement('style');st.textContent='.o:not(canvas),.bub,.pn,.mp,#mpTop,#mpCtl,#mpBot,#mpEye,#sys,button{display:none!important}';cw.document.head.appendChild(st);
+  cw.MP.draw();sc.traverse(o=>{if(o.isSprite)o.visible=false});sc.fog.near=400;sc.fog.far=1100;build();seek(0);window.READY=true}catch(e){console.error(e);window.SCENE_ERR=e.message+' '+(e.stack||'')}},200)});
+let play=null;addEventListener('keydown',e=>{if(e.key!==' '||!window.READY)return;if(play){cancelAnimationFrame(play);play=null;return}const t0=performance.now();const lp=()=>{seek((performance.now()-t0)/1000);play=requestAnimationFrame(lp)};lp()});
+window.seek=seek;window.DUR=DUR;window.LINES=LINES;window.vkey=t=>'k'+Math.round(t*30);
+</script></body></html>
