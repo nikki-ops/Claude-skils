@@ -177,7 +177,7 @@ sc.add(new THREE.Mesh(new THREE.SphereGeometry(1500,16,16),new THREE.MeshBasicMa
 sc.add(new THREE.HemisphereLight(0xffd9b0,0x6b2a1a,.75));
 const sun=new THREE.DirectionalLight(0xffe2b8,1.5);sun.position.set(-8,60,-6);sun.target.position.set(95,0,-50);sc.add(sun.target);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);{const c=sun.shadow.camera;c.left=-160;c.right=160;c.top=160;c.bottom=-160;c.far=300}sc.add(sun);
 // поверхность: город ровный, вокруг холмы
-const H=(x,z)=>{const dx=Math.max(0,-228-x,x-798),dz=Math.max(0,-448-z,z-318),r=Math.hypot(dx,dz),k=Math.min(1,r/35);return k*(Math.sin(x*.06)*Math.cos(z*.05)*5+Math.sin(x*.15+z*.11)*1.2+Math.max(0,r-60)*.08)};
+const H=(x,z)=>{const dx=Math.max(0,-228-x,x-798),dz=Math.max(0,-448-z,z-(x>-240&&x<800?740:318)),r=Math.hypot(dx,dz),k=Math.min(1,r/35);return k*(Math.sin(x*.06)*Math.cos(z*.05)*5+Math.sin(x*.15+z*.11)*1.2+Math.max(0,r-60)*.08)};
 {const gg=new THREE.PlaneGeometry(2600,2600,240,240);gg.rotateX(-Math.PI/2);gg.translate(162,0,-70);const gp=gg.attributes.position;
 for(let i=0;i<gp.count;i++)gp.setY(i,H(gp.getX(i),gp.getZ(i)));gg.computeVertexNormals();
 const gm=new THREE.Mesh(gg,new THREE.MeshLambertMaterial({color:0xa65a40}));gm.receiveShadow=true;sc.add(gm);
@@ -1613,6 +1613,68 @@ try{// ===== ЗОЛОТАЯ БАШНЯ (серия 12, 1000 подписчико
  g.position.set(TP.x,0,TP.z);g.userData.top=4+N*FH+15;g.userData.dyn=1;sc.add(g);
  MLIST.push({n:'БалгинДоканова 🏆',g,x:TP.x,z:TP.z,top:g.userData.top,bld:1,kind:'Золотая башня, 100 этажей (1000 подписчиков). Верхний этаж — @БалгинДоканова (розыгрыш среди 825 комментаторов). Остальные 99 этажей свободны',day:12,district:'Сити'});
  window.ZTOWER=g})()}catch(e){console.warn("tower",e)}
+try{// ===== РАЙОН БАШНИ + ЗОЛОТОЙ РАЙОН (25.11): юг за ж/д кольцом. Участки пустые; ники комментаторов — в RB_NICKS (по порядку: 1-й — ближе к башне) =====
+(function(){const RB_NICKS=[];// сюда ники комментаторов «1 лайк = 1 этаж»
+ const ETAZHEY=64;// этажей башни (как в ролике); после 24 ч — число лайков
+ const ROOT=new THREE.Group();ROOT.userData.dyn=1;sc.add(ROOT);
+ const flat=(w,d,c,x,y,z)=>{const m=new THREE.Mesh(new THREE.PlaneGeometry(w,d),mat(c));m.rotation.x=-Math.PI/2;m.position.set(x,y,z);m.receiveShadow=true;ROOT.add(m);return m};
+ const sign=(t,w,h,bg,fg,x,z,ry)=>{const g=new THREE.Group();box(g,.3,h+1.6,.3,0x3a3f48,-w/2+.4,(h+1.6)/2,0);box(g,.3,h+1.6,.3,0x3a3f48,w/2-.4,(h+1.6)/2,0);box(g,w+.3,h+.3,.25,0x2a2d34,0,1.6+h/2,0);lab(g,t,w,h,bg,fg,0,1.6+h/2,.14);lab(g,t,w,h,bg,fg,0,1.6+h/2,-.14).rotation.y=Math.PI;g.position.set(x,0,z);g.rotation.y=ry||0;ROOT.add(g);return g};
+ // дороги из города через ж/д кольцо
+ [[52,10],[550,10]].forEach(a=>flat(a[1],52,0x4a4a52,a[0],.07,330));
+ // ---------- РАЙОН БАШНИ: 7×7 кварталов по 5×4 участка, центр 3×3 — площадь ----------
+ const BX0=-170,BZ0=350,PX=65,PZ=54,NB=7,TX=22,TZ=534,TW=83;
+ flat(PX*NB-10+16,PZ*NB-10+16,0x4a4a52,BX0+(PX*NB-10)/2,.05,BZ0+(PZ*NB-10)/2);
+ const plots=[];
+ for(let i=0;i<NB;i++)for(let j=0;j<NB;j++){const x0=BX0+i*PX,z0=BZ0+j*PZ;if(i>=2&&i<=4&&j>=2&&j<=4)continue;
+  flat(55,44,0x2a2070,x0+27.5,.08,z0+22);
+  for(let a=0;a<5;a++)for(let b=0;b<4;b++)plots.push([x0+5.5+a*11,z0+5.5+b*11])}
+ plots.sort((p,q)=>Math.hypot(p[0]-(TX+TW)/2,p[1]-TZ)-Math.hypot(q[0]-(TX+TW)/2,q[1]-TZ));
+ {const fr=new THREE.InstancedMesh(new THREE.BoxGeometry(9,.2,9),new THREE.MeshLambertMaterial({color:0x8a7ad8}),plots.length),
+   tl=new THREE.InstancedMesh(new THREE.BoxGeometry(8,.3,8),new THREE.MeshLambertMaterial({color:0x4a3a9a}),plots.length),
+   pst=new THREE.InstancedMesh(new THREE.BoxGeometry(.25,1.6,.25),new THREE.MeshLambertMaterial({color:0xf7c24a}),plots.length*2),M=new THREE.Matrix4();
+  plots.forEach((p,k)=>{M.makeTranslation(p[0],.15,p[1]);fr.setMatrixAt(k,M);M.makeTranslation(p[0],.2,p[1]);tl.setMatrixAt(k,M);M.makeTranslation(p[0]-3.8,.9,p[1]+3.8);pst.setMatrixAt(k*2,M);M.makeTranslation(p[0]+3.8,.9,p[1]+3.8);pst.setMatrixAt(k*2+1,M)});
+  [fr,tl,pst].forEach(m=>{m.instanceMatrix.needsUpdate=true;ROOT.add(m)})}
+ window.RB_PLOTS=plots;// [x,z] по удалённости от башни
+ // площадь
+ flat(185,152,0x6e6888,52.5,.09,534);for(let k=0;k<16;k++){const a=k/16*6.283;box(ROOT,.3,4,.3,0x3a3f48,52.5+Math.cos(a)*80,2,534+Math.sin(a)*62);msh(ROOT,new THREE.SphereGeometry(.8,10,8),new THREE.MeshBasicMaterial({color:0xfff0b0}),52.5+Math.cos(a)*80,4.4,534+Math.sin(a)*62)}
+ // башня из ролика «1 лайк = 1 этаж»: цветные этажи, плиты, окна; наверху «ТВОЙ ЭТАЖ?» и кот
+ {const FW=9,FH=3.1,PAL=[0xf4efe6,0xffd23a,0x6ab3f3,0xe8503a,0x5dff8a,0xc58cff,0xff9a3c,0xf7f7f7],M=new THREE.Matrix4(),R=new THREE.Matrix4(),C=new THREE.Color(),T=new THREE.Group();T.userData.dyn=1;
+  const body=new THREE.InstancedMesh(new THREE.BoxGeometry(FW,FH-.35,FW),new THREE.MeshLambertMaterial({color:0xffffff}),ETAZHEY),slab=new THREE.InstancedMesh(new THREE.BoxGeometry(FW+.6,.35,FW+.6),new THREE.MeshLambertMaterial({color:0x5a5560}),ETAZHEY);
+  const WN=ETAZHEY*12,wl=new THREE.InstancedMesh(new THREE.BoxGeometry(1.7,1.4,.12),new THREE.MeshBasicMaterial({color:0xffe7a0}),WN),wd=new THREE.InstancedMesh(new THREE.BoxGeometry(1.7,1.4,.12),new THREE.MeshBasicMaterial({color:0x2a3a5c}),WN);let nl=0,nd=0;
+  for(let i=0;i<ETAZHEY;i++){M.makeTranslation(0,i*FH+(FH-.35)/2,0);body.setMatrixAt(i,M);body.setColorAt(i,C.setHex(PAL[i%PAL.length]));M.makeTranslation(0,i*FH+FH-.175,0);slab.setMatrixAt(i,M);
+   for(let s=0;s<4;s++){const a=s*Math.PI/2;for(let k=-1;k<=1;k++){M.makeRotationY(a);M.setPosition(Math.sin(a)*(FW/2+.02)+Math.cos(a)*k*2.8,i*FH+1.45,Math.cos(a)*(FW/2+.02)-Math.sin(a)*k*2.8);if(i%5===2||(i*7+s*3+k)%11===0)wl.setMatrixAt(nl++,M);else wd.setMatrixAt(nd++,M)}}}
+  wl.count=nl;wd.count=nd;[body,slab,wl,wd].forEach(m=>{m.instanceMatrix.needsUpdate=true;T.add(m)});if(body.instanceColor)body.instanceColor.needsUpdate=true;
+  box(T,FW*2,.3,FW*2,0xe6dcc4,0,.15,0);
+  // верхушка: пустой этаж пунктиром + табличка + кот
+  const top=new THREE.Group();box(top,FW+.6,.35,FW+.6,0x5a5560,0,.17,0);const ed=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(FW,FH-.4,FW)),new THREE.LineDashedMaterial({color:0x5dff8a,dashSize:.8,gapSize:.5}));ed.computeLineDistances();ed.position.y=.35+(FH-.4)/2;top.add(ed);
+  [0,1].forEach(k=>{const p=lab(top,'ТВОЙ ЭТАЖ?',6,2.2,'#5dff8a','#0d2a14',0,1.9,k?-(FW/2+.05):FW/2+.05);if(k)p.rotation.y=Math.PI});
+  const cat=new THREE.Group();[[.55,.5,.75,0xf2a23a,0,.25,0],[.5,.45,.45,0xf2a23a,0,.72,.22],[.12,.16,.08,0xf2a23a,-.15,1,.22],[.12,.16,.08,0xf2a23a,.15,1,.22],[.08,.25,.02,0xd8202a,0,.35,.38]].forEach(b=>box(cat,b[0],b[1],b[2],b[3],b[4],b[5],b[6]));cat.position.set(FW/2-.9,.35,FW/2-.9);cat.scale.setScalar(1.6);top.add(cat);
+  top.position.y=ETAZHEY*FH;T.add(top);
+  // кран и забор «СТРОЙКА»
+  const CR=new THREE.Group();box(CR,1.6,ETAZHEY*FH+14,1.6,0xf2b705,0,(ETAZHEY*FH+14)/2,0);box(CR,30,1,1,0xf2b705,12,ETAZHEY*FH+15,0);box(CR,2.4,2,1.6,0x8a8a90,-4,ETAZHEY*FH+14,0);box(CR,2.2,1.8,2.2,0xffffff,0,ETAZHEY*FH+13,1.2);CR.position.set(-FW-6,0,-FW-4);T.add(CR);
+  lab(T,'БАШНЯ · 1 ЛАЙК = 1 ЭТАЖ',16,2.4,'#1d2a44','#ffd23a',0,1.8,FW+.6);
+  T.position.set(TX,0,TZ);ROOT.add(T);
+  MLIST.push({n:'Башня «1 лайк = 1 этаж» 🏢',g:T,x:TX,z:TZ,top:ETAZHEY*FH+6,bld:1,kind:'Башня из ролика «1 лайк = 1 этаж»: '+ETAZHEY+' этажей. Этажи получат ники комментаторов; вокруг — 800 участков под их дома',day:13,district:'Район башни'})}
+ // место под башню-близнеца
+ {const g=new THREE.Group();box(g,18,.3,18,0xd8d2e8,0,.15,0);const ed=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(9,40,9)),new THREE.LineDashedMaterial({color:0xffe23a,dashSize:1.2,gapSize:.8}));ed.computeLineDistances();ed.position.y=20.3;g.add(ed);
+  lab(g,'МЕСТО ДЛЯ БАШНИ-БЛИЗНЕЦА',16,2.2,'#7a6ae0','#ffffff',0,1.6,9.2);g.position.set(TW,0,TZ);ROOT.add(g)}
+ sign('РАЙОН БАШНИ · 800 УЧАСТКОВ',22,2.6,'#7a6ae0','#ffffff',52,360,0);
+ // ---------- ЗОЛОТОЙ РАЙОН: Золотая башня в центре, 10 участков под башни кольцом ----------
+ const GX=550,GZ=534;flat(436,384,0x4a4a52,GX,.05,GZ);flat(420,368,0x7a5208,GX,.08,GZ);flat(70,70,0x9a8a60,GX,.1,GZ);
+ for(let k=0;k<10;k++){const a=k/10*6.283-Math.PI/2,x=GX+Math.cos(a)*150,z=GZ+Math.sin(a)*130,g=new THREE.Group();
+  box(g,40,.25,40,0x8a7444,0,.13,0);[[0,20,40,1],[0,-20,40,1],[20,0,1,40],[-20,0,1,40]].forEach(b=>box(g,b[2],.5,b[3],0xf2a81e,b[0],.25,b[1]));
+  [[-20,-20],[20,-20],[-20,20],[20,20]].forEach(c=>box(g,.6,3,.6,0xf2a81e,c[0],1.5,c[1]));
+  lab(g,'УЧАСТОК ПОД БАШНЮ №'+(k+1),14,2,'#141829','#ffd860',0,1.4,20.6);g.position.set(x,0,z);g.rotation.y=-a-Math.PI/2;ROOT.add(g)}
+ sign('ЗОЛОТОЙ РАЙОН · 10 БАШЕН',20,2.6,'#141829','#ffd860',550,360,0);
+ // Золотая башня переезжает сюда
+ if(window.ZTOWER){ZTOWER.position.set(GX,0,GZ);const h=MLIST.find(q=>q.g===ZTOWER);if(h){h.x=GX;h.z=GZ;h.district='Золотой район';h.kind+='. Переехала из Сити в Золотой район (25.11)'}}
+ // в Сити на её месте — стройка нового Дома Сити (дома вокруг остаются скрыты)
+ {const g=new THREE.Group();g.userData.dyn=1;box(g,28,.3,28,0x9a9da2,0,.15,0);[[0,14,28,.3],[0,-14,28,.3],[14,0,.3,28],[-14,0,.3,28]].forEach(b=>box(g,b[2],1.8,b[3],0xf2b705,b[0],1.05,b[1]));
+  box(g,1.2,40,1.2,0xf2b705,-8,20,-8);box(g,22,.9,.9,0xf2b705,0,40,-8);box(g,12,6,12,0xc9c2b4,0,3.3,0);lab(g,'НОВЫЙ ДОМ СИТИ · СТРОЙКА',18,2.2,'#ee6c3a','#ffffff',0,2.6,14.3);g.position.set(282,0,-108);sc.add(g);
+  MLIST.push({n:'Новый Дом Сити 🚧',g,x:282,z:-108,top:42,bld:1,kind:'Стройка нового Дома Сити — на месте Золотой башни, которая переехала в Золотой район',day:13,district:'Сити'})}
+ // подписи районов
+ if(typeof DL!=='undefined'){[['РАЙОН БАШНИ','#b8a8ff',52,534],['ЗОЛОТОЙ РАЙОН','#ffd860',550,534]].forEach(q=>{const e=document.createElement('div');e.className='o';e.style.cssText=DL[0].e.style.cssText;e.style.color=q[1];e.textContent=q[0];st.appendChild(e);DL.push({e,x:q[2],z:q[3]})});PRI.splice(4,0,'РАЙОН БАШНИ','ЗОЛОТОЙ РАЙОН')}
+})()}catch(e){console.warn("rayony",e)}
 try{// ===== ЗОЛОТАЯ СТАТУЯ КОТА 100 м (серия 16): кот-мэр в чёрных очках, лапа пуста; вокруг дома-коты =====
 (function(){const cx=702,cz=-88,g=new THREE.Group(),G=new THREE.MeshPhongMaterial({color:0xf2a81e,emissive:0x5a3a00,specular:0xffe6a0,shininess:80}),
  B=(w,h,d,x,y,z,m)=>{const o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m||G);o.position.set(x,y,z);g.add(o);return o},GL=new THREE.MeshPhongMaterial({color:0x111111,specular:0x888888,shininess:120});
@@ -1724,8 +1786,8 @@ window.__opt2=function(){sc.updateMatrixWorld(true);const okh=(o,g)=>{if(!o.isMe
 new Set(MLIST.map(h=>h.g).filter(g=>g&&g.parent&&!g.userData.dyn)).forEach(g=>{const L=[];g.traverse(o=>{if(o!==g&&okh(o,g))L.push(o)});if(L.length<2)return;const inv=new THREE.Matrix4().copy(g.matrixWorld).invert();mergeInto(g,L,g,inv)})};
 })();
 }catch(e){console.warn("merge",e)}
-const MAPCFG={title:'MARS CITY',list:MLIST,center:[162,-64],radius:600,maxD:900,goal:1000,fog:0xdba383,tg:'https://t.me/',
-tabs:[{name:'▶️ YouTube',fly:ZC.yt},{name:'🎵 TikTok',fly:ZC.tt},{name:'⭐ Центр',fly:ZC.c},{name:'🏙 Сити',fly:ZC.city},{name:'✨ Аллея желаний',fly:ZC.al},{name:'🏗 Промзона',fly:ZC.pz},{name:'🎡 Отдых',fly:ZC.fun},{name:'🦁 Зоопарк',fly:[702,176,150]},{name:'🐱 Статуя кота',fly:[702,-88,170]},{name:'🚀 Космодром',fly:ZC.cos},{name:'🏳 Страна Imen',fly:ZC.im},{name:'🛡 Сопротивление',fly:ZC.res},{name:'☣ Заражение',fly:ZC.inf}],
+const MAPCFG={title:'MARS CITY',list:MLIST,center:[162,-64],radius:600,maxD:1100,goal:1000,fog:0xdba383,tg:'https://t.me/',
+tabs:[{name:'▶️ YouTube',fly:ZC.yt},{name:'🎵 TikTok',fly:ZC.tt},{name:'⭐ Центр',fly:ZC.c},{name:'🏙 Сити',fly:ZC.city},{name:'🏢 Район башни',fly:[52,534,260]},{name:'👑 Золотой район',fly:[550,534,280]},{name:'✨ Аллея желаний',fly:ZC.al},{name:'🏗 Промзона',fly:ZC.pz},{name:'🎡 Отдых',fly:ZC.fun},{name:'🦁 Зоопарк',fly:[702,176,150]},{name:'🐱 Статуя кота',fly:[702,-88,170]},{name:'🚀 Космодром',fly:ZC.cos},{name:'🏳 Страна Imen',fly:ZC.im},{name:'🛡 Сопротивление',fly:ZC.res},{name:'☣ Заражение',fly:ZC.inf}],
 days:{max:13,label:d=>d===1?'основатель · выпуск 1':'выпуск '+d},
 tour:['Космодром «Марс-1»','тгк: qwuufh','nyaaan.mp3','Дон-х9щ','ANTI_COPUSTA','DwYoP69','Bloodyking-123','Нормис-л6х','$$+BB','BETA_deta','Маргошкинс💋','Юля-л4х1н','Urbanofix🛠','NEZ_Rbx_Z','Обурмолдить-❤️','ZXC_TEFTELI','KAPAOKE_KOT','GorodKotikov'],
 tick:t=>{dlab();MT.forEach(f=>{try{f(t)}catch(_){}});if(typeof up4==='function')up4(t);SM.forEach(q=>{const k=(t*.7+q.i*.33)%1;q.m.position.y=q.y0+k*3;q.m.material.opacity=.7*(1-k);q.m.scale.setScalar(.6+k*.9)});(M3.fly||[]).forEach((p,k)=>p.position.y=5+Math.sin(t*1.6+k)*.4);(M3.dia||[]).forEach(d=>d.rotation.y=t*.8)}};
