@@ -57,5 +57,5 @@ $('map').addEventListener('load',()=>{cw=$('map').contentWindow;const iv=setInte
 let play=null;addEventListener('keydown',e=>{if(e.key!==' '||!window.READY)return;if(play){cancelAnimationFrame(play);play=null;return}const t0=performance.now();const lp=()=>{seek((performance.now()-t0)/1000);play=requestAnimationFrame(lp)};lp()});
 let W8=null;try{const x=new XMLHttpRequest();x.open('GET','/golos/rb01/warp.json',false);x.send();if(x.status===200)W8=JSON.parse(x.responseText)}catch(e){}
 const toScene=v=>{if(!W8)return v;const w=W8.warp.find(x=>v>=x[0]&&v<x[1])||W8.warp[W8.warp.length-1];return w[2]+(w[3]-w[2])*cl((v-w[0])/(w[1]-w[0]),0,1)};
-window.seek=v=>seek(toScene(v));window.DUR=W8?W8.dur:DUR;window.LINES=LINES;window.vkey=t=>'k'+Math.round(t*30);
+const seekS=seek;window.seek=v=>seekS(toScene(v));window.DUR=W8?W8.dur:DUR;window.LINES=LINES;window.vkey=t=>'k'+Math.round(t*30);
 </script></body></html>
