@@ -28,9 +28,9 @@ const LINES=[[0,3.2,'Вы построили <b>две тысячи этажей
 // камера: высота подъёма вдоль фасада с никами (ники — этажи 1…491), потом разгон к верху
 function climbY(t){if(t<3.2)return lerp(2,470,Math.pow(t/3.2,1.15));const k=sm(3.2,4.6,t);return lerp(470,TOPY+40,k)}
 function camAt(t){
- if(t<5.2){const y=climbY(t),d=t<3.2?15:lerp(15,70,sm(3.6,5.2,t));return [[TX+d*.25,y+(t<3.2?1:lerp(1,30,sm(4.2,5.2,t))),TZ+d],[TX,y+(t<3.2?2:lerp(2,-25,sm(4.2,5.2,t))),TZ]]}
+ if(t<5.2){const y=climbY(t),d=t<3.2?48:lerp(48,80,sm(3.6,5.2,t));return [[TX+d*.25,y+(t<3.2?-6:lerp(1,30,sm(4.2,5.2,t))),TZ+d],[TX,y+(t<3.2?2:lerp(2,-25,sm(4.2,5.2,t))),TZ]]}
  const SH=[[5.2,7.5,[TX+60,TOPY*0.4,TZ+120],[CXD,0,TZ-40],[CXD+20,170,TZ+120],[CXD,0,TZ-70]],[7.5,10.5,[CXD+20,170,TZ+120],[CXD,0,TZ-70],[CXD-10,60,TZ+10],[CXD,0,TZ-85]],
-  [10.5,12.5,[TW+60,60,TZ+70],[TW,20,TZ],[TW+28,26,TZ+34],[TW,12,TZ]],[12.5,14.5,[TW+28,26,TZ+34],[TW,12,TZ],[CXD+10,300,TZ+260],[CXD,0,TZ]],[14.5,16.5,[CXD+10,300,TZ+260],[CXD,0,TZ],[TX+3.75,3,TZ+15],[TX,4,TZ]]];
+  [10.5,12.5,[TW+60,60,TZ+70],[TW,20,TZ],[TW+28,26,TZ+34],[TW,12,TZ]],[12.5,14.5,[TW+28,26,TZ+34],[TW,12,TZ],[CXD+10,300,TZ+260],[CXD,0,TZ]],[14.5,16.5,[CXD+10,300,TZ+260],[CXD,0,TZ],[TX+12,3,TZ+48],[TX,4,TZ]]];
  const s=SH.find(x=>t>=x[0]&&t<x[1])||SH[SH.length-1],k=sm(s[0],s[1],t);if(s[0]===5.2){const kk=sm(5.2,7.5,t);return [[lerp(TX+17,s[4][0],kk),lerp(TOPY+30,s[4][1],Math.pow(kk,.45)),lerp(TZ+70,s[4][2],kk)],L3([TX,TOPY,TZ],s[5],Math.pow(kk,.6))]}return [L3(s[2],s[4],k),L3(s[3],s[5],k)]}
 function build(){const lab=cw.eval('lab'),mk=cw.eval('mk');
  sc.traverse(o=>{if(o.isMesh&&o.geometry&&o.geometry.parameters&&o.geometry.parameters.radius===1500)SKY=o});
