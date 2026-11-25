@@ -17,15 +17,17 @@ for i, (a, b, txt) in enumerate(lines):
     d = float(subprocess.check_output(['ffprobe', '-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', f]))
     print(f'{i:02d} [{a}-{b}] {d:.2f}s  {text}')
     lines[i].append(d)
-# сборка: фразы подряд — каждая с начала своего слота или сразу после предыдущей; ускорение только если наезжает на следующий слот (до 1.2)
-filt, inputs, prev, starts = [], [], 0, []
+# сборка: фразы подряд с паузой GAP — кадр не висит после слов. warp.json: [видео_с, видео_по, сцена_с, сцена_по] на каждую фразу.
+GAP = .2
+SLOTS = [(0,2),(2,5),(5,9),(9,13),(13,17),(17,21),(21,25),(25,29),(29,33),(33,37),(37,40)]
+filt, inputs, v, warp = [], [], .05, []
 for i, (a, b, txt, d) in enumerate(lines):
-    inputs += ['-i', f'{out}/{i:02d}.mp3']; st = max(a, prev + .08)
-    nxt = lines[i + 1][0] + .4 if i + 1 < len(lines) else 39.95
-    tempo = min(1.2, max(1, d / max(.5, nxt - st))); prev = st + d / tempo; starts.append(round(st, 2))
-    filt.append(f'[{i}:a]atempo={tempo:.3f},adelay={int(st*1000)}|{int(st*1000)}[v{i}]')
-print('старты фраз:', starts)
-json.dump(starts, open(out + '/starts.json', 'w'))
+    inputs += ['-i', f'{out}/{i:02d}.mp3']
+    filt.append(f'[{i}:a]adelay={int(v*1000)}|{int(v*1000)}[v{i}]')
+    v0 = 0 if i == 0 else v; v1 = v + d + GAP; warp.append([round(v0, 3), round(v1, 3), SLOTS[i][0], SLOTS[i][1]]); v = v1
+TOTAL = round(v, 3)
+json.dump({'warp': warp, 'dur': TOTAL}, open(out + '/warp.json', 'w'))
+print('длительность ролика:', TOTAL)
 mix = ''.join(f'[v{i}]' for i in range(len(lines)))
-subprocess.run(['ffmpeg', '-v', 'error', '-y', *inputs, '-filter_complex', ';'.join(filt) + f';{mix}amix=inputs={len(lines)}:normalize=0,apad,atrim=0:40[a]', '-map', '[a]', '-ar', '44100', ROOT + '/golos/ng01-golos.wav'], check=True)
+subprocess.run(['ffmpeg', '-v', 'error', '-y', *inputs, '-filter_complex', ';'.join(filt) + f';{mix}amix=inputs={len(lines)}:normalize=0,apad,atrim=0:'+str(TOTAL)+'[a]', '-map', '[a]', '-ar', '44100', ROOT + '/golos/ng01-golos.wav'], check=True)
 print('токенов потрачено:', spent)
