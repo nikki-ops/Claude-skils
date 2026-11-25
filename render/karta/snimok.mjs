@@ -6,8 +6,10 @@ const HERE=path.dirname(fileURLToPath(import.meta.url)),ROOT=path.resolve(HERE,'
 const [out='karta-sverhu.png',tx,tz,d,yaw,pp]=process.argv.slice(2);
 const MIME={'.html':'text/html; charset=utf-8','.js':'text/javascript','.png':'image/png','.json':'application/json'};
 const srv=http.createServer((q,r)=>{const f=path.join(ROOT,decodeURIComponent(q.url.split('?')[0]));if(!f.startsWith(ROOT)||!fs.existsSync(f)||fs.statSync(f).isDirectory()){r.writeHead(404);return r.end()}r.writeHead(200,{'content-type':MIME[path.extname(f)]||'application/octet-stream'});fs.createReadStream(f).pipe(r)}).listen(0);
-const b=await chromium.launch({args:['--ignore-gpu-blocklist','--enable-gpu-rasterization']});
+const b=await chromium.launch({args:['--ignore-gpu-blocklist','--enable-gpu-rasterization','--enable-unsafe-swiftshader','--use-gl=swiftshader']});
 const p=await b.newPage({viewport:{width:1600,height:1600}});
+if(process.env.THREE_LOCAL)await p.route(/three\.min\.js/,r=>r.fulfill({path:process.env.THREE_LOCAL,contentType:'text/javascript'}));// r128, если cdnjs недоступен
+await p.route(/fonts\.(googleapis|gstatic)\.com/,r=>r.abort());
 const errs=[];p.on('pageerror',e=>errs.push(e.message));p.on('console',m=>{if(m.type()==='warning'||m.type()==='error')errs.push(m.text())});
 await p.goto(`http://127.0.0.1:${srv.address().port}/render/karta/index.html?video`);
 await p.waitForFunction(()=>window.MP,null,{timeout:180000});await p.waitForTimeout(2500);

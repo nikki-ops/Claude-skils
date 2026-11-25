@@ -842,7 +842,7 @@ function unclash(){// надписи районов не налезают: ва�
  const pr=d=>{const t=d.e.textContent;let i=PRI.findIndex(p=>t.startsWith(p));return i<0?50:i};const vis=DL.filter(d=>d.e.style.display!=='none').sort((a,b)=>pr(a)-pr(b)),kept=[];
  const hit=(r)=>kept.some(k=>r.left<k.right+6&&r.right>k.left-6&&r.top<k.bottom+4&&r.bottom>k.top-4);
  vis.forEach(d=>{let r=d.e.getBoundingClientRect();if(!hit(r)){kept.push(r);return}const top0=parseFloat(d.e.style.top),h=r.height;
-  for(const dy of [h+4,-(h+4),2*(h+4),-2*(h+4)]){d.e.style.top=(top0+dy)+'px';r=d.e.getBoundingClientRect();if(!hit(r)){kept.push(r);return}}d.e.style.top=top0+'px';d.e.style.display='none'})}
+  for(const dy of []){d.e.style.top=(top0+dy)+'px';r=d.e.getBoundingClientRect();if(!hit(r)){kept.push(r);return}}d.e.style.top=top0+'px';d.e.style.display='none'})}
 try{// ===== YouTube: новые жители (комменты к 4 выпуску) =====
 function eyecastle5(){const g=castle3();g.traverse(o=>{if(o.isMesh&&o.material&&o.material.color)o.material=mat(new THREE.Color(o.material.color).multiplyScalar(.4).lerp(new THREE.Color(0x5a5a68),.5).getHex())});box(g,1.4,9,1.4,0x3a3a44,0,7,-1);const e=msh(g,new THREE.SphereGeometry(1.3,14,10),new THREE.MeshBasicMaterial({color:0xff6a1a}),0,12.4,-1);e.scale.set(1.4,.8,.6);box(g,.3,1.1,.1,0x111111,0,12.4,-.3);g.userData.top=14;return g}
 function bunkerhouse5(){const g=izba(0xc9b89a,0x5a6068);box(g,7,.3,7,0x6a6f78,0,-.1,0);box(g,1.6,1.2,1.6,0x3a3f48,2.6,.6,2.4);box(g,1.2,.1,1.2,0x1a1a1a,2.6,1.25,2.4);return g}
