@@ -1662,16 +1662,19 @@ try{// ===== РАЙОН БАШНИ + ЗОЛОТОЙ РАЙОН (25.11): юг з�
  // дома комментаторов: кто раньше написал — ближе к башне (2 вызова отрисовки на все дома)
  {const NH=Math.min(RBD.houses.length,plots.length),M=new THREE.Matrix4(),Q=new THREE.Quaternion(),Y=new THREE.Vector3(0,1,0),SC=new THREE.Vector3(1,1,1),PV=new THREE.Vector3(),C=new THREE.Color(),
    COL=[0xf4efe6,0xffd23a,0x6ab3f3,0xe8503a,0x5dff8a,0xc58cff,0xff9a3c,0xd9b07a],RC=[0x8a3b22,0x2f6f6a,0x3a2a44,0x2f5f4a,0x4a2c24],
-   hb=new THREE.InstancedMesh(new THREE.BoxGeometry(5.4,3.6,5.4),new THREE.MeshLambertMaterial({color:0xffffff}),NH),hr=new THREE.InstancedMesh(new THREE.ConeGeometry(4.4,2.6,4),new THREE.MeshLambertMaterial({color:0xffffff}),NH),
-   hd=new THREE.InstancedMesh(new THREE.BoxGeometry(1.1,1.8,.15),new THREE.MeshLambertMaterial({color:0x3a2a24}),NH);
+   TY=['izba','brick','dome','kupol','two','cottage','villa','dacha','banya','zeml'],
+   // модель дома карты → одна геометрия с цветами вершин (без табличек и прозрачного дыма)
+   merge=(g)=>{g.updateMatrixWorld(true);const P=[],N=[],Cc=[];g.traverse(m=>{if(!m.isMesh||!m.material||Array.isArray(m.material)||m.material.transparent||m.material.map)return;let q=m.geometry.index?m.geometry.toNonIndexed():m.geometry.clone();q.applyMatrix4(m.matrixWorld);if(!q.attributes.normal)q.computeVertexNormals();
+     const p=q.attributes.position,n=q.attributes.normal,c=m.material.color||new THREE.Color(1,1,1);for(let k=0;k<p.count;k++){P.push(p.getX(k),p.getY(k),p.getZ(k));N.push(n.getX(k),n.getY(k),n.getZ(k));Cc.push(c.r,c.g,c.b)}});
+    const o=new THREE.BufferGeometry();o.setAttribute('position',new THREE.Float32BufferAttribute(P,3));o.setAttribute('normal',new THREE.Float32BufferAttribute(N,3));o.setAttribute('color',new THREE.Float32BufferAttribute(Cc,3));return o},
+   HM=new THREE.MeshLambertMaterial({vertexColors:true}),IM=TY.map((t,k)=>{const cnt=Math.ceil(NH/TY.length)+1,m=new THREE.InstancedMesh(merge(mk(t)),HM,cnt);m.count=0;return m}),
+   tile=new THREE.InstancedMesh(new THREE.BoxGeometry(8.2,.12,8.2),new THREE.MeshLambertMaterial({color:0xd8c8a8}),NH);
   const fl={};RBD.floors.forEach((n,i)=>fl[n]=i+1);fl[RBD.top]=ETAZHEY;
   for(let k=0;k<NH;k++){const p=plots[k],ry=p[1]<TZ?0:Math.PI;Q.setFromAxisAngle(Y,ry);
-   M.compose(PV.set(p[0],2,p[1]),Q,SC);hb.setMatrixAt(k,M);hb.setColorAt(k,C.setHex(COL[k%COL.length]));
-   Q.setFromAxisAngle(Y,ry+Math.PI/4);M.compose(PV.set(p[0],5.1,p[1]),Q,SC);hr.setMatrixAt(k,M);hr.setColorAt(k,C.setHex(RC[k%RC.length]));
-   Q.setFromAxisAngle(Y,ry);M.compose(PV.set(p[0],1.1,p[1]+(ry?-2.76:2.76)),Q,SC);hd.setMatrixAt(k,M);
+   const im=IM[k%TY.length];M.compose(PV.set(p[0],.3,p[1]),Q,SC);im.setMatrixAt(im.count++,M);M.compose(PV.set(p[0],.3,p[1]),Q,SC);tile.setMatrixAt(k,M);
    const n=RBD.houses[k],g=new THREE.Group();g.position.set(p[0],0,p[1]);ROOT.add(g);
    MLIST.push({n,g,x:p[0],z:p[1],top:6.5,kind:'Дом комментатора «1 лайк = 1 этаж»'+(fl[n]?' · этаж №'+fl[n]+' в башне':''),day:13,district:'Район башни'})}
-  [hb,hr,hd].forEach(m=>{m.instanceMatrix.needsUpdate=true;if(m.instanceColor)m.instanceColor.needsUpdate=true;m.frustumCulled=false;ROOT.add(m)})}
+  [...IM,tile].forEach(m=>{m.instanceMatrix.needsUpdate=true;m.frustumCulled=false;ROOT.add(m)})}
  // место под башню-близнеца
  {const g=new THREE.Group();box(g,18,.3,18,0xd8d2e8,0,.15,0);const ed=new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(9,40,9)),new THREE.LineDashedMaterial({color:0xffe23a,dashSize:1.2,gapSize:.8}));ed.computeLineDistances();ed.position.y=20.3;g.add(ed);
   lab(g,'МЕСТО ДЛЯ БАШНИ-БЛИЗНЕЦА',16,2.2,'#7a6ae0','#ffffff',0,1.6,9.2);g.position.set(TW,0,TZ);ROOT.add(g)}
