@@ -42,6 +42,7 @@ html,body{margin:0;height:100%;background:#000;overflow:hidden}
 // 0 «Не можешь найти свой дом в городе?» · 2.09 «Я выложил карту… в Телеграм» · 5.13 «Приближаешь — и видно все ники» · 7.77 «Ставь лайк, и твой дом загорится первым» · 11.14 «Ссылка в профиле…»
 // Один план: крупно дом → отлёт на город → нырок вдоль улицы → золотая волна → снова тот же дом (петля).
 const W=1080,H=1920,DUR=14.4,CX=162,CZ=-64;
+const CATP=[-4.2,0,-2.2],CATR=.7,CATS=1.7;// кот: смещение от «твоего» дома, поворот, масштаб
 const T={tg:2.1,dive:5.1,like:7.75,gold0:8.1,gold1:10.6,cta:11.1,fade0:12.9,fade1:13.7};
 const $=id=>document.getElementById(id);
 let cw,THREE,sc,cam,R,HOME,GOLD,GLOW,DATA=[],POOL=[];
@@ -55,6 +56,13 @@ function build(){
  L.forEach(h=>{const top=h.top||6,d=Math.hypot(h.x-HOME.x,h.z-HOME.z);DATA.push({h,top,d,on:h===HOME?T.like+.25:T.gold0+(T.gold1-T.gold0)*Math.min(1,d/330)+((h.x*7+h.z*3)%10+10)%10/60})});
  GOLD.frustumCulled=false;sc.add(GOLD);
  GLOW=new THREE.PointLight(0xffd060,0,60);GLOW.position.set(HOME.x,(HOME.top||6)+4,HOME.z);sc.add(GLOW);
+ // пасхалка: крошечный кот-мэр выглядывает из-за угла дома рядом с «твоим» (модель из s01) — машет лапой
+ {const cat=new THREE.Group(),cm=new THREE.MeshLambertMaterial({color:0xf2a23a}),dk=new THREE.MeshLambertMaterial({color:0x14141a}),wh=new THREE.MeshLambertMaterial({color:0xfff4e0});
+  const B=(g,w,h,d,m,x,y,z)=>{const o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);o.position.set(x,y,z);g.add(o);return o};
+  B(cat,.55,.5,.75,dk,0,.25,0);B(cat,.5,.45,.45,cm,0,.72,.22);B(cat,.12,.16,.08,cm,-.15,1.0,.22);B(cat,.12,.16,.08,cm,.15,1.0,.22);B(cat,.36,.09,.03,dk,0,.78,.45);B(cat,.18,.08,.03,wh,0,.64,.45);
+  const tail=B(cat,.1,.1,.5,cm,0,.4,-.5);tail.rotation.x=-.8;const paw=new THREE.Group();paw.position.set(.3,.5,.2);cat.add(paw);B(paw,.12,.4,.12,cm,0,.2,0);
+  B(cat,.08,.25,.02,new THREE.MeshLambertMaterial({color:0xd8202a}),0,.35,.38);
+  cat.scale.setScalar(CATS);cat.position.set(HOME.x+CATP[0],CATP[1],HOME.z+CATP[2]);cat.rotation.y=CATR;sc.add(cat);window.CAT=cat;window.PAW=paw}
  for(let i=0;i<70;i++){const d=document.createElement('div');d.style.display='none';$('lbl').appendChild(d);POOL.push(d)}
  console.log('[17] домов',L.length,'твой дом',HOME.n,HOME.x,HOME.z)}
 // позы камеры: [x,y,z, lookX,lookY,lookZ]
@@ -87,6 +95,7 @@ function seek(t){t=((t%DUR)+DUR)%DUR;window.__t=t;
  const o=new THREE.Object3D(),fade=1-sm(T.fade0,T.fade1,t);
  DATA.forEach((d,i)=>{let s=.0001;if(t>=d.on){const k=cl((t-d.on)/.3,0,1);s=(k<1?.2+k*1.05:1)*fade+.0001}
   o.position.set(d.h.x,d.top+.6,d.h.z);o.scale.set(s,s*(d.h===HOME?1.8:1),s);o.updateMatrix();GOLD.setMatrixAt(i,o.matrix)});GOLD.instanceMatrix.needsUpdate=true;
+ PAW.rotation.z=-.6+Math.sin(t*9)*.6;
  GLOW.intensity=t>=T.like+.25&&t<T.fade1?(4+Math.sin(t*7))*fade:0;
  R.render(sc,cam);labels(t);
  // 2D
