@@ -1,0 +1,9 @@
+{
+  "name": "mars-city-igra-server",
+  "version": "1.0.0",
+  "description": "Онлайн для прогулки по MARS CITY: игроки видят друг друга и общий чат",
+  "main": "server.js",
+  "scripts": { "start": "node server.js" },
+  "engines": { "node": ">=18" },
+  "dependencies": { "ws": "^8.18.0" }
+}
