@@ -1,4 +1,4 @@
-// Обложка «Небоскрёб для семьи»: node render/seriya/neboskreb/oblozhka.mjs → gotovo/neboskreb-cover.png (кадр 21 с: небоскрёб с никами и кот, крупно «НЕБОСКРЁБ. КОМУ?»)
+// Обложка «Небоскрёб для семьи»: node render/seriya/neboskreb/oblozhka.mjs → gotovo/neboskreb-cover.png (кадр 8,6 с: небоскрёб, кот и семьи с никами, крупно «НЕБОСКРЁБ. КОМУ?»)
 //   node render/seriya/neboskreb/video.mjs            → gotovo/neboskreb.mp4
 //   node render/seriya/neboskreb/video.mjs --kadry 0.5,3,8,11.5  → PNG в render/_istochniki/neboskreb/
 import http from 'node:http';import {execFileSync} from 'node:child_process';import fs from 'node:fs';import path from 'node:path';import {spawn} from 'node:child_process';import {fileURLToPath} from 'node:url';
@@ -18,7 +18,7 @@ await p.goto(`http://127.0.0.1:${srv.address().port}/render/seriya/neboskreb/sce
 await p.waitForFunction(()=>window.READY||window.SCENE_ERR,null,{timeout:600000});const ERR=await p.evaluate(()=>window.SCENE_ERR);if(ERR){console.log('Сцена не запустилась:',ERR);await b.close();srv.close();process.exit(1)}
 
 
-await p.evaluate(()=>{seek(21.0);document.querySelectorAll('#title,#sub,#cm,#timer,#tick,#vs,#share,#flash').forEach(e=>e.style.display='none');
+await p.evaluate(()=>{seek(8.6);document.querySelectorAll('#title,#sub,#cm,#timer,#cnt,#vs,#share,#flash').forEach(e=>e.style.display='none');
  const st=document.createElement('style');st.textContent=`.cv{position:absolute;left:60px;width:870px;text-align:center;z-index:9000;font-family:Rubik,'Arial Black',Arial,sans-serif;font-weight:900}
  #c1{top:230px;font-size:136px;line-height:.98;color:#fff;-webkit-text-stroke:24px #141829;paint-order:stroke fill}#c1 b{color:#f7c24a}
  #c2{top:1040px}#c2 span{display:inline-block;background:#d8263a;color:#fff;border:10px solid #141829;border-radius:34px;padding:12px 30px;font-size:54px;transform:rotate(-2deg);box-shadow:0 14px 0 #141829;white-space:nowrap}`;
