@@ -5,33 +5,33 @@ import json, subprocess, urllib.request, os, re
 VOICE, MODEL = '4pgVbj4UhrQBWoRhHv9g', 'eleven_v4_turbo'
 SET = {'stability': .42, 'similarity_boost': .75, 'style': .2, 'speed': 1.02, 'use_speaker_boost': True}
 ROOT = os.path.dirname(os.path.abspath(__file__)) + '/../../..'
-DUR = 27.0
-# [желаемое начало, текст]; последняя фраза ставится так, чтобы закончиться к 26.75 с (удар петли)
-LINES = [[1.0, 'Здесь будет самый высокий дом на Марсе... Сто этажей...'],
-         [3.3, 'Но получит его не один человек...'],
-         [5.0, '...а самая большая семья. Каждый член семьи — этаж в небоскрёбе...'],
-         [12.0, 'Пиши в комментах «Семья» и свой ник...'],
-         [16.0, 'Отправь другу — пусть напишет «Семья» и твой ник...'],
-         [20.0, 'Итоги через сорок восемь часов...'],
-         [-26.75, 'Так кому достанется небоскрёб?']]
+# Правки 26.11: первые три фразы — скорость 1.12, без «...»; «а самая большая семья» — не позже 4,5 с; ролик 22–24 с.
+# [пауза после предыдущей фразы (или абсолютное начало, если >= 0 и это первая), текст, скорость]
+LINES = [[0.2, 'Самый высокий дом на Марсе.', 1.12],  # «Сто этажей» — текстом на экране: иначе «а самая большая семья» не успевает к 4,5 с
+         [0.08, 'Но получит его не один человек,', 1.12],
+         [0.05, 'а самая большая семья. Каждый член семьи — этаж в небоскрёбе.', 1.12],
+         [0.35, 'Пиши в комментах «Семья» и свой ник...', 1.02],
+         [0.3, 'Отправь другу — пусть напишет «Семья» и твой ник...', 1.02],
+         [0.3, 'Итоги через сорок восемь часов...', 1.02],
+         [1.5, 'Так кому достанется небоскрёб?', 1.02]]
 out = ROOT + '/golos/neboskreb'; os.makedirs(out, exist_ok=True); spent = 0; prev = 0; ins = []; filt = []; phr = []; words = []
 def dur(f): return float(subprocess.check_output(['ffprobe', '-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', f]))
-for i, (want, text) in enumerate(LINES):
+for i, (want, text, spd) in enumerate(LINES):
     f = f'{out}/{i:02d}.mp3'
     if not os.path.exists(f):
         j = f + '.json'
         if not os.path.exists(j):
-            body = json.dumps({'text': text, 'voice_id': VOICE, 'model_id': MODEL, 'language_code': 'ru', 'voice_settings': SET}).encode()
+            body = json.dumps({'text': text, 'voice_id': VOICE, 'model_id': MODEL, 'language_code': 'ru', 'voice_settings': dict(SET, speed=spd)}).encode()
             r = json.load(urllib.request.urlopen(urllib.request.Request('https://neuralbox.ru/api/tts/generate', body, {'Content-Type': 'application/json'}), timeout=120))
             spent += int(r.get('tokens_spent', 0)); json.dump(r, open(j, 'w'))
         r = json.load(open(j))
         subprocess.run(['curl', '-sS', '--retry', '6', '--retry-all-errors', '--retry-delay', '3', '-m', '90', '-o', f, r['audio_url']], check=True)
     t = f'{out}/t{i:02d}.wav'
     # обрезка тишины по краям, длинные паузы внутри → 0.2 с, первые три фразы чуть быстрее (atempo, тон не меняется)
-    af = 'silenceremove=start_periods=1:start_threshold=-45dB,areverse,silenceremove=start_periods=1:start_threshold=-45dB,areverse,silenceremove=stop_periods=-1:stop_duration=0.24:stop_threshold=-42dB:stop_silence=0.2' + (',atempo=1.1' if i <= 2 else '')
+    af = 'silenceremove=start_periods=1:start_threshold=-45dB,areverse,silenceremove=start_periods=1:start_threshold=-45dB,areverse,silenceremove=stop_periods=-1:stop_duration=0.24:stop_threshold=-42dB:stop_silence=0.2' + (',atempo=1.15' if i <= 2 else '')
     subprocess.run(['ffmpeg', '-v', 'error', '-y', '-i', f, '-af', af, '-ar', '44100', t], check=True)
     d = dur(t)
-    st = (-want - d) if want < 0 else max(want, prev + .1)
+    st = want if i == 0 else prev + want
     prev = st + d; phr.append([round(st, 3), round(d, 3), text])
     # паузы внутри фразы → куски; слова раскладываем по кускам пропорционально длине
     sd = subprocess.run(['ffmpeg', '-i', t, '-af', 'silencedetect=n=-38dB:d=0.18', '-f', 'null', '-'], capture_output=True, text=True).stderr
@@ -51,6 +51,7 @@ for i, (want, text) in enumerate(LINES):
             y = x + (b - a) * l / tot; words.append([round(st + x, 3), round(st + y, 3), w]); x = y
     ins += ['-i', t]; filt.append(f'[{i}]adelay={int(st*1000)}|{int(st*1000)}[a{i}]')
     print(f'{i} старт {st:.2f} длина {d:.2f} кусков {len(spans)}  {text}')
+DUR = round(prev + .45, 2)
 subprocess.run(['ffmpeg', '-v', 'error', '-y', *ins, '-filter_complex', ';'.join(filt) + ';' + ''.join(f'[a{i}]' for i in range(len(LINES))) + f'amix=inputs={len(LINES)}:normalize=0,apad,atrim=0:{DUR}[a]', '-map', '[a]', '-ac', '2', '-ar', '44100', ROOT + '/golos/neboskreb.wav'], check=True)
 json.dump({'phrases': phr, 'words': words, 'dur': DUR}, open(out + '/tayming.json', 'w'), ensure_ascii=False)
 print('токенов', spent)
