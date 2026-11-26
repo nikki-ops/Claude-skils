@@ -219,7 +219,8 @@ function overlay(t){
  // таймер 48:00:00 → тикает
  const tm=$('timer');tm.style.display=t>=T.timer&&t<T.back?'block':'none';if(t>=T.timer){const s=Math.max(0,48*3600-Math.floor((t-T.timer)*2));const hh=Math.floor(s/3600),mm=Math.floor(s/60)%60,ss=s%60;tm.textContent=[hh,mm,ss].map(v=>String(v).padStart(2,'0')).join(':')}
  tm.style.transform=`scale(${(sm(T.timer,T.timer+.2,t)*(1+.03*Math.sin(t*2*Math.PI*2))).toFixed(3)})`;
- const tk=$('tick');tk.style.display=t>=T.timer+.2&&t<T.back?'block':'none';[...tk.children].forEach(d=>{const a=+d.dataset.t0,k=sm(a,a+.2,t)*(1-sm(a+1.4,a+1.8,t));d.style.opacity=k.toFixed(3);d.style.left=d.dataset.x+'px';d.style.top=(+d.dataset.y-(t-a)*30).toFixed(1)+'px';d.style.transform=`scale(${(.7+.3*k).toFixed(3)})`});
+ const tk=$('tick');tk.style.display='none';// плашки ников в небе убраны по решению автора (путались с никами на этажах)
+[...tk.children].forEach(d=>{const a=+d.dataset.t0,k=sm(a,a+.2,t)*(1-sm(a+1.4,a+1.8,t));d.style.opacity=k.toFixed(3);d.style.left=d.dataset.x+'px';d.style.top=(+d.dataset.y-(t-a)*30).toFixed(1)+'px';d.style.transform=`scale(${(.7+.3*k).toFixed(3)})`});
  // субтитры по словам
  const ch=CHUNKS.find(c=>t>=c.t0-.04&&t<c.t1);const sb=$('sub');sb.innerHTML=ch?ch.html:'';sb.style.top=(t>=T.cm&&t<T.share||t>=T.timer&&t<T.back?1400:1330)+'px';
  labels(t);
