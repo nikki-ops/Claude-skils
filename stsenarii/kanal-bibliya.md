@@ -1,6 +1,6 @@
 # Библия канала MARS CITY
 
-Канал: YouTube `@gorodpodpiscikov`, Instagram `gorod.podpischikov`, TikTok `@gorodkotikov`. Карта города: `render/karta/index.html` (копия marsity.netlify.app).
+Канал: YouTube `@gorodpodpiscikov`, Instagram `gorod.podpischikov`, TikTok `@gorodkotikov`. Карта города: `render/karta/index.html` (копия marssities.netlify.app).
 Основа: разбор 9 роликов агентами (тексты, хуки, визуал), отчёты — `render/_istochniki/kanal/otchety/` (не в git). Статистики по роликам пока нет — выводы по содержанию, не по цифрам.
 
 ## Суть

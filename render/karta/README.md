@@ -1,6 +1,6 @@
 # Карта города — MARS CITY
 
-Копия сайта https://marsity.netlify.app (Netlify), сохранена 2026-11-10. Один файл `index.html` (Three.js r128 с cdnjs, шрифт Rubik с Google Fonts). Скрипт Netlify HUD при сохранении убран.
+Копия сайта https://marssities.netlify.app (Netlify), сохранена 2026-11-10. Один файл `index.html` (Three.js r128 с cdnjs, шрифт Rubik с Google Fonts). Скрипт Netlify HUD при сохранении убран.
 
 ## Что внутри (где менять данные)
 - `NICK`, `TOTAL` — ник главного жителя выпуска и общее число жителей (`const END=45,NICK='KAPAOKE_KOT',TOTAL=102;`).
