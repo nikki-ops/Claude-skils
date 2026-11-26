@@ -38,7 +38,7 @@ h1{margin:0;font-size:20px;font-weight:900;letter-spacing:.01em}h1 b{color:var(-
 <div id="ctl"><button id="bAll" title="Весь город">🗺 Весь город</button><button id="bRnd">🎲 Случайный</button><button id="bNight">🌙 Ночь</button></div>
 <div id="card" class="card" hidden><div class="no" id="cNo"></div><div class="nm" id="cNm"></div><div id="cInfo" style="color:var(--muted)"></div>
 <div class="row"><a class="tg" id="cTg" href="https://t.me/" target="_blank" rel="noopener">✈️ Карта в Telegram</a><button id="cClose">Закрыть</button></div></div>
-<div id="hint">Тяни — вращать · колёсико или два пальца — приблизить · нажми на дом</div>
+<div id="hint">Тяни — двигать карту · колёсико или два пальца — приблизить · нажми на дом</div>
 <div id="err" hidden></div>
 <script>// Раскладка участков нового города: житель №n → координаты участка (детерминированно, дом никогда не «переезжает»).
 // Кварталы 2×2 участка идут по квадратной спирали вокруг центральной площади (квартал 0 = площадь).
@@ -214,8 +214,8 @@ function fly(x,z,d){anim={t0:performance.now(),f:{...K},to:{tx:x,tz:z,d,yaw:K.ya
 function size(){const w=innerWidth,h=innerHeight;R.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix()}addEventListener('resize',size);size();
 const P=new Map();let last=null;cv.addEventListener('pointerdown',e=>{P.set(e.pointerId,{x:e.clientX,y:e.clientY});cv.setPointerCapture(e.pointerId);anim=null;last=null});
 const up=e=>{P.delete(e.pointerId);last=null};cv.addEventListener('pointerup',up);cv.addEventListener('pointercancel',up);
-cv.addEventListener('pointermove',e=>{if(!P.has(e.pointerId))return;const o=P.get(e.pointerId);if(P.size===1){K.yaw-=(e.clientX-o.x)*.006;K.p=Math.max(.25,Math.min(1.35,K.p+(e.clientY-o.y)*.004))}else if(P.size===2){const ps=[...P.entries()].map(([id,v])=>id===e.pointerId?{x:e.clientX,y:e.clientY}:v),dd=Math.hypot(ps[0].x-ps[1].x,ps[0].y-ps[1].y);if(last)K.d=Math.max(25,Math.min(420,K.d*last/dd));last=dd}o.x=e.clientX;o.y=e.clientY});
-cv.addEventListener('wheel',e=>{e.preventDefault();K.d=Math.max(25,Math.min(420,K.d*(e.deltaY>0?1.1:.9)))},{passive:false});
+cv.addEventListener('pointermove',e=>{if(!P.has(e.pointerId))return;const o=P.get(e.pointerId);if(P.size===1&&!(e.buttons&2)&&!e.shiftKey){const dx=e.clientX-o.x,dy=e.clientY-o.y,k=K.d/innerHeight*1.4;K.tx-=(dx*Math.cos(K.yaw)+dy*Math.sin(K.yaw))*k;K.tz-=(-dx*Math.sin(K.yaw)+dy*Math.cos(K.yaw))*k;K.tx=Math.max(-260,Math.min(260,K.tx));K.tz=Math.max(-260,Math.min(260,K.tz))}else if(P.size===1){K.yaw-=(e.clientX-o.x)*.006}else if(P.size===2){const ps=[...P.entries()].map(([id,v])=>id===e.pointerId?{x:e.clientX,y:e.clientY}:v),dd=Math.hypot(ps[0].x-ps[1].x,ps[0].y-ps[1].y),an=Math.atan2(ps[1].y-ps[0].y,ps[1].x-ps[0].x);if(last){K.d=Math.max(25,Math.min(420,K.d*last.dd/dd));K.yaw-=an-last.an}last={dd,an}}o.x=e.clientX;o.y=e.clientY});
+cv.addEventListener('contextmenu',e=>e.preventDefault());cv.addEventListener('wheel',e=>{e.preventDefault();K.d=Math.max(25,Math.min(420,K.d*(e.deltaY>0?1.1:.9)))},{passive:false});
 const $=id=>document.getElementById(id);let sel=null;
 function go(h){sel=h;fly(h.x,h.z,30);$('cNo').textContent='Житель № '+(h.i+1)+' · '+h.rayon;$('cNm').textContent='@'+h.n;$('cInfo').textContent='Участок '+(h.i+1)+' · серия 1 · «Снос через 24 часа»';$('card').hidden=false;$('sug').hidden=true;$('hint').hidden=true;$('ctl').style.bottom='calc(env(safe-area-inset-bottom,0px) + 170px)'}
 $('q').addEventListener('input',e=>{const v=e.target.value.trim().toLowerCase().replace(/^@/,'');const sg=$('sug');if(!v){sg.hidden=true;return}const r=HOMES.filter(h=>h.n.toLowerCase().includes(v)).slice(0,8);
@@ -229,7 +229,7 @@ const rc=new THREE.Raycaster(),mv=new THREE.Vector2();let down=null;cv.addEventL
 cv.addEventListener('pointerup',e=>{if(!down||Math.hypot(e.clientX-down.x,e.clientY-down.y)>6)return;mv.set(e.clientX/innerWidth*2-1,-(e.clientY/innerHeight)*2+1);rc.setFromCamera(mv,cam);const hit=rc.intersectObjects(HOMES.map(h=>h.g),true).find(x=>x.object.userData.home!=null);if(hit)go(HOMES[hit.object.userData.home])});
 const V=new THREE.Vector3();function tags(){const W=innerWidth,H=innerHeight,near=K.d<120;HOMES.forEach(h=>{const show=h===sel||(near&&Math.hypot(h.x-K.tx,h.z-K.tz)<K.d*.9);if(!show){h.e.style.display='none';return}V.set(h.x,h.y,h.z).project(cam);if(V.z>1||Math.abs(V.x)>1.1||Math.abs(V.y)>1.1){h.e.style.display='none';return}h.e.style.display='block';h.e.classList.toggle('me',h===sel);h.e.style.left=(V.x*.5+.5)*W+'px';h.e.style.top=(-V.y*.5+.5)*H+'px'})}
 const t0=performance.now();(function loop(now){if(anim){const u=Math.min(1,(now-anim.t0)/1200),k=u*u*(3-2*u);for(const q of['tx','tz','d','p'])K[q]=anim.f[q]+(anim.to[q]-anim.f[q])*k;if(u>=1)anim=null}
- if(!P.size&&!anim&&!sel)K.yaw+=.0006;const cp=Math.cos(K.p);cam.position.set(K.tx+Math.sin(K.yaw)*cp*K.d,Math.sin(K.p)*K.d,K.tz+Math.cos(K.yaw)*cp*K.d);cam.lookAt(K.tx,0,K.tz);
+ const cp=Math.cos(K.p);cam.position.set(K.tx+Math.sin(K.yaw)*cp*K.d,Math.sin(K.p)*K.d,K.tz+Math.cos(K.yaw)*cp*K.d);cam.lookAt(K.tx,0,K.tz);
  if(world.tick)world.tick((now-t0)/1000);R.render(sc,cam);tags();requestAnimationFrame(loop)})(performance.now());
 }catch(e){const el=document.getElementById('err');el.hidden=false;el.textContent='Карта не загрузилась: '+(e.message||e)}
 </script>
