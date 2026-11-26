@@ -177,7 +177,7 @@ sc.add(new THREE.Mesh(new THREE.SphereGeometry(1500,16,16),new THREE.MeshBasicMa
 sc.add(new THREE.HemisphereLight(0xffd9b0,0x6b2a1a,.75));
 const sun=new THREE.DirectionalLight(0xffe2b8,1.5);sun.position.set(-8,60,-6);sun.target.position.set(95,0,-50);sc.add(sun.target);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);{const c=sun.shadow.camera;c.left=-160;c.right=160;c.top=160;c.bottom=-160;c.far=300}sc.add(sun);
 // поверхность: город ровный, вокруг холмы
-const H=(x,z)=>{const dx=Math.max(0,-228-x,x-798),dz=Math.max(0,-448-z,z-(x>-240&&x<800?740:318)),r=Math.min(Math.hypot(dx,dz),Math.hypot(Math.max(0,-664-x,x+226),Math.max(0,-230-z,z-130))),k=Math.min(1,r/35);/* + ровная площадка Семейного района (запад) */return k*(Math.sin(x*.06)*Math.cos(z*.05)*5+Math.sin(x*.15+z*.11)*1.2+Math.max(0,r-60)*.08)};
+const H=(x,z)=>{const dx=Math.max(0,-228-x,x-798),dz=Math.max(0,-448-z,z-(x>-240&&x<800?740:318)),r=Math.min(Math.hypot(dx,dz),Math.hypot(Math.max(0,-664-x,x+226),Math.max(0,-230-z,z-130)),Math.hypot(Math.max(0,30-x,x-600),Math.max(0,-560-z,z+448))),/* + ровная площадка новых рядов Района YouTube (север, 26.11) */k=Math.min(1,r/35);/* + ровная площадка Семейного района (запад) */return k*(Math.sin(x*.06)*Math.cos(z*.05)*5+Math.sin(x*.15+z*.11)*1.2+Math.max(0,r-60)*.08)};
 {const gg=new THREE.PlaneGeometry(2600,2600,240,240);gg.rotateX(-Math.PI/2);gg.translate(162,0,-70);const gp=gg.attributes.position;
 for(let i=0;i<gp.count;i++)gp.setY(i,H(gp.getX(i),gp.getZ(i)));gg.computeVertexNormals();
 const gm=new THREE.Mesh(gg,new THREE.MeshLambertMaterial({color:0xa65a40}));gm.receiveShadow=true;sc.add(gm);
@@ -1228,6 +1228,8 @@ const W15=[["АннаМоспаненко-о6р","izba","дом"],["LEVA2018YW",
 W15.forEach((q,i)=>{if(fn<FREEN.length){const h=FREEN[fn++];h.n=q[0];h.anon=0;h.kind=q[2]+' · новостройка';h.day=13;return}let g;try{g=b10(q[0],q[1],q[2])}catch(e){console.warn('w15',q[0],e&&e.message);g=mk('izba')}
  const k=Math.max(4,Math.min(10,(()=>{const b=new THREE.Box3().setFromObject(g);return Math.max(b.max.x-b.min.x,b.max.z-b.min.z)})()));g.scale.multiplyScalar(Math.min(1,9.5/k));
  const x=50+(i%48)*11,z=-470-Math.floor(i/48)*12;g.position.set(x,0,z);sc.add(g);MLIST.push({n:q[0],g,x,z,top:(g.userData.top||6)*g.scale.y,kind:q[2],day:13,district:'Район YouTube',w15:1})});// новые ряды Района YouTube к северу от ж/д кольца (replan их не трогает)
+{const pad=new THREE.Mesh(new THREE.PlaneGeometry(548,72),new THREE.MeshLambertMaterial({color:0xb5655a,polygonOffset:true,polygonOffsetFactor:-1,polygonOffsetUnits:-2}));pad.rotation.x=-Math.PI/2;pad.position.set(308.5,.02,-494);sc.add(pad);// земля новых рядов YouTube
+ const sg=new THREE.Group();box(sg,.3,4.2,.3,0x3a3f48,-6.6,2.1,0);box(sg,.3,4.2,.3,0x3a3f48,6.6,2.1,0);lab(sg,'РАЙОН YOUTUBE · НОВЫЕ РЯДЫ',14,2,'#c43a32','#ffffff',0,3.4,.05);lab(sg,'РАЙОН YOUTUBE · НОВЫЕ РЯДЫ',14,2,'#c43a32','#ffffff',0,3.4,-.05).rotation.y=Math.PI;sg.position.set(26,0,-494);sg.rotation.y=Math.PI/2;sc.add(sg)}
 }catch(e){console.warn("yt12",e)}
 try{// ===== УЮТ: марсианский участок — плитка, дорожка, фонарь, камни и заборчик у каждого жилого дома =====
 const LG=[0xd9b48a,0xcfa87c,0xe0bf98],LAMP=new THREE.MeshBasicMaterial({color:0xffd27a});
