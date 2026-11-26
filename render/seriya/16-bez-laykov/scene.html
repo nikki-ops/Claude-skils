@@ -69,7 +69,7 @@ function seek(t){t=((t%DUR)+DUR)%DUR;
  const likes=Math.round(37000*(1-sm(T.cut-.4,T.cut+.5,t)));$('cn').textContent=likes.toLocaleString('ru');$('cnt').style.display=t>=3.2&&t<T.home?'block':'none';
  const yk=sm(T.cta,T.cta+.25,t);$('you').style.transform=`translate(-50%,-50%) scale(${yk*(1+Math.sin(t*10)*.03*yk)})`;$('tg').style.display=t>=T.cta+.6?'block':'none';
  $('cloud').style.opacity=(Math.max(1-sm(0,.35,t),sm(DUR-.35,DUR,t))*.6).toFixed(3)}
-function sfxList(){return[[0,'whoosh',.6],[T.cut,'tick',1],[T.off0,'swish',.6],[7.9,'swish',.6],[T.home,'pop',.9],[T.one,'ding',1],[T.yours,'pop',.6],[T.wave0,'whoosh',.9],[T.cta,'ding',.7],[DUR-.5,'swish',.6]]}
+function sfxList(){return[[0,'whoosh',.6],[T.cut,'tick',1],[T.off0,'swish',.6],[7.9,'swish',.6],[T.home,'pop',.9],[T.one,'boom',.45],[T.yours,'pop',.6],[T.wave0,'whoosh',.9],[T.cta,'click',.6],[DUR-.5,'swish',.6]]}
 function fit(){if(document.body.classList.contains('render'))return;const k=Math.min(innerWidth/W,innerHeight/H);$('stage').style.transform=`scale(${k})`;$('stage').style.left=(innerWidth-W*k)/2+'px'}
 addEventListener('resize',fit);fit();if(/[?&]render/.test(location.search)){document.body.classList.add('render');$('stage').style.transform='none'}
 $('map').addEventListener('load',()=>{cw=$('map').contentWindow;const iv=setInterval(()=>{if(!cw.MP)return;clearInterval(iv);
