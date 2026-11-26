@@ -1,0 +1,111 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><title>Найди свой дом</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@700;900&display=swap" rel="stylesheet">
+<style>
+html,body{margin:0;height:100%;background:#000;overflow:hidden}
+#stage{position:absolute;left:0;top:0;width:1080px;height:1920px;transform-origin:0 0;overflow:hidden;background:#0b0a10;font-family:Rubik,'Arial Black',Arial,sans-serif;font-weight:900}
+#map{position:absolute;left:0;top:0;width:1080px;height:1920px;border:0}
+.L{position:absolute;inset:0;pointer-events:none}
+#vig{background:radial-gradient(ellipse at 50% 50%,rgba(0,0,0,0) 45%,rgba(0,0,0,.55) 100%)}
+#lbl div{position:absolute;transform:translate(-50%,-100%);background:#141829;color:#fff;border:4px solid #ffd23a;border-radius:14px;padding:2px 12px;white-space:nowrap;line-height:1.15}
+#lbl div.g{background:#f7c24a;color:#2a1600;border-color:#fff}
+#lbl div.me{background:#5dff8a;color:#0d2a14;border-color:#fff}
+.big{position:absolute;left:0;right:0;text-align:center;color:#fff;-webkit-text-stroke:14px #000;paint-order:stroke fill;line-height:1.02}
+.big b{color:#ffd23a}
+#head{top:230px;font-size:104px}
+#tg{position:absolute;left:50%;top:560px;transform:translate(-50%,0);background:#2aa3e0;color:#fff;border:9px solid #fff;border-radius:44px;padding:18px 40px;font-size:54px;line-height:1.08;text-align:center;white-space:nowrap;box-shadow:0 18px 50px rgba(0,0,0,.45);transform-origin:50% 0}
+#tg small{display:block;font-size:44px;color:#dff3ff}
+#cnt{position:absolute;left:50%;top:1300px;transform:translate(-50%,0);background:#1a1d36;border:8px solid #ffd23a;border-radius:48px;color:#fff;font-size:78px;padding:10px 46px;white-space:nowrap}
+#cnt b{color:#ffd23a}
+.pl{position:absolute;left:50%;top:1330px;transform:translate(-50%,0) scale(0);border:8px solid #fff;border-radius:40px;padding:14px 36px;font-size:66px;white-space:nowrap;text-align:center;line-height:1.05}
+#lupa{background:#1a1d36;color:#fff}
+#like{background:#f7c24a;color:#2a1600}
+#cta{background:#5dff8a;color:#0d2a14}
+#cta small,#like small{display:block;font-size:46px;margin-top:4px}
+#head,#tg,#cnt,.pl{z-index:5000}
+#flash{z-index:5001;position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none}
+</style></head><body>
+<div id="stage">
+ <iframe id="map" src="../../karta/index.html?video"></iframe>
+ <div class="L" id="vig"></div>
+ <div class="L" id="lbl"></div>
+ <div class="big" id="head">НЕ МОЖЕШЬ НАЙТИ<br><b>СВОЙ ДОМ?</b></div>
+ <div id="cnt">🏠 ДОМОВ <b id="cn">0</b></div>
+ <div id="tg">🗺 КАРТА С КАЖДЫМ НИКОМ<small>— в Telegram</small></div>
+ <div class="pl" id="lupa">🔍 ВИДНО КАЖДЫЙ НИК</div>
+ <div class="pl" id="like">👍 ЛАЙК =<br>ТВОЙ ДОМ ГОРИТ<small>ник — в комменты 👇</small></div>
+ <div class="pl" id="cta">ССЫЛКА В ПРОФИЛЕ ⬆<small>залетай и ищи себя</small></div>
+ <div id="flash"></div>
+</div>
+<script>
+// Шортс «Найди свой дом» (серия 17). Сценарий — stsenarii/17-naydi-svoy-dom.md, голос — golos/17-naydi-svoy-dom/tayming.json:
+// 0 «Не можешь найти свой дом в городе?» · 2.09 «Я выложил карту… в Телеграм» · 5.13 «Приближаешь — и видно все ники» · 7.77 «Ставь лайк, и твой дом загорится первым» · 11.14 «Ссылка в профиле…»
+// Один план: крупно дом → отлёт на город → нырок вдоль улицы → золотая волна → снова тот же дом (петля).
+const W=1080,H=1920,DUR=14.4,CX=162,CZ=-64;
+const T={tg:2.1,dive:5.1,like:7.75,gold0:8.1,gold1:10.6,cta:11.1,fade0:12.9,fade1:13.7};
+const $=id=>document.getElementById(id);
+let cw,THREE,sc,cam,R,HOME,GOLD,GLOW,DATA=[],POOL=[];
+const cl=(x,a,b)=>Math.max(a,Math.min(b,x)),sm=(a,b,x)=>{const k=cl((x-a)/(b-a),0,1);return k*k*(3-2*k)},lerp=(a,b,k)=>a+(b-a)*k;
+const short=n=>n.length>16?n.slice(0,15)+'…':n;
+function build(){
+ const L=cw.MP.L.filter(h=>h.g&&h.n&&!h.site&&!h.bld&&isFinite(h.x)&&isFinite(h.z));
+ // «твой дом» — в самом плотном жилом квартале (больше всего соседей в радиусе 45 м), с коротким читаемым ником
+ let dc=null,dn=-1;L.forEach(h=>{if(h.n.length>12||h.n.length<4)return;let c=0;for(const q of L)if(Math.abs(q.x-h.x)<45&&Math.abs(q.z-h.z)<45)c++;if(c>dn){dn=c;dc=h}});HOME=dc;
+ GOLD=new THREE.InstancedMesh(new THREE.BoxGeometry(5.2,1.8,5.2),new THREE.MeshBasicMaterial({color:0xffc83a}),L.length);
+ L.forEach(h=>{const top=h.top||6,d=Math.hypot(h.x-HOME.x,h.z-HOME.z);DATA.push({h,top,d,on:h===HOME?T.like+.25:T.gold0+(T.gold1-T.gold0)*Math.min(1,d/330)+((h.x*7+h.z*3)%10+10)%10/60})});
+ GOLD.frustumCulled=false;sc.add(GOLD);
+ GLOW=new THREE.PointLight(0xffd060,0,60);GLOW.position.set(HOME.x,(HOME.top||6)+4,HOME.z);sc.add(GLOW);
+ for(let i=0;i<70;i++){const d=document.createElement('div');d.style.display='none';$('lbl').appendChild(d);POOL.push(d)}
+ console.log('[17] домов',L.length,'твой дом',HOME.n,HOME.x,HOME.z)}
+// позы камеры: [x,y,z, lookX,lookY,lookZ]
+function poses(){const hx=HOME.x,hz=HOME.z,ht=HOME.top||6;return{
+ close:[hx+7,ht+19,hz+15,hx,ht+.5,hz-1],
+ wide:[CX+40,620,CZ+520,CX,0,CZ-40],wide2:[CX-60,560,CZ+470,CX+10,0,CZ-20],
+ st0:[hx-10,80,hz+80,hx,0,hz-5],st1:[hx-4,30,hz+42,hx,1,hz-22],
+ mid:[hx+30,165,hz+70,hx,0,hz-15]}}
+function cameraAt(t){const P=poses();
+ const K=[[0,P.close],[1.9,P.wide],[T.dive-.15,P.wide2],[T.dive+.9,P.st0],[T.like-.1,P.st1],[T.like+1.1,P.mid],[T.cta+.6,P.mid],[DUR,P.close]];
+ let i=0;while(i<K.length-2&&t>=K[i+1][0])i++;const [a,A]=K[i],[b,B]=K[i+1];
+ // нырок: плавный вход; отлёт в начале — быстрый старт
+ let k=cl((t-a)/(b-a),0,1);k=i===0?1-Math.pow(1-k,3):k*k*(3-2*k);
+ if(i===2){const kk=k;// с высоты на улицу: высота падает быстрее, чем сдвиг
+  return A.map((v,j)=>j===1?lerp(v,B[j],1-Math.pow(1-kk,2.2)):lerp(v,B[j],kk))}
+ return A.map((v,j)=>lerp(v,B[j],k))}
+function labels(t){const v=new THREE.Vector3(),cp=cam.position,cand=[];
+ const maxD=300;for(const d of DATA){const dx=d.h.x-cp.x,dz=d.h.z-cp.z,dy=d.top-cp.y,dist=Math.sqrt(dx*dx+dy*dy+dz*dz);if(dist>maxD)continue;
+  v.set(d.h.x,d.top+(d.h===HOME?1.2:2.2),d.h.z).project(cam);if(v.z>1||v.x<-1.1||v.x>1.1||v.y<-1.1||v.y>1.1)continue;cand.push([dist,d,(v.x*.5+.5)*W,(-v.y*.5+.5)*H])}
+ cand.sort((a,b)=>(a[1].h===HOME?-1:0)-(b[1].h===HOME?-1:0)||a[0]-b[0]);const boxes=[];let n=0;
+ for(const [dist,d,x,y] of cand){if(n>=POOL.length)break;let fs=cl(2400/dist,17,74)*(d.h===HOME?1.3:1);if(d.h===HOME)fs=Math.max(fs,58);
+  const w=short(d.h.n).length*fs*.62+30,h=fs*1.3+8,bx=[x-w/2,y-h,x+w/2,y];if(y<200||y>1880)continue;
+  if(boxes.some(o=>bx[0]<o[2]&&bx[2]>o[0]&&bx[1]<o[3]&&bx[3]>o[1]))continue;boxes.push(bx);
+  const el=POOL[n++],lit=t>=d.on&&t<T.fade1,me=d.h===HOME&&t>=T.like+.25&&t<T.fade1;
+  el.textContent=(me?'⭐ ':'@')+short(d.h.n);el.className=me?'me':lit?'g':'';el.style.cssText=`display:block;left:${x.toFixed(1)}px;top:${y.toFixed(1)}px;font-size:${fs.toFixed(1)}px;border-width:${Math.max(3,fs/12).toFixed(1)}px;z-index:${Math.round(1000-dist)}`}
+ for(;n<POOL.length;n++)POOL[n].style.display='none'}
+function seek(t){t=((t%DUR)+DUR)%DUR;window.__t=t;
+ const c=cameraAt(t);cam.position.set(c[0],c[1],c[2]);cam.fov=50;cam.updateProjectionMatrix();cam.lookAt(c[3],c[4],c[5]);
+ // золото на крышах: волна от твоего дома, гаснет к петле
+ const o=new THREE.Object3D(),fade=1-sm(T.fade0,T.fade1,t);
+ DATA.forEach((d,i)=>{let s=.0001;if(t>=d.on){const k=cl((t-d.on)/.3,0,1);s=(k<1?.2+k*1.05:1)*fade+.0001}
+  o.position.set(d.h.x,d.top+.6,d.h.z);o.scale.set(s,s*(d.h===HOME?1.8:1),s);o.updateMatrix();GOLD.setMatrixAt(i,o.matrix)});GOLD.instanceMatrix.needsUpdate=true;
+ GLOW.intensity=t>=T.like+.25&&t<T.fade1?(4+Math.sin(t*7))*fade:0;
+ R.render(sc,cam);labels(t);
+ // 2D
+ const sh=(el,on,s=1,tr='translate(-50%,0)')=>{el.style.display=on>0.001?'block':'none';el.style.transform=`${tr} scale(${(on*s).toFixed(3)})`};
+ const hk=1-sm(1.7,2.05,t)+sm(DUR-.35,DUR,t);$('head').style.opacity=cl(hk,0,1).toFixed(3);$('head').style.transform=`scale(${(1+.06*Math.max(0,1-t/.4)).toFixed(3)})`;
+ const tk=sm(T.tg,T.tg+.25,t)*(1-sm(DUR-.45,DUR-.15,t));const small=sm(T.dive-.3,T.dive+.2,t);
+ $('tg').style.display=tk>0.001?'block':'none';$('tg').style.top=lerp(300,120,small).toFixed(1)+'px';$('tg').style.transform=`translate(-50%,0) scale(${(tk*lerp(1.12,.82,small)*(1+.03*Math.sin(t*8)*(1-small))).toFixed(3)})`;
+ const ck=sm(T.tg+.3,T.tg+.55,t)*(1-sm(T.dive-.25,T.dive,t));sh($('cnt'),ck);$('cn').textContent=Math.round(DATA.length*sm(T.tg+.3,T.dive-.6,t)).toLocaleString('ru');
+ sh($('lupa'),sm(T.dive+.3,T.dive+.5,t)*(1-sm(T.like-.2,T.like,t)));
+ sh($('like'),sm(T.like,T.like+.22,t)*(1-sm(T.cta-.2,T.cta,t)),1+.03*Math.sin(t*10));
+ sh($('cta'),sm(T.cta,T.cta+.22,t)*(1-sm(DUR-.6,DUR-.3,t)),1+.03*Math.sin(t*10));
+ $('flash').style.opacity=(.5*Math.max(0,1-Math.abs(t-(T.like+.25))/.12)).toFixed(3)}
+function sfxList(){return[[0,'whoosh',.8],[T.tg,'pop',.9],[T.dive,'whoosh',.8],[T.like+.25,'boom',.5],[T.gold0+.3,'swish',.6],[T.gold0+1.2,'swish',.5],[T.cta,'click',.7],[DUR-.6,'whoosh',.6]]}
+function fit(){if(document.body.classList.contains('render'))return;const k=Math.min(innerWidth/W,innerHeight/H);$('stage').style.transform=`scale(${k})`;$('stage').style.left=(innerWidth-W*k)/2+'px'}
+addEventListener('resize',fit);fit();if(/[?&]render/.test(location.search)){document.body.classList.add('render');$('stage').style.transform='none'}
+$('map').addEventListener('load',()=>{cw=$('map').contentWindow;const iv=setInterval(()=>{let ok=false;try{ok=!!(cw.MP&&cw.eval('sc'))}catch(e){}if(!ok)return;clearInterval(iv);
+ try{THREE=cw.THREE;sc=cw.eval('sc');cam=cw.eval('cam');R=cw.eval('R');cw.requestAnimationFrame=()=>0;
+  const st=cw.document.createElement('style');st.textContent='.o:not(canvas),.bub,.pn,.mp,#mpTop,#mpCtl,#mpBot,#mpEye,#sys,button{display:none!important}';cw.document.head.appendChild(st);
+  cw.MP.draw();sc.traverse(o=>{if(o.isSprite)o.visible=false});if(sc.fog){sc.fog.near=900;sc.fog.far=2600}cam.far=5000;build();seek(0);window.READY=true}catch(e){console.error(e);window.SCENE_ERR=e.message+' '+(e.stack||'')}},300)});
+let play=null;addEventListener('keydown',e=>{if(e.key!==' '||!window.READY)return;if(play){cancelAnimationFrame(play);play=null;return}const t0=performance.now();const lp=()=>{seek((performance.now()-t0)/1000);play=requestAnimationFrame(lp)};lp()});
+window.seek=seek;window.sfxList=sfxList;window.DUR=DUR;window.vkey=t=>'k'+Math.round(t*30);
+</script></body></html>
