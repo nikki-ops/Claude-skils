@@ -68,7 +68,11 @@ function seek(t){t=((t%DUR)+DUR)%DUR;
  R.render(sc,cam);
  // 2D
  $('dark').style.opacity=(.45+.55*dark).toFixed(3);
- const likes=Math.round(37000*(1-sm(T.cut-.4,T.cut+.5,t)));$('cn').textContent=likes.toLocaleString('ru');$('cnt').style.display=t>=3.2&&t<T.home?'block':'none';
+ const NW=DATA.length;let lit=0;DATA.forEach(d=>{if(t<d.off||t>=d.on)lit++});
+ if(t<T.off0-.3){const likes=Math.round(37000*(1-sm(T.cut-.4,T.cut+.5,t)));$('cnt').innerHTML='⚡ ЛАЙКИ <b>'+likes.toLocaleString('ru')+'</b>';$('cnt').style.borderColor='#ffd23a'}
+ else{$('cnt').innerHTML='💡 ОКОН ГОРИТ <b>'+lit.toLocaleString('ru')+'</b>';$('cnt').style.borderColor=lit<50?'#e8384f':'#ffd23a'}
+ const pul=Math.abs(Math.sin(t*9))*(t>=T.off0&&t<T.off1||t>=T.wave0&&t<T.wave1?1:0);$('cnt').style.transform=`translate(-50%,0) scale(${1+pul*.05})`;
+ $('cnt').style.display=t>=3.2&&t<T.cta?'block':'none';
  const yk=sm(T.cta,T.cta+.25,t);$('you').style.transform=`translate(-50%,-50%) scale(${yk*(1+Math.sin(t*10)*.03*yk)})`;$('tg').style.display=t>=T.cta+.6?'block':'none';
  $('cloud').style.opacity=(Math.max(1-sm(0,.35,t),sm(DUR-.35,DUR,t))*.6).toFixed(3)}
 function sfxList(){return[[0,'whoosh',.6],[T.cut,'tick',1],[T.off0,'swish',.6],[7.9,'swish',.6],[T.home,'pop',.9],[T.one,'boom',.45],[T.yours,'pop',.6],[T.wave0,'whoosh',.9],[T.cta,'click',.6],[DUR-.5,'swish',.6]]}
