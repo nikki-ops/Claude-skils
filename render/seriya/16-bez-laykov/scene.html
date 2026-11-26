@@ -1,0 +1,81 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><title>Что будет без лайков</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@700;900&display=swap" rel="stylesheet">
+<style>
+html,body{margin:0;height:100%;background:#000;overflow:hidden}
+#stage{position:absolute;left:0;top:0;width:1080px;height:1920px;transform-origin:0 0;overflow:hidden;background:#05060f;font-family:Rubik,'Arial Black',Arial,sans-serif;font-weight:900}
+#map{position:absolute;left:0;top:0;width:1080px;height:1920px;border:0}
+.L{position:absolute;inset:0;pointer-events:none}
+#dark{background:radial-gradient(ellipse at 50% 55%,rgba(5,6,20,0) 30%,rgba(5,6,20,.85) 100%)}
+#head{position:absolute;left:0;right:0;top:200px;text-align:center;color:#ffd23a;font-size:76px;line-height:1.05;-webkit-text-stroke:13px #000;paint-order:stroke fill}
+#cnt{position:absolute;left:50%;top:1360px;transform:translate(-50%,0);background:#1a1d36;border:8px solid #ffd23a;border-radius:48px;color:#fff;font-size:80px;padding:10px 46px;white-space:nowrap}
+#cnt b{color:#ffd23a}
+#you{position:absolute;left:50%;top:1400px;transform:translate(-50%,-50%) scale(0);background:#5dff8a;color:#0d2a14;border:8px solid #fff;border-radius:40px;padding:14px 40px;text-align:center;font-size:84px;line-height:1.04;white-space:nowrap}
+#you small{display:block;font-size:46px;margin-top:6px}
+#tg{position:absolute;left:50%;top:1590px;transform:translateX(-50%);background:#2aa3e0;color:#fff;border-radius:30px;padding:8px 28px;font-size:42px;white-space:nowrap;border:5px solid #fff;display:none}
+#cloud{position:absolute;inset:-200px;pointer-events:none;background:radial-gradient(circle,#0b0d1a 0 40%,#000 100%);opacity:0}
+</style></head><body>
+<div id="stage">
+ <iframe id="map" src="../../karta/index.html?video"></iframe>
+ <div class="L" id="dark"></div>
+ <div id="head">ЧТО, ЕСЛИ ПЕРЕСТАТЬ<br>СТАВИТЬ ЛАЙКИ?</div>
+ <div id="cnt">⚡ ЛАЙКИ <b id="cn">37 000</b></div>
+ <div id="you">ТВОЁ ОКНО?<small>лайк + ник в комменты 👇</small></div>
+ <div id="tg">🗺 карта города — в Telegram</div>
+ <div id="cloud"></div>
+</div>
+<script>
+// Шортс «Что будет без лайков» (серия 16). Тайминги — golos/16-bez-laykov/tayming.json:
+// 0 «Что будет…» · 3.25 «Лайки — электричество. Я их отключил» · 6.69 «Гаснет аэропорт. Небоскрёбы» · 9.6 «А теперь… твой дом» · 11.9 «Но одно окно…» · 16.84 «Лайк — и свет включён…»
+const W=1080,H=1920,DUR=20.9,CX=162,CZ=-64,AIR=[320,263];
+const T={cut:5.9,off0:6.7,off1:9.3,home:10.9,one:13.3,yours:15.2,wave0:16.9,wave1:18.6,cta:18.7};
+const $=id=>document.getElementById(id);
+let cw,THREE,sc,cam,R,WIN,HOME,BADGE,BTEX={},LT=[],DATA=[];
+const cl=(x,a,b)=>Math.max(a,Math.min(b,x)),sm=(a,b,x)=>{const k=cl((x-a)/(b-a),0,1);return k*k*(3-2*k)},lerp=(a,b,k)=>a+(b-a)*k;
+function badge(txt,bg,fg){const c=cw.document.createElement('canvas');c.width=640;c.height=140;const x=c.getContext('2d');x.fillStyle=bg;x.beginPath();x.roundRect(6,6,628,128,60);x.fill();x.strokeStyle='#fff';x.lineWidth=10;x.stroke();x.fillStyle=fg;x.font='900 66px Rubik, Arial Black, Arial';x.textAlign='center';x.textBaseline='middle';x.fillText(txt,320,74);return new THREE.CanvasTexture(c)}
+function build(){
+ const L=cw.MP.L.filter(h=>h.g&&h.n&&!h.site&&!h.bld&&isFinite(h.x)&&isFinite(h.z));
+ // свой дом — ближайший к центру района YouTube
+ let best=null,bd=1e9;L.forEach(h=>{const d=Math.hypot(h.x-128,h.z-41);if(d<bd){bd=d;best=h}});HOME=best;
+ const geo=new THREE.BoxGeometry(3.2,1.1,3.2);WIN=new THREE.InstancedMesh(geo,new THREE.MeshBasicMaterial({color:0xffe08a}),L.length);
+ const o=new THREE.Object3D(),md=Math.max(...L.map(h=>Math.hypot(h.x-AIR[0],h.z-AIR[1])));
+ L.forEach((h,i)=>{const top=(h.top||6);o.position.set(h.x,top+.5,h.z);o.updateMatrix();WIN.setMatrixAt(i,o.matrix);
+  const dAir=Math.hypot(h.x-AIR[0],h.z-AIR[1])/md,dHome=Math.hypot(h.x-HOME.x,h.z-HOME.z);
+  DATA.push({h,top,off:h===HOME?T.home:lerp(T.off0,T.off1,dAir)+((i*37)%10)/40,on:h===HOME?T.one:T.wave0+(T.wave1-T.wave0)*Math.min(1,dHome/260)})});
+ sc.add(WIN);WIN.instanceMatrix.needsUpdate=true;
+ // свет в собственном окне сильнее
+ BTEX.me=badge('@твой_ник','#ffffff','#141829');BTEX.off=badge('ОФЛАЙН','#555b6e','#ffffff');BTEX.yours=badge('ТВОЁ ОКНО','#5dff8a','#0d2a14');
+ BADGE=new THREE.Sprite(new THREE.SpriteMaterial({map:BTEX.me,depthTest:false}));BADGE.scale.set(14,3,1);BADGE.renderOrder=9;BADGE.position.set(HOME.x,(HOME.top||6)+7,HOME.z);sc.add(BADGE);
+ const glow=new THREE.PointLight(0xffc860,0,40);glow.position.set(HOME.x,(HOME.top||6)+3,HOME.z);sc.add(glow);window.GLOW=glow;
+ sc.traverse(x=>{if(x.isLight&&x!==glow)LT.push([x,x.intensity])});
+ if(sc.fog){window.FOG=[sc.fog.color.getHex(),sc.fog.near,sc.fog.far]}
+ console.log('[свет] окон',L.length,'дом',HOME.n)}
+function seek(t){t=((t%DUR)+DUR)%DUR;
+ const o=new THREE.Object3D(),dark=sm(T.off0,T.off1,t)*(1-sm(T.wave0,T.wave1+.4,t)),night=.2-.13*dark;
+ LT.forEach(([x,i])=>x.intensity=i*night);
+ if(sc.fog){sc.fog.color.setHex(0x0a0c1e);sc.fog.near=300;sc.fog.far=900}
+ DATA.forEach((d,i)=>{const lit=t<d.off||t>=d.on;let s=lit?1:.0001;if(t>=d.on){const k=cl((t-d.on)/.25,0,1);s=k<1?.3+k*.9:1}
+  o.position.set(d.h.x,d.top+.5,d.h.z);o.scale.setScalar(s);o.updateMatrix();WIN.setMatrixAt(i,o.matrix)});WIN.instanceMatrix.needsUpdate=true;
+ // свой дом: бейдж
+ const homeLit=t<T.home||t>=T.one;BADGE.material.map=t<T.home?BTEX.me:t<T.one?BTEX.off:BTEX.yours;BADGE.visible=t>=3&&t<T.wave1+.6;
+ GLOW.intensity=t>=T.one&&t<T.wave1?3+Math.sin(t*6)*.6:0;
+ // камера: один план — сверху на город, спуск к своему дому, отлёт обратно (петля)
+ const S={x:CX,y:250,z:CZ+190,lx:CX,ly:0,lz:CZ},Hm={x:HOME.x+22,y:(HOME.top||6)+26,z:HOME.z+34,lx:HOME.x,ly:(HOME.top||6)+1,lz:HOME.z};
+ const k=sm(3,T.home,t)*(1-sm(T.wave0,DUR-.2,t)),dr=Math.sin(t*.35)*6;
+ cam.position.set(lerp(S.x,Hm.x,k)+dr,lerp(S.y,Hm.y,k),lerp(S.z,Hm.z,k));cam.fov=50;cam.updateProjectionMatrix();cam.lookAt(lerp(S.lx,Hm.lx,k),lerp(S.ly,Hm.ly,k),lerp(S.lz,Hm.lz,k));
+ R.render(sc,cam);
+ // 2D
+ $('dark').style.opacity=(.45+.55*dark).toFixed(3);
+ const likes=Math.round(37000*(1-sm(T.cut-.4,T.cut+.5,t)));$('cn').textContent=likes.toLocaleString('ru');$('cnt').style.display=t>=3.2&&t<T.home?'block':'none';
+ const yk=sm(T.cta,T.cta+.25,t);$('you').style.transform=`translate(-50%,-50%) scale(${yk*(1+Math.sin(t*10)*.03*yk)})`;$('tg').style.display=t>=T.cta+.6?'block':'none';
+ $('cloud').style.opacity=(Math.max(1-sm(0,.35,t),sm(DUR-.35,DUR,t))*.6).toFixed(3)}
+function sfxList(){return[[0,'whoosh',.6],[T.cut,'tick',1],[T.off0,'swish',.6],[7.9,'swish',.6],[T.home,'pop',.9],[T.one,'ding',1],[T.yours,'pop',.6],[T.wave0,'whoosh',.9],[T.cta,'ding',.7],[DUR-.5,'swish',.6]]}
+function fit(){if(document.body.classList.contains('render'))return;const k=Math.min(innerWidth/W,innerHeight/H);$('stage').style.transform=`scale(${k})`;$('stage').style.left=(innerWidth-W*k)/2+'px'}
+addEventListener('resize',fit);fit();if(/[?&]render/.test(location.search)){document.body.classList.add('render');$('stage').style.transform='none'}
+$('map').addEventListener('load',()=>{cw=$('map').contentWindow;const iv=setInterval(()=>{if(!cw.MP)return;clearInterval(iv);
+ try{THREE=cw.THREE;sc=cw.eval('sc');cam=cw.eval('cam');R=cw.eval('R');cw.requestAnimationFrame=()=>0;
+  const st=cw.document.createElement('style');st.textContent='.o:not(canvas),.bub,.pn,.mp,#mpTop,#mpCtl,#mpBot,#mpEye,#sys,button{display:none!important}';cw.document.head.appendChild(st);
+  cw.MP.draw();sc.traverse(o=>{if(o.isSprite)o.visible=false});build();seek(0);window.READY=true}catch(e){console.error(e);window.SCENE_ERR=e.message+' '+(e.stack||'')}},200)});
+let play=null;addEventListener('keydown',e=>{if(e.key!==' '||!window.READY)return;if(play){cancelAnimationFrame(play);play=null;return}const t0=performance.now();const lp=()=>{seek((performance.now()-t0)/1000);play=requestAnimationFrame(lp)};lp()});
+window.seek=seek;window.sfxList=sfxList;window.DUR=DUR;window.vkey=t=>'k'+Math.round(t*30);
+</script></body></html>
