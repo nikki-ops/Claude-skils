@@ -1,0 +1,139 @@
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><title>Стадион: 1 лайк = 1 болельщик</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@700;900&display=swap" rel="stylesheet">
+<style>
+html,body{margin:0;height:100%;background:#000;overflow:hidden}
+#stage{position:absolute;left:0;top:0;width:1080px;height:1920px;transform-origin:0 0;overflow:hidden;background:#0b0d1a;font-family:Rubik,'Arial Black',Arial,sans-serif;font-weight:900}
+#map{position:absolute;left:0;top:0;width:1080px;height:1920px;border:0}
+.L{position:absolute;inset:0;pointer-events:none}
+#shade{background:linear-gradient(rgba(10,12,30,.55),rgba(10,12,30,0) 20%,rgba(10,12,30,0) 68%,rgba(10,12,30,.65))}
+#night{background:#0a0c22}
+#head{position:absolute;left:0;right:0;top:190px;text-align:center;color:#ffd23a;font-size:88px;line-height:1.02;-webkit-text-stroke:14px #000;paint-order:stroke fill}
+#head small{display:block;color:#fff;font-size:58px;-webkit-text-stroke:10px #000;margin-top:12px}
+#cnt{position:absolute;left:50%;top:1330px;transform:translate(-50%,0);background:#1a1d36;border:8px solid #ffd23a;border-radius:48px;color:#fff;font-size:84px;padding:10px 46px;white-space:nowrap;box-shadow:0 10px 30px rgba(0,0,0,.5)}
+#cnt b{color:#ffd23a}
+#nick{position:absolute;left:50%;top:1480px;transform:translateX(-50%);color:#fff;font-size:56px;-webkit-text-stroke:10px #000;paint-order:stroke fill;white-space:nowrap}
+#vs{position:absolute;left:50%;top:520px;transform:translate(-50%,0) scale(0);background:#6a2fd0;color:#fff;border:8px solid #fff;border-radius:30px;padding:14px 40px;font-size:80px;white-space:nowrap}
+#cta{position:absolute;left:50%;top:1330px;transform:translate(-50%,0) scale(0);background:#5dff8a;color:#0d2a14;border:8px solid #fff;border-radius:40px;padding:14px 40px;text-align:center;font-size:76px;line-height:1.05;white-space:nowrap}
+#cta small{display:block;font-size:44px;margin-top:6px}
+#tg{position:absolute;left:50%;top:1580px;transform:translate(-50%,0);background:#2aa3e0;color:#fff;border-radius:30px;padding:10px 30px;font-size:46px;white-space:nowrap;border:5px solid #fff;display:none}
+#cloud{position:absolute;inset:-200px;pointer-events:none;background:radial-gradient(circle at 30% 40%,#fff 0 18%,transparent 34%),radial-gradient(circle at 70% 55%,#fff 0 20%,transparent 36%),radial-gradient(circle at 45% 70%,#fff 0 22%,transparent 38%);filter:blur(30px);opacity:0}
+</style></head><body>
+<div id="stage">
+ <iframe id="map" src="../../karta/index.html?video"></iframe>
+ <div class="L" id="night"></div>
+ <div class="L" id="shade"></div>
+ <div id="head"></div>
+ <div id="cnt"><b id="cn">0</b> / 5 000</div>
+ <div id="nick"></div>
+ <div id="vs">MARS CITY vs IMEN</div>
+ <div id="cta">ПИШИ НИК 👇<small>посажу в первый ряд</small></div>
+ <div id="tg">🎟 билет — в Telegram</div>
+ <div id="cloud"></div>
+</div>
+<script>
+// Шортс «1 лайк = 1 болельщик» (серия 15). Карта не меняется — стадион строится в её сцене из iframe, на пустыре за районом TikTok.
+// Тайминги фраз LINES (сек) — черновые; после озвучки подогнать по паузам голоса.
+const W=1080,H=1920,CX=100,CZ=-500;
+const LINES=[[0,4.2,'1 ЛАЙК = 1 БОЛЕЛЬЩИК<small>а трибуны пустые…</small>'],[4.4,6.6,'ТВОЙ ЛАЙК —<br>ТВОЁ МЕСТО'],[6.8,8.3,'СМОТРИ!'],[8.5,10.0,'НО ЭТО НЕ ПРОСТО МАТЧ…'],[10.2,14.8,'ПУСТЫЕ ТРИБУНЫ —<br><small>арену заберут IMEN!</small>'],[15.0,20.6,''],[20.8,21.9,'МАТЧ — ЗАВТРА!']];
+const DUR=22.4,T_IMEN=10.2,T_CTA=15.0,T_END=20.8;
+const $=id=>document.getElementById(id);
+let cw,THREE,sc,cam,R,FANS,HEADS,SEATS,SEAT_N=0,ORDER=[],NICKS=[],TAGS=[],IMEN=[],CAT,LIGHTS=[];
+const cl=(x,a,b)=>Math.max(a,Math.min(b,x)),sm=(a,b,x)=>{const k=cl((x-a)/(b-a),0,1);return k*k*(3-2*k)},lerp=(a,b,k)=>a+(b-a)*k;
+let SEED=11;const rnd=()=>{SEED=(SEED*16807)%2147483647;return (SEED-1)/2147483646};
+const RX0=26,RZ0=17,RINGS=9,PER=110;
+// сколько мест занято к моменту t (из 5000 на счётчике)
+function filled(t){return Math.round(5000*(0.02*sm(4.4,5.2,t)+0.48*sm(6.6,9.6,t)+0.2*sm(15,20,t)))}
+function texNick(n){const c=cw.document.createElement('canvas');c.width=512;c.height=110;const x=c.getContext('2d');x.fillStyle='#ffffff';x.beginPath();x.roundRect(4,4,504,102,46);x.fill();x.strokeStyle='#5dff8a';x.lineWidth=10;x.stroke();x.fillStyle='#141829';x.font='900 54px Rubik, Arial Black, Arial';x.textAlign='center';x.textBaseline='middle';x.fillText('@'+n.slice(0,14),256,58);return new THREE.CanvasTexture(c)}
+function build(){
+ const M=(c)=>new THREE.MeshLambertMaterial({color:c}),B=(g,w,h,d,m,x,y,z)=>{const o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);o.position.set(x,y,z);g.add(o);return o};
+ const G=new THREE.Group();G.position.set(CX,0,CZ);sc.add(G);
+ // поле
+ B(G,RX0*2+18,.2,RZ0*2+14,M(0xb9a58e),0,.1,0);
+ for(let i=0;i<8;i++)B(G,(RX0*2-6)/8,.24,RZ0*2-6,M(i%2?0x46b052:0x3fa64a),-(RX0-3)+(i+.5)*(RX0*2-6)/8,.12,0);
+ const Wm=new THREE.MeshBasicMaterial({color:0xffffff});B(G,.25,.05,RZ0*2-6,Wm,0,.26,0);
+ const cc=new THREE.Mesh(new THREE.RingGeometry(4.2,4.6,40),Wm);cc.rotation.x=-1.5708;cc.position.y=.27;G.add(cc);
+ for(const s of[-1,1]){B(G,.4,3,7,M(0xffffff),s*(RX0-3.2),1.5,0);B(G,.5,.05,14,Wm,s*(RX0-8),.26,0)}
+ // трибуны: ступени + кресла (InstancedMesh)
+ const seatG=new THREE.BoxGeometry(1.1,.5,1.0),fanB=new THREE.BoxGeometry(.8,1.0,.6),fanH=new THREE.BoxGeometry(.55,.55,.55);
+ const total=RINGS*PER;SEATS=new THREE.InstancedMesh(seatG,new THREE.MeshLambertMaterial({color:0xffffff}),total);
+ FANS=new THREE.InstancedMesh(fanB,new THREE.MeshLambertMaterial({color:0xffffff}),total);HEADS=new THREE.InstancedMesh(fanH,new THREE.MeshLambertMaterial({color:0xffffff}),total);
+ const o=new THREE.Object3D(),col=new THREE.Color(),PAL=[0xff7a1a,0xf2c230,0x2f8fe0,0xe8384f,0x5dff8a,0xffffff,0xff7ab8];const SK=[0xf1c9a0,0xd7a27a,0x8d5a3b,0xf6d7b8];
+ const stepM=M(0xd8dce4),stepM2=M(0xc2c7d0);let id=0;const pos=[];
+ for(let k=0;k<RINGS;k++){const rx=RX0+k*2.1,rz=RZ0+k*2.1,y=.8+k*1.25;
+  const ring=new THREE.Mesh(new THREE.CylinderGeometry(1,1,1.25,64,1,true),k%2?stepM:stepM2);ring.scale.set(rx+1,1,rz+1);ring.position.y=y-.6;G.add(ring);
+  const top=new THREE.Mesh(new THREE.RingGeometry(1,1+2.1/((rx+rz)/2),64),k%2?stepM:stepM2);top.rotation.x=-1.5708;top.scale.set(rx,rz,1);top.position.y=y;G.add(top);
+  for(let i=0;i<PER;i++){const a=i/PER*Math.PI*2,x=Math.cos(a)*(rx+1),z=Math.sin(a)*(rz+1),ry=-Math.atan2(z,x)-Math.PI/2;
+   o.position.set(CX+x,y+.25,CZ+z);o.rotation.set(0,ry,0);o.updateMatrix();SEATS.setMatrixAt(id,o.matrix);SEATS.setColorAt(id,col.set(0x6a7080));
+   o.position.set(CX+x,y+1.0,CZ+z);o.updateMatrix();FANS.setMatrixAt(id,o.matrix);FANS.setColorAt(id,col.set(PAL[id%PAL.length]));
+   o.position.set(CX+x,y+1.8,CZ+z);o.updateMatrix();HEADS.setMatrixAt(id,o.matrix);HEADS.setColorAt(id,col.set(SK[id%4]));pos.push([CX+x,y,CZ+z,k]);id++}}
+ // наружная стена и прожекторы
+ const outer=new THREE.Mesh(new THREE.CylinderGeometry(1,1,RINGS*1.25+2,64,1,true),new THREE.MeshLambertMaterial({color:0xeef0f4,side:THREE.DoubleSide}));outer.scale.set(RX0+RINGS*2.1+1.6,1,RZ0+RINGS*2.1+1.6);outer.position.y=(RINGS*1.25+2)/2;G.add(outer);
+ for(let i=0;i<4;i++){const a=Math.PI/4+i*Math.PI/2,x=Math.cos(a)*(RX0+RINGS*2.1+4),z=Math.sin(a)*(RZ0+RINGS*2.1+4);B(G,.8,26,.8,M(0x8a929c),x,13,z);
+  const L=new THREE.Mesh(new THREE.BoxGeometry(5,2.4,.6),new THREE.MeshBasicMaterial({color:0x444a55}));L.position.set(x,26.5,z);L.lookAt(CX,0,CZ);L.position.set(x,26.5,z);G.add(L);LIGHTS.push(L)}
+ // табло
+ const tc=cw.document.createElement('canvas');tc.width=1024;tc.height=256;{const x=tc.getContext('2d');x.fillStyle='#141829';x.fillRect(0,0,1024,256);x.strokeStyle='#f7c24a';x.lineWidth=14;x.strokeRect(7,7,1010,242);x.fillStyle='#ffd23a';x.font='900 96px Rubik, Arial Black';x.textAlign='center';x.textBaseline='middle';x.fillText('MARS CITY  vs  IMEN',512,130)}
+ const tab=new THREE.Mesh(new THREE.PlaneGeometry(22,5.5),new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(tc)}));tab.position.set(CX,RINGS*1.25+8,CZ-(RZ0+RINGS*2.1+2));G.add(tab);B(G,.8,RINGS*1.25+6,.8,M(0x8a929c),-9,(RINGS*1.25+6)/2-CZ*0,-(RZ0+RINGS*2.1+2.4));B(G,.8,RINGS*1.25+6,.8,M(0x8a929c),9,(RINGS*1.25+6)/2,-(RZ0+RINGS*2.1+2.4));
+ tab.position.set(0,RINGS*1.25+8,-(RZ0+RINGS*2.1+2));
+ // тоннель IMEN и команда
+ B(G,6,4,3,M(0x3a2a5a),RX0-1,2,RZ0+.5);
+ for(let i=0;i<7;i++){const p=new THREE.Group();B(p,.9,1.6,.6,M(0x7a3ad8),0,1.2,0);B(p,.65,.65,.65,M(0x2a1a40),0,2.35,0);B(p,.3,.9,.3,M(0x7a3ad8),-.6,1.3,0);B(p,.3,.9,.3,M(0x7a3ad8),.6,1.3,0);p.scale.setScalar(1.4);p.visible=false;G.add(p);IMEN.push({p,i})}
+ // кот-мэр в центре поля
+ CAT=new THREE.Group();const cm=M(0xf2a23a),dk=M(0x141414);B(CAT,1.3,1.6,.8,dk,0,1.6,0);B(CAT,.24,.8,.06,M(0xd8202a),0,1.75,.43);B(CAT,1.1,1.0,1.0,cm,0,2.95,0);B(CAT,.28,.35,.2,cm,-.35,3.6,0);B(CAT,.28,.35,.2,cm,.35,3.6,0);B(CAT,.9,.22,.05,dk,0,3.05,.52);B(CAT,.35,.9,.35,dk,-.3,.45,0);B(CAT,.35,.9,.35,dk,.3,.45,0);
+ const arm=new THREE.Group();arm.position.set(.8,2.2,0);B(arm,.3,1.0,.3,dk,0,-.4,0);CAT.add(arm);CAT.userData.arm=arm;B(CAT,.12,.9,.12,M(0x333333),-.9,2.3,.3);
+ CAT.scale.setScalar(1.6);CAT.position.set(0,.25,4);G.add(CAT);
+ [SEATS,FANS,HEADS].forEach(m=>{sc.add(m);m.instanceMatrix.needsUpdate=true;if(m.instanceColor)m.instanceColor.needsUpdate=true});
+ // порядок заполнения: снизу вверх волной, с разбросом
+ const da=a=>{let d=Math.abs(((a-1.6)%(2*Math.PI)+3*Math.PI)%(2*Math.PI)-Math.PI);return d};const idx=pos.map((p,i)=>{const a=Math.atan2(p[2]-CZ,p[0]-CX);const near=da(a)<.45&&p[3]<6;return[i,(near?-6:0)+p[3]*0.9+rnd()*2.2]});idx.sort((a,b)=>a[1]-b[1]);ORDER=idx.map(a=>a[0]);window.POS=pos;
+ // ники над частью мест (реальные жители карты)
+ const L=cw.MP.L.filter(h=>h.n&&!h.site&&!h.bld&&!h.anon&&/^[A-Za-zА-Яа-яЁё0-9_.\-]{4,14}$/.test(h.n));
+ for(let j=0;j<14;j++){const h=L[Math.floor(rnd()*L.length)];NICKS.push(h.n);const s=ORDER[j<3?8+j*25:Math.floor((j+1)/15*total*.68)],p=pos[s];
+  const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:texNick(h.n),depthTest:false}));sp.scale.set(9,2,1);sp.position.set(p[0],p[1]+4,p[2]);sp.visible=false;sp.renderOrder=5;sc.add(sp);TAGS.push({sp,s})}
+ // убрать мелкие объекты карты, если что-то стоит на месте стадиона
+ const fb=new THREE.Box3(new THREE.Vector3(CX-60,-1,CZ-45),new THREE.Vector3(CX+60,80,CZ+45)),bb=new THREE.Box3(),sz=new THREE.Vector3();sc.updateMatrixWorld(true);
+ const skip=new Set([G,SEATS,FANS,HEADS,...TAGS.map(t=>t.sp)]);let hid=0;
+ sc.children.slice().forEach(ch=>{if(skip.has(ch)||!ch.visible||!(ch.isMesh||ch.isGroup))return;bb.setFromObject(ch);if(bb.isEmpty())return;bb.getSize(sz);if(sz.x>60||sz.z>60)return;if(fb.intersectsBox(bb)){ch.visible=false;hid++}});
+ console.log('[стадион] мест',total,'убрано объектов',hid)}
+function seek(t){t=((t%DUR)+DUR)%DUR;
+ const total=RINGS*PER,f=filled(t),n=Math.round(f/5000*total);
+ FANS.count=total;HEADS.count=total;
+ // показываем занятых: прячем остальных масштабом 0
+ const o=new THREE.Object3D(),col=new THREE.Color(),imen=t>=T_IMEN+1.2;
+ if(seek.last!==n||seek.imen!==imen){const pos=window.POS;for(let j=0;j<total;j++){const id=ORDER[j],p=pos[id],on=j<n;
+   const a=Math.atan2(p[2]-CZ,p[0]-CX),ry=-a-Math.PI/2;o.rotation.set(0,ry,0);
+   o.position.set(p[0],p[1]+1.0,p[2]);o.scale.setScalar(on?1:0.0001);o.updateMatrix();FANS.setMatrixAt(id,o.matrix);
+   o.position.set(p[0],p[1]+1.8,p[2]);o.updateMatrix();HEADS.setMatrixAt(id,o.matrix);
+   SEATS.setColorAt(id,col.set(on?0x6a7080:(imen?0x8a3ad8:0x6a7080)))}
+  FANS.instanceMatrix.needsUpdate=HEADS.instanceMatrix.needsUpdate=true;SEATS.instanceColor.needsUpdate=true;seek.last=n;seek.imen=imen}
+ TAGS.forEach((g,j)=>{const on=ORDER.indexOf(g.s)<n&&t<T_IMEN;g.sp.visible=on&&j<10});
+ // IMEN выходят из тоннеля
+ IMEN.forEach(({p,i})=>{const k=sm(T_IMEN+.2+i*.15,T_IMEN+2.2+i*.15,t);p.visible=t>=T_IMEN+.2+i*.15&&t<T_END;p.position.set(lerp(RX0-1,6+i*2.4-7,k),.25,lerp(RZ0+1,-3+(i%2)*2.4,k));p.rotation.y=Math.PI*1.2})
+ if(CAT){CAT.userData.arm.rotation.z=t<4.4?-2.4+Math.sin(t*8)*.25:(t>=T_CTA&&t<T_END?-2.6+Math.sin(t*10)*.3:-.2);CAT.visible=true}
+ LIGHTS.forEach((L,i)=>L.material.color.set(t>=4.4+i*.12?0xfff4c0:0x444a55));
+ // камера по фразам
+ const ang=(a,d,h,lx,ly,lz)=>({a,d,h,lx,ly,lz});
+ const K=[[0,ang(.3,110,70,0,0,0)],[4.2,ang(.55,80,42,0,4,0)],[4.6,ang(1.6,6,6,-0.9,8,23)],[6.6,ang(1.75,6,6,-4,9,22)],
+  [6.8,ang(2.4,70,32,0,5,0)],[8.3,ang(3.4,80,38,0,5,0)],[8.5,ang(3.5,70,30,0,5,0)],[10.0,ang(3.55,66,28,0,5,0)],
+  [10.2,ang(-2.2,12,6,8,2,5)],[14.8,ang(-2.4,14,8,3,2,0)],[15.0,ang(-1.3,10,5,7,3,-18.3)],[20.6,ang(-1.15,11,6,9,4,-18)],[20.8,ang(.1,95,60,0,0,0)],[22.4,ang(.3,110,70,0,0,0)]];
+ let A=K[0][1],Bk=K[0][1],u=0;for(let i=0;i<K.length-1;i++)if(t>=K[i][0]&&t<K[i+1][0]){A=K[i][1];Bk=K[i+1][1];u=sm(K[i][0],K[i+1][0],t);const gap=K[i+1][0]-K[i][0];if(gap<=.3){A=Bk;u=1}break}
+ const c={};for(const k of['a','d','h','lx','ly','lz'])c[k]=lerp(A[k],Bk[k],u);
+ cam.position.set(CX+Math.cos(c.a)*c.d,c.h,CZ+Math.sin(c.a)*c.d);cam.fov=50;cam.updateProjectionMatrix();cam.lookAt(CX+c.lx,c.ly,CZ+c.lz);
+ R.render(sc,cam);
+ // 2D
+ const ln=LINES.find(l=>t>=l[0]&&t<l[1]+.2);$('head').innerHTML=ln?ln[2]:'';
+ $('night').style.opacity=(0.55*(1-sm(4.2,5.4,t))).toFixed(3);
+ $('cn').textContent=f.toLocaleString('ru');$('cnt').style.display=t<T_CTA&&t>=0?'block':'none';
+ const tg=TAGS.find(g=>g.sp.visible);$('nick').textContent='';
+ $('vs').style.transform=`translate(-50%,0) scale(${sm(T_IMEN,T_IMEN+.25,t)*(t<T_CTA?1:0)})`;
+ const ck=sm(T_CTA,T_CTA+.25,t)*(t<T_END?1:0);$('cta').style.transform=`translate(-50%,0) scale(${ck})`;$('tg').style.display=t>=T_CTA+2.2&&t<T_END?'block':'none';
+ $('cloud').style.opacity=(Math.max(1-sm(0,.4,t),sm(DUR-.4,DUR,t))*.9).toFixed(3)}
+function sfxList(){return[[0,'whoosh',.6],[4.4,'ding',.8],[5,'pop',.6],[6.8,'swish',.6],[7.2,'pop',.5],[7.8,'pop',.5],[8.5,'tick',.6],[T_IMEN,'whoosh',.9],[T_IMEN+.25,'ding',.7],[T_CTA,'ding',.6],[T_END,'swish',.8],[DUR-.5,'whoosh',.6]]}
+function fit(){if(document.body.classList.contains('render'))return;const k=Math.min(innerWidth/W,innerHeight/H);$('stage').style.transform=`scale(${k})`;$('stage').style.left=(innerWidth-W*k)/2+'px'}
+addEventListener('resize',fit);fit();if(/[?&]render/.test(location.search)){document.body.classList.add('render');$('stage').style.transform='none'}
+$('map').addEventListener('load',()=>{cw=$('map').contentWindow;const iv=setInterval(()=>{if(!cw.MP)return;clearInterval(iv);
+ try{THREE=cw.THREE;sc=cw.eval('sc');cam=cw.eval('cam');R=cw.eval('R');cw.requestAnimationFrame=()=>0;
+  const st=cw.document.createElement('style');st.textContent='.o:not(canvas),.bub,.pn,.mp,#mpTop,#mpCtl,#mpBot,#mpEye,#sys,button{display:none!important}';cw.document.head.appendChild(st);
+  cw.MP.draw();sc.traverse(o=>{if(o.isSprite)o.visible=false});build();seek(0);window.READY=true}catch(e){console.error(e);window.SCENE_ERR=e.message+' '+(e.stack||'')}},200)});
+let play=null;addEventListener('keydown',e=>{if(e.key!==' '||!window.READY)return;if(play){cancelAnimationFrame(play);play=null;return}const t0=performance.now();const lp=()=>{seek((performance.now()-t0)/1000);play=requestAnimationFrame(lp)};lp()});
+window.seek=seek;window.sfxList=sfxList;window.DUR=DUR;window.vkey=t=>'k'+Math.round(t*30);
+</script></body></html>
