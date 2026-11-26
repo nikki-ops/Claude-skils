@@ -4,7 +4,8 @@
 По городу ходят жители: у каждого ник настоящего подписчика с карты, и он стоит или гуляет у своего дома.
 
 ## Как зайти
-- Кнопка **🚶 Гулять** внизу карты или ссылка `…/index.html?igra` (сразу откроет вход).
+- Отдельная страница **`igra.html`** рядом с картой: `https://<сайт>/igra.html`. Обычная карта `index.html` не изменена.
+- На странице прогулки внизу тоже есть кнопка **🚶 Гулять**, если закрыть окно входа.
 - Ввести ник: если он есть на карте, игрок появится у своего дома (кнопка 🏠 вернёт туда же).
 - Компьютер: WASD или стрелки — идти, Shift — бег, мышь — камера, колесо — приближение, E — поговорить с жителем, Enter — чат, Esc — выйти.
 - Телефон: джойстик слева, камера — пальцем, жителя можно просто нажать.
@@ -17,21 +18,22 @@
 ```
 cd render/karta/igra-server
 npm install
-npm start          # http://localhost:3000/?igra
+npm start          # http://localhost:3000/igra.html
 ```
 
 Выложить бесплатно (например, Render.com → New → Web Service):
 - репозиторий и ветка с картой, Root Directory: `render/karta/igra-server`
 - Build: `npm install`, Start: `npm start`
-- карта и онлайн будут по одному адресу: `https://<имя>.onrender.com/?igra`
+- карта и онлайн будут по одному адресу: `https://<имя>.onrender.com/` (сразу открывается прогулка)
 
-Чтобы онлайн работал и на Netlify-версии карты, в `index.html` перед `<script src="igra.js">` добавить
-`<script>window.IGRA_SERVER='wss://<имя>.onrender.com'</script>` или открыть карту с `?srv=wss://<имя>.onrender.com`.
+Чтобы онлайн работал и на Netlify-версии карты, в `igra.html` перед `<script src="igra.js">` добавить
+`<script>window.IGRA_SERVER='wss://<имя>.onrender.com'</script>` или открыть `igra.html?srv=wss://<имя>.onrender.com`.
 
 ## Что где
 - `../igra.js` — вся игра в браузере: персонажи, жители, столкновения с домами, джойстик, чат, связь с сервером.
 - `server.js` — сервер: до 300 игроков (`MAX_PLAYERS`), позиции 10 раз в секунду, чат не чаще 1 сообщения в 1,2 с, ник до 24 символов, сообщение до 120.
-- В `index.html` добавлена одна строка в конце: `<script src="igra.js"></script>`.
+- `../igra.html` — копия карты `index.html` с одной строкой в конце: `<script src="igra.js"></script>`. Карта `index.html` не тронута. После обновления карты (новые жители) пересобрать копию:
+  `cd render/karta && python3 -c "s=open('index.html').read();i=s.rfind('</body></html>');open('igra.html','w').write(s[:i].replace('<title>MARS CITY · Карта Марса</title>','<title>MARS CITY · Прогулка по городу</title>',1)+'<script src=\"igra.js\"></script>'+s[i:])"`
 
 ## Ограничения
 - Сквозь дома жителей пройти нельзя. Крупные постройки (космодром и т.п.), стены, поезда и мелкий декор не мешают ходить.

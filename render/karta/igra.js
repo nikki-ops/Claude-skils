@@ -538,7 +538,7 @@ body.igwalk .bub.mpn{font-size:1.5em!important;opacity:.9}
     }
 
     // ссылка сразу в прогулку: …/index.html?igra
-    if (Q.has('igra')) setTimeout(openStart, 800);
+    if (!Q.has('video')) setTimeout(openStart, 800);
     window.IGRA = { me, npcs, others, open: openStart, enter: enterWalk, exit: exitWalk, blocked };
   }
 })();

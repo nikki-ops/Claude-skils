@@ -2021,4 +2021,4 @@ if(LITEMAP)(function(){const GS=new Set(),TS=new Set();sc.traverse(o=>{if(o.isPo
  TS.forEach(t=>{const im=t.image;if(!im||!im.getContext)return;let c=im;if(im.width>256){c=document.createElement('canvas');c.width=Math.round(im.width/2);c.height=Math.max(1,Math.round(im.height/2));c.getContext('2d').drawImage(im,0,0,c.width,c.height);im.width=im.height=1;t.image=c}
   t.generateMipmaps=false;t.minFilter=THREE.LinearFilter;t.onUpdate=()=>{c.width=c.height=1};t.needsUpdate=true});
 })()}catch(e){console.warn("lite",e)}
-</script><script src="igra.js"></script></body></html>
+</script></body></html>

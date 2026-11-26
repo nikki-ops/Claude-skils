@@ -1,5 +1,5 @@
 // Сервер онлайна MARS CITY. Раздаёт карту (render/karta) и держит WebSocket /ws.
-// Запуск: cd render/karta/igra-server && npm install && npm start  → http://localhost:3000/?igra
+// Запуск: cd render/karta/igra-server && npm install && npm start  → http://localhost:3000/igra.html
 const http = require('http'), fs = require('fs'), path = require('path');
 const { WebSocketServer } = require('ws');
 
@@ -12,6 +12,7 @@ const COLORS = [0xee6c3a, 0xf7c24a, 0x44c26b, 0x3e93a6, 0x9b6cf0, 0xe84a8a, 0x5a
 const server = http.createServer((req, res) => {
   let u = decodeURIComponent((req.url || '/').split('?')[0]);
   if (u === '/health') { res.writeHead(200, { 'content-type': 'application/json' }); return res.end(JSON.stringify({ ok: true, players: players.size })); }
+  if (u === '/') u = '/igra.html';
   if (u.endsWith('/')) u += 'index.html';
   const f = path.join(ROOT, u);
   if (!f.startsWith(ROOT + path.sep) || f.includes(`${path.sep}igra-server${path.sep}`) || !fs.existsSync(f) || fs.statSync(f).isDirectory()) { res.writeHead(404); return res.end('not found'); }
@@ -59,4 +60,4 @@ setInterval(() => {
 // отключаем «зависших»
 setInterval(() => { wss.clients.forEach((ws) => { if (!ws.isAlive) return ws.terminate(); ws.isAlive = false; try { ws.ping(); } catch (_) {} }); }, 30000);
 
-server.listen(PORT, () => console.log(`MARS CITY онлайн: http://localhost:${PORT}/?igra`));
+server.listen(PORT, () => console.log(`MARS CITY онлайн: http://localhost:${PORT}/igra.html`));
