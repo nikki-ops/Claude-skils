@@ -85,7 +85,7 @@ function Flashlight({ x, y, on = 1, rot = 20 }) {
 
 const A = { B1: 0, B2: 2.43, B3: 3.74, B4: 5.64, B5: 8.43, B6: 12.65, B7: 16.78, B8: 18.77, B9: 22.33, B10: 25.49, B11: 28.1, B12: 30.07, B13: 32.6, B14: 34.2, B15: 36.95, B16: 38.45 };
 export const T = 40.1;
-export const CAP_Y = 880;
+export const CAP_Y = 1330;
 const DORM = { night: 0, lamp: 0.35, cut: 0, pbed: 0, prof: 0 };
 const NIGHT = { night: 1, lamp: 0.9, cut: 0, pbed: 0, prof: 0 };
 const HALL = { sun: 1 };
@@ -135,22 +135,22 @@ export const SHOTS = [
     p: (t) => ({ ...HALL, rx: key([[0, -0.4], [2.8, -0.9]], t), ry: 1.6, rz: 0.6, tx: -1.4, ty: 1.1, tz: -3.0, lens: 1.1 }),
     cam: (t) => ({ s: key([[0, 1.0], [2.8, 1.1]], t), x: 0, y: 0 }),
     mid: (t) => [<Toon env="in" x={120} y={420} s={1.0} o="prof" dur={3} face={{ eyes: "smug", brows: "angry", mouth: t > 1.6 ? "grin" : "flat", glasses: true, stache: true, blinks: [1.2] }} arms={{ r: ["down", "point", 1.6] }} />],
-    top: (t) => [<Sheet x={500} y={760} s={0.72} rows={["Петров", "Сидоров", "Иванова", "Ким", "Смирнов", "Лебедев"]} strike={Math.floor(cl((t - 0.3) / 1.6) * 4)} />,
+    top: (t) => [<Sheet x={500} y={500} s={0.72} rows={["Петров", "Сидоров", "Иванова", "Ким", "Смирнов", "Лебедев"]} strike={Math.floor(cl((t - 0.3) / 1.6) * 4)} />,
       <Label x={60} y={250} w={560} text="ВАЛИТ ПОЛОВИНУ" bg="#D21E34" fg="#FFFFFF" s={pop(t, 1.65, 2) * 0.9} rot={-4} />] },
   { name: "B5", at: A.B5, scene: "dorm", focus: null, enter: "cut",
     p: (t) => ({ ...DORM, cut: 1, rx: key([[0, 0.6], [4.2, 0.1]], t), ry: 2.9, rz: 2.2, tx: -0.4, ty: 0.5, tz: -3.7, lens: 1.05 }),
     cam: (t) => ({ s: key([[0, 1.0], [4.2, 1.1]], t), x: 0, y: 0 }),
     mid: (t) => [
       <Toon env="in" x={300} y={560} s={0.65} o="pajama" dur={5} face={{ eyes: "smug", brows: "flat", mouth: "flat", glasses: true, stache: true, blinks: [1.0, 3.0] }} hold={NIGHTCAP} />,
-      <Toon env="in" x={330} y={1040} s={0.75} o="student" dur={5} face={{ eyes: "smug", brows: "smug", mouth: "smirk", blinks: [2.0] }} arms={{ r: ["down", "knock", 1.2] }} hold={HAIR} />],
+      <Toon env="in" x={330} y={850} s={0.75} o="student" dur={5} face={{ eyes: "smug", brows: "smug", mouth: "smirk", blinks: [2.0] }} arms={{ r: ["down", "knock", 1.2] }} hold={HAIR} />],
     top: (t) => [<Label x={480} y={560} w={430} size={42} text="ПРОФЕССОР" bg="#B79AE8" s={pop(t, 0.9, 5) * 0.9} rot={4} />,
-      <Label x={170} y={1500} w={280} size={70} text="№13" bg="#F2C14E" s={pop(t, 2.2, 5)} rot={-5} />,
+      <Label x={150} y={1540} w={280} size={70} text="№13" bg="#F2C14E" s={pop(t, 2.2, 5)} rot={-5} />,
       <Boom x={300} y={830} text="СТЕНКА" s={pop(t, 2.6, 5) * 0.55} col="#FFFFFF" rot={0} />] },
   { name: "B6", at: A.B6, scene: "dorm", focus: 0.4, blur: 12, enter: "fade",
     p: () => ({ ...DORM, rx: 1.4, ry: 1.3, rz: -1.0, tx: 1.75, ty: 0.8, tz: -2.3, lens: 1.1 }),
     cam: (t) => ({ s: key([[0, 1.0], [4.1, 1.06]], t), x: 0, y: 0 }),
     top: (t) => { const hl = cl((t - 1.3) / 0.9); return [
-      <frame x={80} y={560} width={920} height={1100} layout="none" origin="center" animate={S(key([[0, 0.95], [4.1, 1.02]], t), -2)}>
+      <frame x={80} y={300} width={920} height={1100} layout="none" origin="center" animate={S(key([[0, 0.8], [4.1, 0.85]], t), -2)}>
         <rect x={14} y={18} width={900} height={1080} radius={12} fill="#1E1418" />
         <rect x={0} y={0} width={900} height={1080} radius={12} fill="#FBF6E6" strokeColor="#1E1418" strokeWidth={8} />
         <text x={0} y={50} width={900} align="center" fontFamily="Montserrat" fontWeight={800} fontSize={60} color="#1E1418">ПРАВИЛА УНИВЕРСИТЕТА</text>
@@ -161,7 +161,7 @@ export const SHOTS = [
         <text x={70} y={720} width={760} fontFamily="Montserrat" fontWeight={800} fontSize={58} color="#D21E34">студенты свободны</text>
         {[0, 1, 2].map((i) => <rect x={70} y={860 + i * 70} width={700 - i * 120} height={22} radius={11} fill="#CFC8B4" />)}
       </frame>,
-      P(`M${lerp(260, 900, hl)} ${1360} l60 -40 l30 70 Z`, { fill: "#F2C14E", stroke: { width: 6, color: INK } })]; } },
+      P(`M${lerp(260, 900, hl)} ${1110} l60 -40 l30 70 Z`, { fill: "#F2C14E", stroke: { width: 6, color: INK } })]; } },
   { name: "B7", at: A.B7, scene: "dorm", focus: null, enter: "fade",
     p: (t) => ({ ...NIGHT, rx: key([[0, -0.2], [2.0, 0.6]], t), ry: 1.4, rz: 0.9, tx: -0.4, ty: 0.6, tz: -2.6, lens: 1.0 }),
     cam: () => ({ s: 1.04, x: 0, y: 0 }),
@@ -178,7 +178,7 @@ export const SHOTS = [
         <Toon env="in" x={300} y={560} s={0.65} o="pajama" dur={4} face={any ? { eyes: "shock", brows: "up", mouth: "o", glasses: true, stache: true } : { eyes: "happy", brows: "flat", mouth: "flat", glasses: true, stache: true }} hold={NIGHTCAP}
           anim={[{ property: "offsetY", keyframes: [{ at: 0, value: any ? -90 : 0 }, { at: 0.02, value: any ? -90 : 0 }] }]} />,
         ...Array.from({ length: 6 }, (_, i) => <Alarm x={110 + i * 140} y={1150 - (i % 2) * 20} s={0.5} col={CLK[i % CLK.length]} ring={on(i) ? 1 : 0} t={t} />),
-        <Boom x={260} y={1300} text="ДЗЫНЬ!" s={any ? 0.9 + 0.05 * Math.sin(t * 40) : 0} rot={-6} />]; },
+        <Boom x={40} y={400} text="ДЗЫНЬ!" s={any ? 0.9 + 0.05 * Math.sin(t * 40) : 0} rot={-6} />]; },
     top: (t) => [<Label x={600} y={230} w={380} size={70} text={t < 1.0 ? "1:00" : t < 2.02 ? "1:03" : t < 2.4 ? "1:06" : t < 2.75 ? "1:09" : "1:12"} bg="#1E2A5A" fg="#FFE45C" s={1} rot={3} />] },
   { name: "B9", at: A.B9, scene: "dorm", focus: null, enter: "cut",
     p: (t) => ({ ...NIGHT, prof: 1, lamp: 0.2, rx: 0.4, ry: 1.3, rz: 0.9, tx: -0.7, ty: 0.9, tz: -2.8, lens: 1.0 }),
@@ -200,7 +200,7 @@ export const SHOTS = [
       <Toon env="in" x={300} y={560 + key([[1.2, 0], [1.6, 90]], t)} s={0.65} o="pajama" dur={3} face={t < 1.3 ? { eyes: "open", brows: "sad", mouth: "flat", glasses: true, stache: true } : { eyes: "happy", brows: "flat", mouth: "o", glasses: true, stache: true }} hold={NIGHTCAP}
         anim={[{ property: "rotation", keyframes: [{ at: 0, value: 0 }, { at: 1.3, value: 0 }, { at: 1.6, value: -70 }, { at: 2.9, value: -70 }] }]} />,
       ...Array.from({ length: 6 }, (_, i) => <Alarm x={110 + i * 140} y={1150 - (i % 2) * 20} s={0.5} col={CLK[i % CLK.length]} t={t} />),
-      <Toon env="in" x={620} y={1000} s={0.7} o="student" dur={3} face={{ eyes: "smug", brows: "smug", mouth: "smirk", blinks: [0.8] }} arms={{ r: ["down", "up", 1.7] }} hold={HAIR} />],
+      <Toon env="in" x={620} y={820} s={0.7} o="student" dur={3} face={{ eyes: "smug", brows: "smug", mouth: "smirk", blinks: [0.8] }} arms={{ r: ["down", "up", 1.7] }} hold={HAIR} />],
     top: (t) => [<Label x={600} y={230} w={380} size={70} text="5:00" bg="#1E2A5A" fg="#FFE45C" s={1} rot={3} />,
       <Boom x={160} y={460} text="Zzz" s={t > 1.6 ? 0.8 + 0.1 * Math.sin(t * 6) : 0} col="#B79AE8" rot={-12} />] },
   { name: "B11", at: A.B11, scene: "hall", focus: 4.0, blur: 6, enter: "fade",
@@ -221,7 +221,7 @@ export const SHOTS = [
     p: () => ({ ...HALL, rx: -0.4, ry: 1.6, rz: 0.8, tx: -1.4, ty: 1.1, tz: -3.0, lens: 1.1 }),
     cam: (t) => ({ s: key([[0, 1.04], [1.6, 1.12]], t), x: 0, y: 0 }),
     mid: (t) => [<Toon env="in" x={160} y={440} s={1.0} o="dean" dur={3} face={{ eyes: "open", brows: "flat", mouth: "talk", talk: [[0.05, 1.5]], glasses: true }} arms={{ r: ["hold"] }} hold={[<rect x={380} y={480} width={170} height={210} radius={8} fill="#FBF6E6" strokeColor={INK} strokeWidth={7} />]} />],
-    top: (t) => [<Label x={90} y={1300} w={900} size={52} text="ЭКЗАМЕН ЧЕРЕЗ НЕДЕЛЮ" bg="#8FD06A" s={pop(t, 0.5, 2)} rot={-3} />,
+    top: (t) => [<Label x={90} y={1520} w={900} size={52} text="ЭКЗАМЕН ЧЕРЕЗ НЕДЕЛЮ" bg="#8FD06A" s={pop(t, 0.5, 2)} rot={-3} />,
       <Boom x={300} y={260} text="УРА!" s={pop(t, 1.0, 1) * 1.0} col="#FFE45C" rot={8} />] },
   { name: "B14", at: A.B14, scene: "dorm", focus: null, enter: "fade",
     p: (t) => ({ ...DORM, lamp: 0.8, rx: key([[0, 0.3], [2.7, 0.0]], t), ry: 1.5, rz: 1.0, tx: 0.2, ty: 0.7, tz: -2.4, lens: 1.0 }),
