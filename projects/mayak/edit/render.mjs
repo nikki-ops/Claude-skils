@@ -3,7 +3,7 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { createRequire } from "node:module";
 const { chromium } = createRequire(import.meta.url)("playwright");
 const S = process.env.SCR;
-await build({ entryPoints: ["frames.jsx"], bundle: true, platform: "node", format: "esm", outfile: S + "/frames.mjs", jsxFactory: "h", jsxFragment: "Fragment", inject: ["h.js"], loader: { ".jsx": "jsx" } });
+await build({ entryPoints: ["frames.jsx"], bundle: true, platform: "node", format: "esm", outfile: S + "/frames.mjs", jsxFactory: "__h", jsxFragment: "__F", inject: ["h.js"], loader: { ".jsx": "jsx" } });
 const { FRAMES, CAP } = await import(S + "/frames.mjs?" + Date.now());
 const { toSVG, svgDefs } = await import("./svg.mjs");
 const LIB = readFileSync("../../../toon3d-shorts-higgsedit/templates/boat-lantern/edit3d/lib.glsl", "utf8");

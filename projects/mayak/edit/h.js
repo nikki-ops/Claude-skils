@@ -3,3 +3,5 @@ export function h(type, props, ...children) {
   return { type, props: props || {}, children: children.flat(Infinity).filter((c) => c != null && c !== false && c !== true) };
 }
 export const Fragment = (p) => p.children;
+export const __h = h;
+export const __F = Fragment;

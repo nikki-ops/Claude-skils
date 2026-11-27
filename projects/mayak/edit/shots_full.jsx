@@ -23,7 +23,7 @@ const SixBoard = ({ n }) => <frame x={300} y={300} width={480} height={190} layo
   <rect x={0} y={0} width={480} height={190} radius={16} fill="#24302C" strokeColor="#B8902F" strokeWidth={14} />
   <text x={0} y={36} width={480} align="center" fontFamily="Montserrat" fontWeight={800} fontSize={96} color="#F2EEDC">{`вечер ${n}`}</text>
 </frame>;
-const RedDots = ({ k }) => <frame x={300} y={420} width={480} height={160} layout="none">
+const RedDots = ({ k }) => <frame x={300} y={1430} width={480} height={160} layout="none">
   {[0, 1, 2].filter((i) => i < k).map((i) => P(circ(80 + i * 160, 80, 56, 56), { fill: "#FF3B30", stroke: { width: 9, color: INK } }))}
 </frame>;
 const Gull = ({ x, y, s = 1, flap = 0 }) => { const w = 28 * Math.sin(flap);
@@ -129,7 +129,7 @@ export const SHOTS = [
     mid: (t) => [<Toon env="in" x={250} y={560} s={1.0} o="bookie" dur={3} face={{ eyes: "smug", brows: "smug", mouth: t > 0.9 && t < 2.0 ? "grin" : "smirk", blinks: [0.5] }} arms={{ r: ["hold"] }} />],
     top: (t) => [<Watch x={600 + Math.sin(t * 7) * 60} y={720 + Math.cos(t * 7) * 30} s={0.55} rot={Math.sin(t * 7) * 30} />] },
   { name: "L14", at: A.L14, scene: "lighthouse", focus: null, enter: "fade",
-    p: (t) => { const hit = 0.9; return { ...PIER, rx: 3.5, ry: 0.6, rz: -20.0, tx: 9.0, ty: -1.4, tz: -30.0, lens: 1.1, fogH: -1.3,
+    p: (t) => { const hit = 0.9; return { ...PIER, rx: 2.0, ry: 1.6, rz: -17.0, tx: 7.5, ty: -1.4, tz: -30.0, lens: 1.05, fogH: -1.9,
       sx: t < hit ? lerp(1.0, 5.6, t / hit) : 5.6 + 0.15 * ease((t - hit) / 0.3), sz: -30.0, stilt: ease((t - hit) / 0.35) }; },
     cam: (t) => { const sh = t > 0.9 && t < 1.25 ? Math.sin(t * 90) * 14 : 0; return { s: 1.02, x: sh, y: sh * 0.5 }; },
     top: (t) => Burst({ cx: 560, cy: 1060, at: 0.9, dur: 2.2, n: 40, seed: 5, colors: ["#3E3040", "#6E5A70", "#F2EEDC", "#B8902F"] }) },
