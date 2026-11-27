@@ -167,9 +167,9 @@ function seek(t){t=((t%DUR)+DUR)%DUR;const s=SH.find(x=>t>=x[0]&&t<x[1])||SH[SH.
  if(t>=10&&t<19.5){place(BOSS,DX+2.9,0,-.4,{t,mood:t<17?'shock':'shock',wave:t>=10.4&&t<13.4});tagAt(BOSS,t<13.5)}else if(t<8){place(BOSS,-1,0,1,{t,mood:'laugh',wave:true});tagAt(BOSS,false)}else hide(BOSS);hide(NEW);
  // дома падают
  const W2=1080,H2=1920,v=new THREE.Vector3(),ln=lastNick(t);
- const occ=[],all=t<8||t>=19.5;const vis=[];
+ cam.updateMatrixWorld();const occ=[],all=t<8||t>=19.5;const vis=[];
  HOMES.forEach((o,i)=>{const a=t-o.t;o.h.visible=a>=0;if(a>=0){const kf=cl(a/.35,0,1);o.h.position.set(o.x,(1-kf*kf)*18+(kf>=1?Math.max(0,.4*Math.sin(Math.min(1,(a-.35)/.25)*Math.PI)):0),o.z)}o.e.style.display='none';if(all&&a>=.3)vis.push(i)});
- vis.sort((x,y)=>y-x);for(const i of vis){const o=HOMES[i];v.set(o.x,o.h.position.y+4.6,o.z).project(cam);if(v.z>1)continue;const X=(v.x*.5+.5)*W2,Y=(-v.y*.5+.5)*H2,w=NICKS[i].length*15+36,h2=40;
+ vis.sort((x,y)=>y-x);for(const i of vis){const o=HOMES[i];v.set(o.x,o.h.position.y+(o.h.userData.nickY||5),o.z).project(cam);if(v.z>1)continue;const X=(v.x*.5+.5)*W2,Y=(-v.y*.5+.5)*H2,w=NICKS[i].length*15+36,h2=40;
   if(X<w/2||X>W2-w/2||Y<240||Y>1300)continue;const r=[X-w/2,Y-h2,X+w/2,Y];if(occ.some(q=>r[0]<q[2]&&r[2]>q[0]&&r[1]<q[3]&&r[3]>q[1]))continue;occ.push(r);
   o.e.style.display='block';o.e.style.left=X+'px';o.e.style.top=Y+'px';o.e.style.opacity=1;o.e.style.fontSize=i===vis[0]&&t<8?'34px':'24px';o.e.style.padding='2px 10px';o.e.style.borderWidth='3px'}
  PUFF.forEach((p,j)=>{const o=HOMES[Math.max(0,ln-(j%3))];const a=o?t-o.t-.35:-1;p.m.visible=t<8&&a>=0&&a<.5;if(p.m.visible){const r=1+a*5*p.s;p.m.position.set(o.x+Math.cos(p.a)*r,.3+a,o.z+Math.sin(p.a)*r);p.m.material.opacity=.7*(1-a/.5);p.m.scale.setScalar(.5+a*2)}});
