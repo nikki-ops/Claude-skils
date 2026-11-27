@@ -58,3 +58,9 @@ window.__job = (async () => { for (let i = 0; i < window.__chunks.length; i++) a
 
 ## Альтернатива: ElevenLabs v4 в Content Factory
 Если на Higgsfield хватает кредитов (около 4.6 на 60 с) — один `generate_audio`: `model: "elevenlabs_v4"`, русский голос **Alexey** `7c2133e5-68ab-511f-9aed-9a67664382b1`, `stability` 0.40. Весь текст — одним дублем. В начале направление в скобках: `[dry, punchy storyteller, brisk pace]`. Подробнее в `content_factory.md`. Голос, который юзер назвал сам, имеет приоритет.
+
+## Neuralbox (ElevenLabs) — основной путь с 27.11.2026
+Юзер выбрал голос **Mell** (ElevenLabs, профессиональный, ru, московский акцент) на модели **`eleven_v4`**.
+- `POST https://neuralbox.ru/api/tts/generate` с телом `{"text": "...", "voice_id": "0haPZKt9OsEyLoUPKrop", "model_id": "eleven_v4"}`. Ответ: `audio_url` (mp3 на cdn.neuralbox.ru) и `segments` с таймингами предложений.
+- Список голосов: `GET /api/tts/voices`. Распознать готовый файл и сверить текст: `POST /api/audio/transcribe {"audio_url": ...}`.
+- Потом как обычно: ужать паузы, подогнать темп, расставить субтитры (`projects/mayak/edit/voice_build.py`, `caps_overlay.mjs`).
