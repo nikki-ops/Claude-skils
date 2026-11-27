@@ -1,6 +1,6 @@
 // Dorm room 13. Floor y=0, back wall z=-3 (shared wall with professor's room), left wall x=-2.4 with door, window right.
 // params: rx ry rz tx ty tz lens  night (0 day .. 1 night)  lamp (desk lamp 0..1)  cut (0 normal .. 1 cutaway: back wall removed,
-//         professor's room visible behind it)  pbed (professor jumps 0..1)
+//         professor's room visible behind it)  pbed (professor jumps 0..1)  prof (1 = this is the professor's room: lilac walls, no poster)
 float fbm(vec2 p){ return noise2(p)*0.5+noise2(p*2.1)*0.25+noise2(p*4.3)*0.125+noise2(p*8.7)*0.0625; }
 vec2 map(vec3 p){
   vec2 r=vec2(1e5,0.0);
@@ -28,7 +28,7 @@ vec2 map(vec3 p){
   r=opU(r,vec2(sdEllipsoid(l-vec3(-0.12,0.36,0.0),vec3(0.13,0.07,0.1)),10.0));
   r=opU(r,vec2(sdRoundBox(d-vec3(-0.2,0.8,0.05),vec3(0.18,0.04,0.13),0.01),11.0)); // books
   // poster on the back wall
-  if(u_cut<0.5) r=opU(r,vec2(sdRoundBox(p-vec3(0.55,1.55,-2.98),vec3(0.32,0.44,0.01),0.005),12.0));
+  if(u_cut<0.5 && u_prof<0.5) r=opU(r,vec2(sdRoundBox(p-vec3(0.55,1.55,-2.98),vec3(0.32,0.44,0.01),0.005),12.0));
   // window frame (right part of back wall)
   if(u_cut<0.5) r=opU(r,vec2(max(sdRoundBox(p-vec3(1.75,1.6,-2.97),vec3(0.55,0.5,0.04),0.01),-sdRoundBox(p-vec3(1.75,1.6,-2.97),vec3(0.48,0.43,0.1),0.0)),13.0));
   // professor's room behind the wall (cutaway): floor step, bed with a lump under the blanket, nightstand
@@ -37,7 +37,8 @@ vec2 map(vec3 p){
     r=opU(r,vec2(sdRoundBox(q-vec3(0.0,0.22,0.0),vec3(1.1,0.22,0.55),0.03),14.0));
     r=opU(r,vec2(sdRoundBox(q-vec3(0.0,0.5+0.18*u_pbed,0.0),vec3(1.05,0.1+0.05*u_pbed,0.5),0.08),15.0));
     r=opU(r,vec2(sdRoundBox(q-vec3(1.45,0.3,-0.2),vec3(0.25,0.3,0.25),0.02),14.0));
-    r=opU(r,vec2(-(p.z+5.0),16.0));
+    r=opU(r,vec2(p.z+5.0,16.0));
+    r=opU(r,vec2(sdRoundBox(p-vec3(0.0,1.4,-5.0),vec3(3.0,1.4,0.05),0.01),16.0));
   }
   return r;
 }
@@ -60,8 +61,8 @@ vec4 pixel(vec2 uv){
   if(tt<1e4){
     vec3 pos=ro+rd*tt, n, alb; float em=0.0;
     if(tt==tO){ n=calcNormal(pos); float id=m.y;
-      if(id<1.5){ float st=step(0.5,fract(pos.x*4.0)); alb=mix(hexc(246.0,226.0,170.0),hexc(236.0,212.0,156.0),st); alb*=0.93+0.1*fbm(pos.xy*3.0); if(pos.y<0.9) alb=hexc(96.0,120.0,140.0); if(abs(pos.y-0.9)<0.02) alb=hexc(240.0,236.0,226.0); }
-      else if(id<2.5){ alb=hexc(240.0,220.0,166.0); if(pos.y<0.9) alb=hexc(96.0,120.0,140.0); }
+      if(id<1.5){ float st=step(0.5,fract(pos.x*4.0)); alb=mix(mix(hexc(246.0,226.0,170.0),hexc(214.0,196.0,240.0),u_prof),mix(hexc(236.0,212.0,156.0),hexc(200.0,182.0,230.0),u_prof),st); alb*=0.93+0.1*fbm(pos.xy*3.0); if(pos.y<0.9) alb=hexc(96.0,120.0,140.0); if(abs(pos.y-0.9)<0.02) alb=hexc(240.0,236.0,226.0); }
+      else if(id<2.5){ alb=mix(hexc(240.0,220.0,166.0),hexc(210.0,192.0,236.0),u_prof); if(pos.y<0.9) alb=hexc(96.0,120.0,140.0); }
       else if(id<3.5) alb=hexc(150.0,96.0,60.0);
       else if(id<4.5) alb=mix(hexc(120.0,74.0,48.0),hexc(150.0,96.0,62.0),fbm(pos.xy*vec2(2.0,14.0)));
       else if(id<5.5) alb=hexc(236.0,232.0,224.0);
