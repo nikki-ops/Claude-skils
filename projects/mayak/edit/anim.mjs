@@ -21,7 +21,7 @@ if (process.env.WORDS) {            // 1-2 word cards, break at punctuation, 3 f
 const { toSVG, svgDefs, resetDefs } = await import("./svg.mjs?" + Date.now());
 const TPL = "../../../toon3d-shorts-higgsedit/templates/boat-lantern/edit3d/";
 const LIB = readFileSync(TPL + "lib.glsl", "utf8");
-const SCN = { lighthouse: readFileSync("lighthouse.glsl", "utf8"), booth: readFileSync(TPL + "booth.glsl", "utf8") };
+const SCN = { lighthouse: readFileSync("lighthouse.glsl", "utf8"), booth: readFileSync(process.env.SHOTS ? "tavern.glsl" : TPL + "booth.glsl", "utf8") };
 mkdirSync(S + "/" + (process.env.OUT || "frames"), { recursive: true });
 
 
@@ -76,7 +76,7 @@ for (const f of LIST ?? Array.from({ length: f1 - f0 + 1 }, (_, i) => f0 + i)) {
     else { window.draw('bg', sh.name, frag, P, T_); window.draw('fg', sh.name, frag, { ...P, layer: 2, focus: sh.focus }, T_); document.getElementById('bg').style.filter = 'blur(' + sh.blur / 2 + 'px)'; }
     document.getElementById('mid').innerHTML = mid; document.getElementById('top').innerHTML = top; document.getElementById('cap').innerHTML = cap;
     const c = document.getElementById('cam'); const I = document.getElementById('iris');
-    if (ir && ir.r < 1500) { const r = ir.r, cy0 = 860; const circ = (x) => `M${x - r} ${cy0} A${r} ${r} 0 1 0 ${x + r} ${cy0} A${r} ${r} 0 1 0 ${x - r} ${cy0} Z`;
+    if (ir && ir.r < 1500) { const r = ir.r, cy0 = ir.cy || 860; const circ = (x) => `M${x - r} ${cy0} A${r} ${r} 0 1 0 ${x + r} ${cy0} A${r} ${r} 0 1 0 ${x - r} ${cy0} Z`;
       const d = ir.two ? circ(540 - r * 0.62) + ' ' + circ(540 + r * 0.62) : circ(540);
       c.style.clipPath = `path('${d}')`; document.body.style.background = '#110b19';
       I.innerHTML = `<svg width="1080" height="1920" style="position:absolute;left:0;top:0"><path d="${d}" fill="none" stroke="#B8902F" stroke-width="14"/><path d="${d}" fill="none" stroke="#1E1418" stroke-width="5"/></svg>`; }
