@@ -25,4 +25,14 @@ await pg.setContent(`<html><head>${font}<style>body{margin:0}${st}</style></head
 <div class="t" style="position:absolute;left:0;right:0;top:770px;text-align:center;font-size:54px;color:#1E1418;-webkit-text-stroke:0;text-shadow:none">мультики о тех, кто всех перехитрил</div>
 </body></html>`);
 await pg.evaluate(() => document.fonts.ready); await pg.waitForTimeout(400); await pg.screenshot({ path: "../out/banner.png" });
+
+// VK community cover 1920x768 (mobile shows the centre ~1080 px wide)
+const vk = toSVG(B.vkcover, 0);
+await pg.setViewportSize({ width: 1920, height: 768 });
+await pg.setContent(`<html><head>${font}<style>body{margin:0}${st}</style></head><body style="width:1920px;height:768px;background:linear-gradient(160deg,#FFE45C 0%,#FFB13B 45%,#F2783A 100%);overflow:hidden">
+<svg width="1920" height="768" viewBox="0 0 1920 768" style="position:absolute;left:0;top:0"><defs>${svgDefs()}</defs>${vk}</svg>
+<div class="t" style="position:absolute;left:0;right:0;top:250px;text-align:center;font-size:128px;color:#FFFFFF;transform:rotate(-2deg)">ХИТРЫЙ ПЛАН</div>
+<div class="t" style="position:absolute;left:0;right:0;top:420px;text-align:center;font-size:46px;color:#1E1418;-webkit-text-stroke:0;text-shadow:none">мультики о тех, кто всех перехитрил</div>
+</body></html>`);
+await pg.evaluate(() => document.fonts.ready); await pg.waitForTimeout(400); await pg.screenshot({ path: "../out/vk_cover.png" });
 await b.close(); console.log("ok");
