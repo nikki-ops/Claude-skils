@@ -209,8 +209,8 @@ const HOMES=NICKS.map((n,i)=>{const u=free(),h=makeHouse(THREE,{nick:n});h.posit
  const e=document.createElement('div');e.className='tag';e.textContent='@'+n;document.getElementById('tags').appendChild(e);return {n,i,x:u.x,z:u.z,y:height(u.x,u.z)+7,rayon:u.rayon,g:h,e}});
 const GOAL=1000;document.getElementById('bar').firstChild.style.width=Math.min(100,NICKS.length/GOAL*100)+'%';
 document.getElementById('cnt').textContent='Жителей: '+NICKS.length+' · до '+GOAL+' осталось '+(GOAL-NICKS.length);
-const K={tx:0,tz:0,d:150,yaw:.6,p:.75};let anim=null;
-function fly(x,z,d){anim={t0:performance.now(),f:{...K},to:{tx:x,tz:z,d,yaw:K.yaw,p:.6}}}
+const K={tx:0,tz:0,d:170,yaw:.6,p:1.05};let anim=null;
+function fly(x,z,d){anim={t0:performance.now(),f:{...K},to:{tx:x,tz:z,d,yaw:K.yaw,p:1.0}}}
 function size(){const w=innerWidth,h=innerHeight;R.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix()}addEventListener('resize',size);size();
 const GP=new THREE.Plane(new THREE.Vector3(0,1,0),0),GR=new THREE.Raycaster(),GV=new THREE.Vector2(),GH=new THREE.Vector3();
 function place(){const cp=Math.cos(K.p);cam.position.set(K.tx+Math.sin(K.yaw)*cp*K.d,Math.sin(K.p)*K.d,K.tz+Math.cos(K.yaw)*cp*K.d);cam.lookAt(K.tx,0,K.tz);cam.updateMatrixWorld()}
@@ -225,7 +225,7 @@ $('q').addEventListener('input',e=>{const v=e.target.value.trim().toLowerCase().
  sg.innerHTML='';if(!r.length){const d=document.createElement('div');d.textContent='Не нашли — напиши ник в комментариях под роликом';d.style.color='var(--muted)';sg.appendChild(d)}
  r.forEach(h=>{const d=document.createElement('div');d.textContent='@'+h.n;d.onclick=()=>{$('q').value='';$('q').blur();go(h)};sg.appendChild(d)});sg.hidden=false});
 $('q').addEventListener('keydown',e=>{if(e.key==='Enter'){const f=$('sug').querySelector('div');if(f&&f.onclick)f.onclick()}});
-$('cClose').onclick=()=>{$('card').hidden=true;sel=null;$('ctl').style.bottom=''};$('bAll').onclick=()=>{sel=null;$('card').hidden=true;$('ctl').style.bottom='';anim={t0:performance.now(),f:{...K},to:{tx:0,tz:0,d:150,yaw:K.yaw,p:.75}}};
+$('cClose').onclick=()=>{$('card').hidden=true;sel=null;$('ctl').style.bottom=''};$('bAll').onclick=()=>{sel=null;$('card').hidden=true;$('ctl').style.bottom='';anim={t0:performance.now(),f:{...K},to:{tx:0,tz:0,d:170,yaw:K.yaw,p:1.05}}};
 const rot=a=>{anim={t0:performance.now(),f:{...K},to:{tx:K.tx,tz:K.tz,d:K.d,yaw:K.yaw+a,p:K.p}}};$('bRotL').onclick=()=>rot(-Math.PI/4);$('bRotR').onclick=()=>rot(Math.PI/4);
 $('bRnd').onclick=()=>go(HOMES[Math.floor(Math.random()*HOMES.length)]);
 let night=false;const LT=[];sc.traverse(o=>{if(o.isLight)LT.push([o,o.intensity])});$('bNight').onclick=()=>{night=!night;$('bNight').textContent=night?'☀️ День':'🌙 Ночь';LT.forEach(([o,i])=>o.intensity=night?i*.25:i);sc.fog.color.set(night?0x101830:0xd6ecff)};
