@@ -2,13 +2,12 @@
 // usage: SCR=<scratch dir> NODE_PATH=<global node_modules> node anim.mjs [from_frame to_frame]
 import { build } from "esbuild";
 import { pathToFileURL } from "node:url";
-import { resolve } from "node:path";
+import { resolve, dirname, join } from "node:path";
 // defaults let a plain `node anim.mjs` render the full film from projects/mayak/edit
-process.env.SHOTS = process.env.SHOTS || "shots_full.jsx";
-process.env.WORDS = process.env.WORDS || resolve("../audio/words.json");
+if (!process.env.SHOTS) { process.env.SHOTS = "shots_full.jsx"; process.env.WORDS = process.env.WORDS || resolve("../audio/words.json"); }
 process.env.SCR = resolve(process.env.SCR || "../render");
 import { h } from "./h.mjs";
-import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
+import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
 import { createRequire } from "node:module";
 const { chromium } = createRequire(import.meta.url)("playwright");
 const S = process.env.SCR, FPS = 30;
@@ -18,7 +17,7 @@ const SHOTS_SRC = process.env.SHOTS || "shots.jsx";
 await build({ entryPoints: [SHOTS_SRC], bundle: true, platform: "node", format: "esm", outfile: S + "/shots.mjs", jsxFactory: "__h", jsxFragment: "__F", inject: ["h.mjs"], loader: { ".jsx": "jsx" } });
 const MOD = await import(pathToFileURL(S + "/shots.mjs").href + "?" + Date.now());
 const { SHOTS, T } = MOD;
-const Cap = (s) => h("text", { x: 40, y: 1303, width: 1000, align: "center", fontFamily: "Montserrat", fontWeight: 800, fontSize: 70, color: "#FFFFFF", strokeColor: "#000000", strokeWidth: 5, shadow: { x: 3, y: 4, blur: 0, color: "#000000" } }, s);
+const Cap = (s) => h("text", { x: 40, y: MOD.CAP_Y ?? 1303, width: 1000, align: "center", fontFamily: "Montserrat", fontWeight: 800, fontSize: 70, color: "#FFFFFF", strokeColor: "#000000", strokeWidth: 5, shadow: { x: 3, y: 4, blur: 0, color: "#000000" } }, s);
 let CAPS = MOD.CAPS || [];
 if (process.env.WORDS) {            // 1-2 word cards, break at punctuation, 3 frames before the word
   const W = JSON.parse(readFileSync(process.env.WORDS, "utf8")); CAPS = []; let cur = [];
@@ -29,7 +28,11 @@ if (process.env.WORDS) {            // 1-2 word cards, break at punctuation, 3 f
 const { toSVG, svgDefs, resetDefs } = await import("./svg.mjs?" + Date.now());
 const TPL = "../../../.claude/skills/toon3d-shorts-higgsedit/templates/boat-lantern/edit3d/";
 const LIB = readFileSync(TPL + "lib.glsl", "utf8");
-const SCN = { lighthouse: readFileSync("lighthouse.glsl", "utf8"), booth: readFileSync(process.env.SHOTS ? "tavern.glsl" : TPL + "booth.glsl", "utf8") };
+// scenes: <name>.glsl next to the shots file, then here (mayak/edit), then the template; "booth" = mayak tavern
+const SHOT_DIR = dirname(resolve(SHOTS_SRC));
+const SCN = new Proxy({}, { get: (c, name) => { if (!(name in c)) { const f = name === "booth" ? "tavern" : name;
+  const cands = [join(SHOT_DIR, f + ".glsl"), resolve(f + ".glsl"), resolve(TPL + f + ".glsl")]; const hit = cands.find((x) => existsSync(x));
+  if (!hit) throw new Error("scene not found: " + name); c[name] = readFileSync(hit, "utf8"); } return c[name]; } });
 mkdirSync(S + "/" + (process.env.OUT || "frames"), { recursive: true });
 
 
