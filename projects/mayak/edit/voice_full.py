@@ -12,7 +12,9 @@ for s in segs: s["text"] = re.sub(r"\[[^\]]*\]\s*", "", s["text"]).strip()
 dur = float(run(f"ffprobe -v error -show_entries format=duration -of csv=p=0 {raw}").stdout)
 log = subprocess.run(f"ffmpeg -i {raw} -af silencedetect=n=-38dB:d=0.1 -f null -", shell=True, capture_output=True, text=True).stderr
 st = [float(x) for x in re.findall(r"silence_start: ([\d.]+)", log)]; en = [float(x) for x in re.findall(r"silence_end: ([\d.]+)", log)]
-slow = [(s["start"] - 0.3, s["end"] + 0.3) for s in segs if s["text"] in ("Раз.", "Два.", "Три.")]
+import os
+SLOW = set(x.strip() for x in os.environ.get("SLOW", "Раз.|Два.|Три.").split("|"))
+slow = [(s["start"] - 0.3, s["end"] + 0.3) for s in segs if s["text"] in SLOW]
 keep, cur = [], 0.0
 for s, e in zip(st, en):
     if s < 0.05: cur = max(cur, e - 0.03); continue
