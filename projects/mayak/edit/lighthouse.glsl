@@ -23,8 +23,18 @@ vec2 map(vec3 p){
     r=opU(r,vec2(sdCylinder(m-vec3(0.0,h,0.0),h,0.05),6.0));
     r=opU(r,vec2(sdCylinder(m-vec3(0.0,2.0*h-0.15,0.0),0.08,0.16),6.0));
     r=opU(r,vec2(sdCapsule(m,vec3(0.0,2.0*h-0.3,0.0),vec3(1.4,0.4,0.0),0.015),6.0)); }
-  // smokestack of the Lastochka
-  r=opU(r,vec2(sdCylinder(p-vec3(-3.5,-1.4,-17.0),1.4,0.32),7.0));
+  // the Lastochka: rusty barge at (u_bx,-2.2,-9) heading +x
+  vec3 b=p-vec3(u_bx,-2.2,-9.0); b.y-=0.04*sin(u_time*2.0);
+  if(length(b)<6.0){
+    float hull=sdRoundBox(b-vec3(0.0,0.25,0.0),vec3(2.3-0.35*clamp(b.x-1.4,0.0,1.0),0.32,0.75-0.4*clamp(b.x-1.6,0.0,1.0)),0.12);
+    float cab=sdRoundBox(b-vec3(-1.3,0.85,0.0),vec3(0.45,0.32,0.5),0.05);
+    float stack=sdCylinder(b-vec3(-0.6,1.15,0.0),0.55,0.17);
+    float band=sdCylinder(b-vec3(-0.6,1.45,0.0),0.08,0.185);
+    r=opU(r,vec2(hull,7.0)); r=opU(r,vec2(cab,12.0)); r=opU(r,vec2(stack,13.0)); r=opU(r,vec2(band,14.0));
+    for(int i=0;i<4;i++){ float fi=float(i); float ph=fract(u_time*0.45+fi*0.25);
+      vec3 sm=b-vec3(-0.6-ph*1.6,1.9+ph*1.4,0.0);
+      r=opU(r,vec2(sdSphere(sm,0.12+ph*0.3)+0.08*noise2(sm.xy*5.0+fi),15.0)); }
+  }
   // cape
   vec3 c=p-vec3(18.0,-6.0,-64.0);
   float cape=sdEllipsoid(c,vec3(16.0,13.0,9.0))+0.6*noise2(p.xy*0.35);
@@ -81,11 +91,15 @@ vec4 pixel(vec2 uv){
       else if(id<4.5) alb=hexc(60.0,40.0,40.0);
       else if(id<5.5){ alb=hexc(255.0,210.0,120.0); em=1.0; }
       else if(id<6.5) alb=hexc(70.0,50.0,60.0);
-      else if(id<7.5){ alb=mix(hexc(181.0,104.0,58.0),hexc(120.0,60.0,40.0),noise2(pos.xy*4.0)); }
+      else if(id<7.5){ float rs=noise2(pos.xy*vec2(3.0,6.0))*0.6+noise2(pos.xz*9.0)*0.4; alb=mix(hexc(196.0,98.0,48.0),hexc(110.0,52.0,36.0),rs); alb=mix(alb,hexc(70.0,96.0,110.0),smoothstep(0.62,0.7,noise2(pos.xy*2.0+3.0))*0.6); if(pos.y>-1.68) alb=hexc(96.0,62.0,52.0); if(abs(pos.y+1.66)<0.04) alb=hexc(236.0,226.0,214.0); }
       else if(id<8.5){ alb=(n.y>0.55)?mix(hexc(46.0,120.0,60.0),hexc(92.0,160.0,80.0),noise2(pos.xz*0.5)):mix(hexc(150.0,104.0,90.0),hexc(110.0,70.0,80.0),noise2(pos.xy*0.6)); }
       else if(id<9.5){ float y=pos.y-LH.y; alb=(mod(floor(y/1.6),2.0)<0.5)?hexc(240.0,236.0,230.0):hexc(214.0,52.0,58.0); }
       else if(id<10.5) alb=hexc(50.0,40.0,50.0);
-      else { alb=mix(hexc(255.0,240.0,200.0),hexc(255.0,70.0,60.0),u_flash); em=max(u_lamp,u_flash); }
+      else if(id<11.5){ alb=mix(hexc(255.0,240.0,200.0),hexc(255.0,70.0,60.0),u_flash); em=max(u_lamp,u_flash); }
+      else if(id<12.5){ alb=hexc(230.0,214.0,190.0); float wnd=step(abs(pos.y+1.32),0.1)*step(0.15,abs(fract((pos.x-u_bx)*2.2)-0.5)); alb=mix(alb,hexc(255.0,200.0,110.0),wnd); em=wnd*0.6; }
+      else if(id<13.5) alb=hexc(60.0,44.0,48.0);
+      else if(id<14.5) alb=hexc(214.0,52.0,58.0);
+      else { alb=mix(hexc(250.0,230.0,240.0),hexc(200.0,180.0,215.0),noise2(pos.xy*3.0)); em=0.25; }
       col=shadeR(pos,n,alb,L,keyC,fillC,bounceC,shT,0.3)+alb*em*2.5;
       float rim=pow(clamp(1.0+dot(n,rd),0.0,1.0),3.0)*smoothstep(-0.2,0.6,dot(n,L));
       col+=keyC*alb*rim*0.6;

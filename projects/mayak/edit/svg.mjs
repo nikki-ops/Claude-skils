@@ -57,3 +57,4 @@ export function toSVG(n, t) {
   return toSVG(n.children, t);
 }
 export const svgDefs = () => defs.join("");
+export const resetDefs = () => { defs.length = 0; };
