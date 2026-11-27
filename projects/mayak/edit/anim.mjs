@@ -11,7 +11,7 @@ const { toSVG, svgDefs, resetDefs } = await import("./svg.mjs?" + Date.now());
 const TPL = "../../../toon3d-shorts-higgsedit/templates/boat-lantern/edit3d/";
 const LIB = readFileSync(TPL + "lib.glsl", "utf8");
 const SCN = { lighthouse: readFileSync("lighthouse.glsl", "utf8"), booth: readFileSync(TPL + "booth.glsl", "utf8") };
-mkdirSync(S + "/frames", { recursive: true });
+mkdirSync(S + "/" + (process.env.OUT || "frames"), { recursive: true });
 const LIST = process.argv[2] === "list" ? process.argv.slice(3).map(Number) : null;
 const [f0, f1] = [Number(process.argv[2] ?? 0), Number(process.argv[3] ?? Math.round(T * FPS) - 1)];
 
@@ -52,7 +52,7 @@ for (const f of LIST ?? Array.from({ length: f1 - f0 + 1 }, (_, i) => f0 + i)) {
   const t = T_ - sh.at;
   const P = { ...sh.p(t), layer: 1, focus: 1000 };
   const frag = fragFor(sh.scene, P);
-  const cap = CAPS.filter((c) => T_ >= c[0] - 1e-6).pop();
+  const cap = process.env.NOCAP ? null : CAPS.filter((c) => T_ >= c[0] - 1e-6).pop();
   const cam = sh.cam(t);
   let s = cam.s, blur = 0;
   if (sh.enter === "whip" && t < 0.22) { const u = t / 0.22; s *= 1.18 - 0.18 * (1 - (1 - u) * (1 - u)); blur = 55 * (1 - u) * (1 - u); }
@@ -62,7 +62,7 @@ for (const f of LIST ?? Array.from({ length: f1 - f0 + 1 }, (_, i) => f0 + i)) {
     document.getElementById('mid').innerHTML = mid; document.getElementById('top').innerHTML = top; document.getElementById('cap').innerHTML = cap;
     const c = document.getElementById('cam'); c.style.transform = 'translate(' + cx + 'px,' + cy + 'px) scale(' + s + ')'; c.style.filter = blur > 0.5 ? 'blur(' + blur / 2 + 'px)' : 'none';
   }, { frag, P, sh: { name: sh.name, focus: sh.focus, blur: sh.blur }, t, T_, mid: svgWrap(toSVG(sh.mid ? sh.mid(t) : [], t)), top: svgWrap(toSVG(sh.top ? sh.top(t) : [], t)), cap: svgWrap(cap ? toSVG(Cap(cap[1]), 0) : ""), s, cx: cam.x, cy: cam.y, blur });
-  await page.screenshot({ path: `${S}/frames/f${String(f).padStart(4, "0")}.png` });
+  await page.screenshot({ path: `${S}/${process.env.OUT || "frames"}/f${String(f).padStart(4, "0")}.png` });
   if (f % 10 === 0) console.log(`frame ${f} (${sh.name} t=${t.toFixed(2)}) ${((Date.now() - t0) / 1000).toFixed(0)}s`);
 }
 await browser.close();

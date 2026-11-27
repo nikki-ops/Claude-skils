@@ -1,5 +1,5 @@
 """Music bed + SFX for the first 5.4 s of «Маяк» (no voice yet). numpy only.
-usage: python3 audio_intro.py out.wav
+usage: python3 audio_intro.py out.wav  |  python3 audio_intro.py music.wav sfx.wav
 Events: three bells with the red flashes (0.18/0.58/0.98), watch tick + thud on the counter (1.7-2.2),
 stamp on the "50 к 1" badge (2.55), whip whoosh (3.9), funny wheezy horn of the Lastochka (4.15), gulls (4.4, 4.9).
 """
@@ -62,11 +62,15 @@ for t0, f0 in [(4.4, 2400), (4.9, 2900)]:                          # gull cries
     fr = f0 * (1 - 0.35 * tt / 0.35); ph = 2 * np.pi * np.cumsum(fr) / SR
     add(sfx, t0, np.sin(ph) * np.sin(np.pi * tt / 0.35) * (0.6 + 0.4 * np.sin(2 * np.pi * 28 * tt)), 0.18)
 n = N; amb = bp(rng.standard_normal(n), 100, 800) * 0.05                                            # sea/wind bed
-mix = mus * 0.55 + sfx + amb
-mix = np.tanh(mix * 1.2) / np.tanh(1.2)
-mix = mix / np.max(np.abs(mix)) * 0.8
-st = np.stack([mix, mix], 1)
-with wave.open(sys.argv[1], "wb") as wf:
-    wf.setnchannels(2); wf.setsampwidth(2); wf.setframerate(SR)
-    wf.writeframes((st * 32767).astype(np.int16).tobytes())
+def save(path, x):
+    x = x / max(1e-9, np.max(np.abs(x))) * 0.8
+    st = np.stack([x, x], 1)
+    with wave.open(path, "wb") as wf:
+        wf.setnchannels(2); wf.setsampwidth(2); wf.setframerate(SR)
+        wf.writeframes((st * 32767).astype(np.int16).tobytes())
+if len(sys.argv) > 2:           # stems: out_music.wav out_sfx.wav (for mix.sh)
+    save(sys.argv[1], mus); save(sys.argv[2], sfx + amb)
+else:
+    mix = mus * 0.55 + sfx + amb
+    save(sys.argv[1], np.tanh(mix * 1.2) / np.tanh(1.2))
 print("ok", T)
