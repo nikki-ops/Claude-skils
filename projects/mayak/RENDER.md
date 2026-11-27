@@ -32,7 +32,7 @@ node anim.mjs 0 1325
 ```bash
 ffmpeg -framerate 30 -i ../render/frames/f%04d.png -i ../audio/mix_nomusic.wav -c:v libx264 -pix_fmt yuv420p -crf 18 -c:a aac -b:a 192k -shortest -movflags +faststart ../out/mayak_full.mp4
 ```
-С музыкой: подмешай `../audio/lyria_heist_110s.m4a` на −21 dB (см. `toon3d-shorts-higgsedit/scripts/mix.sh`).
+С тихой фоновой музыкой (уже сведено): замени `../audio/mix_nomusic.wav` на `../audio/mix_music_bg.wav`.
 
 ## Что где
 | Файл | Что это |
