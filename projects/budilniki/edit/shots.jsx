@@ -79,7 +79,7 @@ export const SHOTS = [
       ];
     } },
   // B3 4.0–6.0: roommates in the doorway laugh at him
-  { name: "B3", at: 4.0, scene: "dorm", focus: null, enter: "whip",
+  { name: "B3", at: 3.95, scene: "dorm", focus: null, enter: "whip",
     p: (t) => ({ ...DORM, rx: 0.9, ry: 1.45, rz: -0.6, tx: -2.3, ty: 1.05, tz: 0.15, lens: 1.05 }),
     cam: (t) => ({ s: key([[0, 1.0], [2.0, 1.12]], t), x: key([[0, 0], [2.0, 40]], t), y: 0 }),
     mid: (t) => [
