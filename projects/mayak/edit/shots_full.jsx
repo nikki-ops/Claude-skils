@@ -1,8 +1,8 @@
 // Full «Маяк» (script v2, voice Mell v4, 44.2 s). Shot starts = sentence starts of the compacted voice.
 // Each shot: scene, p(t) uniforms, focus/blur, mid(t) between 3D layers, top(t) in front, cam(t) 2D camera,
 // enter cut|whip|fade, iris(t) -> {r, two} binocular/spyglass mask or null.
-import { Toon, OUTFIT, INK } from "../../../toon3d-shorts-higgsedit/templates/boat-lantern/edit3d/char.jsx";
-import { Bill, CashStack, Burst } from "../../../toon3d-shorts-higgsedit/templates/boat-lantern/edit3d/props.jsx";
+import { Toon, OUTFIT, INK } from "../../../.claude/skills/toon3d-shorts-higgsedit/templates/boat-lantern/edit3d/char.jsx";
+import { Bill, CashStack, Burst } from "../../../.claude/skills/toon3d-shorts-higgsedit/templates/boat-lantern/edit3d/props.jsx";
 import { Watch } from "./shots.jsx";
 
 OUTFIT.aunt = { body: "#E87BA8", shade: "#B9567F", hat: null };

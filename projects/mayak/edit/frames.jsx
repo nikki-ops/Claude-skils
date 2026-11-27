@@ -1,4 +1,4 @@
-import { Toon } from "../../../toon3d-shorts-higgsedit/templates/boat-lantern/edit3d/char.jsx";
+import { Toon } from "../../../.claude/skills/toon3d-shorts-higgsedit/templates/boat-lantern/edit3d/char.jsx";
 const CAP = (t) => <text x={40} y={1303} width={1000} align="center" fontFamily="Montserrat" fontWeight={800} fontSize={70} color="#FFFFFF" strokeColor="#000000" strokeWidth={5} shadow={{ x: 3, y: 4, blur: 0, color: "#000000" }}>{t}</text>;
 export const FRAMES = [
   { name: "L11_flash", t: 0.6,

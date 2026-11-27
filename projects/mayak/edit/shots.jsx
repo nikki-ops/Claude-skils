@@ -1,7 +1,7 @@
 // First 5.4 s of «Маяк» (script v2): L1 three red flashes, L2 watch on the counter, L3 whip to the Lastochka.
 // Each shot: scene (glsl), p(t) uniforms, focus/blur (two-layer DOF), mid(t) = 2D between layers, top(t) = 2D in front,
 // cam(t) = 2D camera {s,x,y}, enter = cut|whip. Times are local seconds.
-import { Toon, INK } from "../../../toon3d-shorts-higgsedit/templates/boat-lantern/edit3d/char.jsx";
+import { Toon, INK } from "../../../.claude/skills/toon3d-shorts-higgsedit/templates/boat-lantern/edit3d/char.jsx";
 
 const lerp = (a, b, u) => a + (b - a) * u;
 const ease = (u) => (u < 0 ? 0 : u > 1 ? 1 : u * u * (3 - 2 * u));

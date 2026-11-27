@@ -6,7 +6,7 @@ const S = process.env.SCR;
 await build({ entryPoints: ["frames.jsx"], bundle: true, platform: "node", format: "esm", outfile: S + "/frames.mjs", jsxFactory: "__h", jsxFragment: "__F", inject: ["h.js"], loader: { ".jsx": "jsx" } });
 const { FRAMES, CAP } = await import(S + "/frames.mjs?" + Date.now());
 const { toSVG, svgDefs } = await import("./svg.mjs");
-const LIB = readFileSync("../../../toon3d-shorts-higgsedit/templates/boat-lantern/edit3d/lib.glsl", "utf8");
+const LIB = readFileSync("../../../.claude/skills/toon3d-shorts-higgsedit/templates/boat-lantern/edit3d/lib.glsl", "utf8");
 const SCN = readFileSync("lighthouse.glsl", "utf8");
 const only = process.argv[2];
 const browser = await chromium.launch({ args: ["--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist"] });

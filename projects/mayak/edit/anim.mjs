@@ -25,7 +25,7 @@ if (process.env.WORDS) {            // 1-2 word cards, break at punctuation, 3 f
   CAPS = CAPS.map((c) => [Math.max(0, Math.round((c[0][1] - 0.1) * 30) / 30), c.map((x) => x[0]).join(" ")]);
 }
 const { toSVG, svgDefs, resetDefs } = await import("./svg.mjs?" + Date.now());
-const TPL = "../../../toon3d-shorts-higgsedit/templates/boat-lantern/edit3d/";
+const TPL = "../../../.claude/skills/toon3d-shorts-higgsedit/templates/boat-lantern/edit3d/";
 const LIB = readFileSync(TPL + "lib.glsl", "utf8");
 const SCN = { lighthouse: readFileSync("lighthouse.glsl", "utf8"), booth: readFileSync(process.env.SHOTS ? "tavern.glsl" : TPL + "booth.glsl", "utf8") };
 mkdirSync(S + "/" + (process.env.OUT || "frames"), { recursive: true });
