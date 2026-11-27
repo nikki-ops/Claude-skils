@@ -1,0 +1,65 @@
+{
+ "duration": 82.431,
+ "width": 576,
+ "height": 1024,
+ "fps": 30.0,
+ "cuts": [
+  3.5,
+  5.667,
+  11.6,
+  12.767,
+  21.2,
+  25.867,
+  27.067,
+  35.233,
+  35.3,
+  35.333,
+  35.633,
+  41.1,
+  46.433,
+  49.367,
+  51.4,
+  56.1,
+  57.0
+ ],
+ "segments": [
+  [
+   0.0,
+   11.0
+  ],
+  [
+   11.0,
+   22.0
+  ],
+  [
+   22.0,
+   33.0
+  ],
+  [
+   33.0,
+   44.0
+  ],
+  [
+   44.0,
+   55.0
+  ],
+  [
+   55.0,
+   66.0
+  ],
+  [
+   66.0,
+   77.0
+  ],
+  [
+   77.0,
+   82.43
+  ]
+ ],
+ "sheets": [
+  "/tmp/claude-0/-home-user-Claude-skils/f621c769-eec0-5a82-826d-a72a98aff867/scratchpad/nadz/sheet_01.jpg",
+  "/tmp/claude-0/-home-user-Claude-skils/f621c769-eec0-5a82-826d-a72a98aff867/scratchpad/nadz/sheet_02.jpg",
+  "/tmp/claude-0/-home-user-Claude-skils/f621c769-eec0-5a82-826d-a72a98aff867/scratchpad/nadz/sheet_03.jpg",
+  "/tmp/claude-0/-home-user-Claude-skils/f621c769-eec0-5a82-826d-a72a98aff867/scratchpad/nadz/sheet_04.jpg"
+ ]
+}
