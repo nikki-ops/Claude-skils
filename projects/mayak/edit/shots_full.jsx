@@ -67,7 +67,7 @@ export const SHOTS = [
   { name: "L4", at: A.L4, scene: "lighthouse", focus: 3.6, blur: 7, enter: "fade",
     p: (t) => ({ ...PIER, rx: 0.1, ry: 1.5, rz: key([[0, 2.9], [2.9, 2.5]], t), tx: 0.7, ty: 1.0, tz: -3.0, lens: 1.0 }),
     cam: (t) => ({ s: key([[0, 1.0], [1.4, 1.02], [2.2, 1.3], [2.9, 1.32]], t), x: key([[0, 0], [1.4, 0], [2.2, -200], [2.9, -210]], t), y: key([[0, 0], [2.2, -40]], t) }),
-    mid: (t) => [<Toon env="dusk" x={180} y={700} s={0.62} o="hero" dur={3} face={{ eyes: "smug", brows: "smug", mouth: "smirk", blinks: [1.2] }} />],
+    mid: (t) => [<Toon env="dusk" x={470} y={720} s={0.6} o="hero" dur={3} face={{ eyes: "smug", brows: "smug", mouth: "smirk", blinks: [1.2] }} />],
     top: (t) => [
       <Toon env="dusk" x={-230} y={880} s={0.78} o="old" dur={4} face={{ eyes: "happy", brows: "up", mouth: "grin", glasses: true, stache: true }} laugh />,
       <Toon env="dusk" x={-20} y={940} s={0.84} o="red" dur={4} face={{ eyes: "squint", brows: "up", mouth: "grin", blush: true }} laugh />,
