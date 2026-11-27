@@ -18,7 +18,7 @@ await p.goto(`http://127.0.0.1:${srv.address().port}/render/seriya/kupol-01/scen
 await p.waitForFunction(()=>window.READY||window.SCENE_ERR,null,{timeout:600000});const ERR=await p.evaluate(()=>window.SCENE_ERR);if(ERR){console.log('Сцена не запустилась:',ERR);await b.close();srv.close();process.exit(1)}
 
 
-const TT=+(process.argv[process.argv.indexOf('--t')+1]||0.9),PL=process.argv.includes('--pl')?process.argv[process.argv.indexOf('--pl')+1]:'❤️ ЛАЙК = ЗАПЛАТКА',OUTN=process.argv.includes('--out')?process.argv[process.argv.indexOf('--out')+1]:'gotovo/kupol-01-cover.png',PY=process.argv.includes('--py')?+process.argv[process.argv.indexOf('--py')+1]:1480;
+const TT=process.argv.includes('--t')?+process.argv[process.argv.indexOf('--t')+1]:0.9,PL=process.argv.includes('--pl')?process.argv[process.argv.indexOf('--pl')+1]:'❤️ ЛАЙК = ЗАПЛАТКА',OUTN=process.argv.includes('--out')?process.argv[process.argv.indexOf('--out')+1]:'gotovo/kupol-01-cover.png',PY=process.argv.includes('--py')?+process.argv[process.argv.indexOf('--py')+1]:1480;
 await p.evaluate(([TT,PL,PY])=>{seek(TT);document.querySelectorAll('#title,#sub,#cm,#cnt,#lk,#board,#flash,#lbl').forEach(e=>e.style.display='none');
  const st=document.createElement('style');st.textContent=`.cv{position:absolute;left:60px;width:870px;text-align:center;z-index:9000;font-family:Rubik,'Arial Black',Arial,sans-serif;font-weight:900}
  #c1{top:420px;font-size:150px;line-height:.98;color:#fff;-webkit-text-stroke:24px #141829;paint-order:stroke fill}#c1 b{color:#f7c24a}
