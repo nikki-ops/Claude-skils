@@ -38,7 +38,7 @@ h1{margin:0;font-size:20px;font-weight:900;letter-spacing:.01em}h1 b{color:var(-
 <div id="ctl"><button id="bAll" title="Весь город">🗺 Весь город</button><button id="bRnd">🎲 Случайный</button><button id="bNight">🌙 Ночь</button><button id="bRotL" aria-label="Повернуть влево">⟲ Повернуть</button><button id="bRotR" aria-label="Повернуть вправо">⟳ Повернуть</button></div>
 <div id="card" class="card" hidden><div class="no" id="cNo"></div><div class="nm" id="cNm"></div><div id="cInfo" style="color:var(--muted)"></div>
 <div class="row"><a class="tg" id="cTg" href="https://t.me/" target="_blank" rel="noopener">✈️ Карта в Telegram</a><button id="cClose">Закрыть</button></div></div>
-<div id="hint">Тяни — двигать карту · колёсико или два пальца — приблизить · поворот — кнопками сбоку</div>
+<div id="hint" hidden>Тяни — двигать карту · колёсико или два пальца — приблизить · поворот — кнопками сбоку</div>
 <div id="err" hidden></div>
 <script>// Раскладка участков нового города: житель №n → координаты участка (детерминированно, дом никогда не «переезжает»).
 // Кварталы 2×2 участка идут по квадратной спирали вокруг центральной площади (квартал 0 = площадь).
@@ -212,9 +212,12 @@ document.getElementById('cnt').textContent='Жителей: '+NICKS.length+' · 
 const K={tx:0,tz:0,d:150,yaw:.6,p:.75};let anim=null;
 function fly(x,z,d){anim={t0:performance.now(),f:{...K},to:{tx:x,tz:z,d,yaw:K.yaw,p:.6}}}
 function size(){const w=innerWidth,h=innerHeight;R.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix()}addEventListener('resize',size);size();
+const GP=new THREE.Plane(new THREE.Vector3(0,1,0),0),GR=new THREE.Raycaster(),GV=new THREE.Vector2(),GH=new THREE.Vector3();
+function place(){const cp=Math.cos(K.p);cam.position.set(K.tx+Math.sin(K.yaw)*cp*K.d,Math.sin(K.p)*K.d,K.tz+Math.cos(K.yaw)*cp*K.d);cam.lookAt(K.tx,0,K.tz);cam.updateMatrixWorld()}
+function ground(x,y){place();GV.set(x/innerWidth*2-1,-(y/innerHeight)*2+1);GR.setFromCamera(GV,cam);return GR.ray.intersectPlane(GP,GH)?GH.clone():null}
 const P=new Map();let last=null;cv.addEventListener('pointerdown',e=>{P.set(e.pointerId,{x:e.clientX,y:e.clientY});cv.setPointerCapture(e.pointerId);anim=null;last=null});
 const up=e=>{P.delete(e.pointerId);last=null};cv.addEventListener('pointerup',up);cv.addEventListener('pointercancel',up);
-cv.addEventListener('pointermove',e=>{if(!P.has(e.pointerId))return;const o=P.get(e.pointerId);if(P.size===1){const dx=e.clientX-o.x,dy=e.clientY-o.y,k=K.d/innerHeight*1.4;K.tx-=(dx*Math.cos(K.yaw)+dy*Math.sin(K.yaw))*k;K.tz-=(-dx*Math.sin(K.yaw)+dy*Math.cos(K.yaw))*k;K.tx=Math.max(-260,Math.min(260,K.tx));K.tz=Math.max(-260,Math.min(260,K.tz))}else if(P.size===2){const ps=[...P.entries()].map(([id,v])=>id===e.pointerId?{x:e.clientX,y:e.clientY}:v),dd=Math.hypot(ps[0].x-ps[1].x,ps[0].y-ps[1].y),an=Math.atan2(ps[1].y-ps[0].y,ps[1].x-ps[0].x);if(last){K.d=Math.max(25,Math.min(420,K.d*last.dd/dd))}last={dd,an}}o.x=e.clientX;o.y=e.clientY});
+cv.addEventListener('pointermove',e=>{if(!P.has(e.pointerId))return;const o=P.get(e.pointerId);if(P.size===1){const a=ground(o.x,o.y),b=ground(e.clientX,e.clientY);if(a&&b){K.tx+=a.x-b.x;K.tz+=a.z-b.z;K.tx=Math.max(-260,Math.min(260,K.tx));K.tz=Math.max(-260,Math.min(260,K.tz));place()}}else if(P.size===2){const ps=[...P.entries()].map(([id,v])=>id===e.pointerId?{x:e.clientX,y:e.clientY}:v),dd=Math.hypot(ps[0].x-ps[1].x,ps[0].y-ps[1].y),an=Math.atan2(ps[1].y-ps[0].y,ps[1].x-ps[0].x);if(last){K.d=Math.max(25,Math.min(420,K.d*last.dd/dd));let da=an-last.an;if(da>Math.PI)da-=2*Math.PI;if(da<-Math.PI)da+=2*Math.PI;K.yaw-=da}last={dd,an}}o.x=e.clientX;o.y=e.clientY});
 cv.addEventListener('contextmenu',e=>e.preventDefault());cv.addEventListener('wheel',e=>{e.preventDefault();K.d=Math.max(25,Math.min(420,K.d*(e.deltaY>0?1.1:.9)))},{passive:false});
 const $=id=>document.getElementById(id);let sel=null;
 function go(h){sel=h;fly(h.x,h.z,30);$('cNo').textContent='Житель № '+(h.i+1)+' · '+h.rayon;$('cNm').textContent='@'+h.n;$('cInfo').textContent='Участок '+(h.i+1)+' · серия 1 · «Снос через 24 часа»';$('card').hidden=false;$('sug').hidden=true;$('hint').hidden=true;$('ctl').style.bottom='calc(env(safe-area-inset-bottom,0px) + 170px)'}
