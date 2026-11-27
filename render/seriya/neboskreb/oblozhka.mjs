@@ -18,9 +18,10 @@ await p.goto(`http://127.0.0.1:${srv.address().port}/render/seriya/neboskreb/sce
 await p.waitForFunction(()=>window.READY||window.SCENE_ERR,null,{timeout:600000});const ERR=await p.evaluate(()=>window.SCENE_ERR);if(ERR){console.log('Сцена не запустилась:',ERR);await b.close();srv.close();process.exit(1)}
 
 
-await p.evaluate(()=>{seek(8.6);document.querySelectorAll('#title,#sub,#cm,#timer,#cnt,#vs,#share,#flash').forEach(e=>e.style.display='none');
+const TT=+(process.argv[process.argv.indexOf('--t')+1]||8.6),PL=process.argv.includes('--pl')?process.argv[process.argv.indexOf('--pl')+1]:'100 ЭТАЖЕЙ · ОДНОЙ СЕМЬЕ',OUTN=process.argv.includes('--out')?process.argv[process.argv.indexOf('--out')+1]:'gotovo/neboskreb-cover.png',PY=process.argv.includes('--py')?+process.argv[process.argv.indexOf('--py')+1]:1040;
+await p.evaluate(([TT,PL,PY])=>{seek(TT);document.querySelectorAll('#title,#sub,#cm,#timer,#cnt,#vs,#share,#flash').forEach(e=>e.style.display='none');
  const st=document.createElement('style');st.textContent=`.cv{position:absolute;left:60px;width:870px;text-align:center;z-index:9000;font-family:Rubik,'Arial Black',Arial,sans-serif;font-weight:900}
  #c1{top:230px;font-size:136px;line-height:.98;color:#fff;-webkit-text-stroke:24px #141829;paint-order:stroke fill}#c1 b{color:#f7c24a}
- #c2{top:1040px}#c2 span{display:inline-block;background:#d8263a;color:#fff;border:10px solid #141829;border-radius:34px;padding:12px 30px;font-size:54px;transform:rotate(-2deg);box-shadow:0 14px 0 #141829;white-space:nowrap}`;
- document.head.appendChild(st);document.getElementById('stage').insertAdjacentHTML('beforeend','<div class="cv" id="c1">НЕБОСКРЁБ.<br><b>КОМУ?</b></div><div class="cv" id="c2"><span>100 ЭТАЖЕЙ · ОДНОЙ СЕМЬЕ</span></div>')});
-await p.waitForTimeout(800);const OB=path.join(ROOT,'gotovo/neboskreb-cover.png');await p.screenshot({path:OB});console.log('обложка →',OB);await b.close();srv.close();
+ #c2{top:${PY}px}#c2 span{display:inline-block;background:#d8263a;color:#fff;border:10px solid #141829;border-radius:34px;padding:12px 30px;font-size:54px;transform:rotate(-2deg);box-shadow:0 14px 0 #141829;white-space:nowrap}`;
+ document.head.appendChild(st);document.getElementById('stage').insertAdjacentHTML('beforeend','<div class="cv" id="c1">НЕБОСКРЁБ.<br><b>КОМУ?</b></div><div class="cv" id="c2"><span>'+PL+'</span></div>')},[TT,PL,PY]);
+await p.waitForTimeout(800);const OB=path.join(ROOT,OUTN);await p.screenshot({path:OB});console.log('обложка →',OB);await b.close();srv.close();
