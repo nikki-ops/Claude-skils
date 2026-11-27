@@ -14,7 +14,7 @@ const pulse = (t, starts, len = 0.24) => Math.max(0, ...starts.map((f) => (t >= 
 const circ = (cx, cy, rx, ry = rx) => { const k = 0.5523, ox = rx * k, oy = ry * k; return `M${cx} ${cy - ry} C${cx + ox} ${cy - ry} ${cx + rx} ${cy - oy} ${cx + rx} ${cy} C${cx + rx} ${cy + oy} ${cx + ox} ${cy + ry} ${cx} ${cy + ry} C${cx - ox} ${cy + ry} ${cx - rx} ${cy + oy} ${cx - rx} ${cy} C${cx - rx} ${cy - oy} ${cx - ox} ${cy - ry} ${cx} ${cy - ry} Z`; };
 const P = (d, o = {}) => <path d={d} x={0} y={0} {...o} />;
 
-const PIER = { flash: 0, lamp: 1, fogH: -0.9, bx: 60, bz: -9, sx: 60, sz: -16, stilt: 0 };
+const PIER = { fsharp: 0, flash: 0, lamp: 1, fogH: -0.9, bx: 60, bz: -9, sx: 60, sz: -16, stilt: 0 };
 const BOO = { rx: 0.2, ry: 1.5, rz: 2.4, tx: 0.0, ty: 1.3, tz: -1.5, lens: 1.05, lamp: 1, radio: 0, shake: 0 };
 const curlers = [[-120, -120], [-50, -150], [30, -158], [110, -140], [170, -95]].map(([dx, dy]) => [
   P(circ(300 + dx, 250 + dy, 30, 22), { fill: "#F2A0C0", stroke: { width: 7, color: INK } }), P(`M${300 + dx - 22} ${250 + dy} L${300 + dx + 22} ${250 + dy}`, { stroke: { width: 4, color: "#C9608C" } })]);
@@ -74,28 +74,28 @@ export const SHOTS = [
       <Toon env="dusk" x={190} y={840} s={0.92} o="skeptic" dur={4} face={{ eyes: "happy", brows: "up", mouth: "grin" }} laugh arms={{ r: ["wave"] }} />,
       <Gull x={lerp(1100, 500, ease(t / 2.0))} y={lerp(420, 980, ease(t / 2.0))} s={0.9} flap={t * 18} />] },
   { name: "L5", at: A.L5, scene: "lighthouse", focus: null, enter: "fade",
-    p: (t) => ({ ...PIER, rx: -2.0, ry: key([[0, 2.2], [4.6, 0.9]], t), rz: key([[0, -4.0], [4.6, -9.0]], t), tx: -1.0, ty: key([[0, -0.2], [4.6, -0.6]], t), tz: -26.0, lens: 1.0, fogH: -0.7,
-      sx: key([[0, -12.0], [3.0, -5.0], [4.6, -3.5]], t), sz: -16.0 }),
+    p: (t) => ({ ...PIER, rx: -2.0, ry: key([[0, 2.2], [4.6, 0.9]], t), rz: key([[0, -4.0], [4.6, -9.0]], t), tx: -1.0, ty: key([[0, -0.2], [4.6, -0.6]], t), tz: -26.0, lens: 1.0, fogH: -1.5,
+      sx: key([[0, -14.0], [3.0, -6.0], [4.6, -4.5]], t), sz: -21.0 }),
     cam: (t) => ({ s: 1, x: 0, y: 0 }),
     top: (t) => [<Gull x={lerp(-200, 1200, t / 4.6)} y={620} s={0.8} flap={t * 16} />] },
   { name: "L6", at: A.L6, scene: "lighthouse", focus: 2.2, blur: 9, enter: "cut",
     p: (t) => ({ ...PIER, rx: 0.3, ry: 1.25, rz: 1.75, tx: key([[0, 0.5], [2.0, 2.6]], t), ty: key([[0, 1.0], [2.0, 2.1]], t), tz: -14.0, lens: 1.05 }),
     cam: (t) => ({ s: key([[0, 1.0], [1.0, 1.0], [2.0, 1.25]], t), x: key([[0, 0], [1.0, 0], [2.0, -180]], t), y: key([[0, 0], [2.0, 180]], t) }),
     mid: (t) => [<Toon env="dusk" x={-60} y={900} s={1.2} o="hero" dur={3} face={{ eyes: "smug", brows: t < 1.0 ? "flat" : "smug", mouth: "smirk", blinks: [0.6] }} />] },
-  { name: "L7", at: A.L7, scene: "lighthouse", focus: 3.0, blur: 7, enter: "cut",
-    p: (t) => ({ ...PIER, rx: 11.6, ry: 15.7, rz: key([[0, -55.8], [2.0, -56.4]], t), tx: 13.0, ty: 15.4, tz: -62.0, lens: 1.05, fogH: -0.9 }),
+  { name: "L7", at: A.L7, scene: "lighthouse", focus: 4.8, blur: 7, enter: "cut",
+    p: (t) => ({ ...PIER, fsharp: 1, rx: 11.6, ry: 15.7, rz: key([[0, -55.8], [2.0, -56.4]], t), tx: 13.0, ty: 15.4, tz: -62.0, lens: 1.05, fogH: -0.9 }),
     cam: (t) => ({ s: key([[0, 1.0], [2.0, 1.06]], t), x: 0, y: 0 }),
     iris: (t) => ({ r: key([[0, 30], [0.25, 420], [1.6, 440], [2.0, 2000]], t), two: true }),
-    mid: (t) => [<Toon env="dusk" x={260} y={560} s={1.1} o="aunt" dur={3} face={{ eyes: "smug", brows: "up", mouth: "smirk", blush: true, blinks: [1.1] }} arms={{ r: ["hold"] }} hold={[...curlers.flat(), ...spyglass]} />] },
+    mid: (t) => [<Toon env="dusk" x={240} y={200} s={0.85} o="aunt" dur={3} face={{ eyes: "smug", brows: "up", mouth: "smirk", blush: true, blinks: [1.1] }} arms={{ r: ["hold"] }} hold={[...curlers.flat(), ...spyglass]} />] },
   { name: "L8", at: A.L8, scene: "lighthouse", focus: null, enter: "cut",
     p: (t) => ({ ...PIER, rx: 12.0, ry: 15.0, rz: -60.0, tx: key([[0, 2.0], [4.2, 6.0]], t), ty: -2.0, tz: -32.0, lens: 1.6, fogH: -1.0,
       bx: -3.0, bz: -38.0, sx: key([[0, 0.0], [4.2, 3.5]], t), sz: -31.0 }),
     cam: (t) => ({ s: 1, x: 0, y: 0 }),
     iris: () => ({ r: 520, two: false }) },
-  { name: "L8b", at: A.L8b, scene: "lighthouse", focus: 3.0, blur: 7, enter: "cut",
-    p: (t) => ({ ...PIER, rx: 11.6, ry: 15.7, rz: -56.4, tx: 13.0, ty: 15.4, tz: -62.0, lens: 1.05, flash: pulse(t, [0.9, 1.35, 1.8], 0.25) }),
+  { name: "L8b", at: A.L8b, scene: "lighthouse", focus: 4.8, blur: 7, enter: "cut",
+    p: (t) => ({ ...PIER, fsharp: 1, rx: 11.6, ry: 15.7, rz: -56.4, tx: 13.0, ty: 15.4, tz: -62.0, lens: 1.05, flash: pulse(t, [0.9, 1.35, 1.8], 0.25) }),
     cam: (t) => ({ s: key([[0, 1.05], [2.7, 1.12]], t), x: 0, y: 0 }),
-    mid: (t) => [<Toon env="dusk" x={260} y={560} s={1.1} o="aunt" dur={3} face={{ eyes: "smug", brows: "smug", mouth: "smirk", blush: true }} arms={{ r: ["up"], l: ["hold"] }} hold={curlers.flat()} />],
+    mid: (t) => [<Toon env="dusk" x={240} y={200} s={0.85} o="aunt" dur={3} face={{ eyes: "smug", brows: "smug", mouth: "smirk", blush: true }} arms={{ r: ["up"], l: ["hold"] }} hold={curlers.flat()} />],
     top: (t) => [<RedDots k={t < 0.9 ? 0 : t < 1.35 ? 1 : t < 1.8 ? 2 : 3} />] },
   { name: "L9", at: A.L9, scene: "lighthouse", focus: 3.6, blur: 7, enter: "fade",
     p: (t) => ({ ...PIER, rx: 0.1, ry: 1.5, rz: 2.7, tx: 0.7, ty: 1.0, tz: -3.0, lens: 1.0 }),
