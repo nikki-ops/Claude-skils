@@ -91,7 +91,7 @@ export function height(x, z) {
   if (d > 55) y += Math.pow((d - 55) / 50, 1.6) * 3 * (1 + Math.sin(x * .07 + z * .03));
   if (z < -80) y += Math.pow((-z - 80) / 35, 1.4) * (7 + 5 * Math.sin(x * .04));
   const vx = 70, vz = -95, vd = Math.hypot(x - vx, z - vz); if (vd < 38) y = Math.max(y, 34 * (1 - vd / 38) - (vd < 5 ? (5 - vd) * 2.2 : 0));
-  if (d < 30) y *= .15; // ровная площадка под город
+  if (d < (globalThis.CITY_R||30)) y *= .03; else if (d < (globalThis.CITY_R||30)+15) y *= .03+.97*(d-(globalThis.CITY_R||30))/15; // ровная площадка под город растёт вместе с городом
   const rd = Math.abs(x - RIVER(z)); if (rd < 7) y = Math.min(y, -1.4 * (1 - rd / 7) * (1 - rd / 7) + y * (rd / 7)); // русло реки
   return y;
 }
@@ -125,7 +125,7 @@ export function makeWorld(THREE, sc, opts = {}) {
   // лес: деревья по холмам, не на реке и не в городе
   const leaf = [0x3f8a2e, 0x4f9a3a, 0x2f7a2e, 0x5aa040], trunk = L(0x6d4a2e);
   for (let i = 0; i < 260; i++) { const a = rnd() * Math.PI * 2, r = 34 + rnd() * 120, x = Math.cos(a) * r, z = Math.sin(a) * r;
-    if (Math.abs(x - RIVER(z)) < 8 || Math.hypot(x - 70, z + 95) < 36 || height(x, z) > 18) continue;
+    if (Math.abs(x - RIVER(z)) < 8 || Math.hypot(x, z) < (globalThis.CITY_R||0) + 8 || Math.hypot(x - 70, z + 95) < 36 || height(x, z) > 18) continue;
     const t = new THREE.Group(), s = .8 + rnd() * .9, y = height(x, z); const tr = new THREE.Mesh(new THREE.CylinderGeometry(.2 * s, .3 * s, 2.4 * s, 6), trunk); tr.position.y = 1.2 * s; t.add(tr);
     if (rnd() < .5) { for (let k = 0; k < 3; k++) { const b = new THREE.Mesh(new THREE.SphereGeometry((1.2 + rnd() * .5) * s, 10, 8), L(leaf[(i + k) % 4])); b.position.set((rnd() - .5) * 1.4 * s, (2.8 + rnd()) * s, (rnd() - .5) * s); b.castShadow = true; t.add(b); } }
     else { for (let k = 0; k < 3; k++) { const b = new THREE.Mesh(new THREE.ConeGeometry((1.5 - k * .35) * s, 1.6 * s, 8), L(0x2f6a32)); b.position.y = (2 + k * .9) * s; b.castShadow = true; t.add(b); } }
