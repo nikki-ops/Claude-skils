@@ -54,10 +54,10 @@ vec2 map(vec3 p){
         vec3 sq=q-vec3(-0.6,0.6+h*0.45,0.08*sin(q.x*2.0));
         float slant=0.25*(sq.y/(h*0.45));
         float sail=max(max(abs(sq.x+slant)-0.55,abs(sq.y)-h*0.42),abs(sq.z)-0.035);
-        r=opU(r,vec2(sail,27.0)); }
+        r=opU(r,vec2(sail,0.3)); }
       // jib
       vec3 jq=m-vec3(1.6,1.4,0.0); float jib=max(max(abs(jq.x-0.25*jq.y)-0.35,abs(jq.y)-0.75),abs(jq.z)-0.035);
-      r=opU(r,vec2(max(jib,-(jq.x+0.45*(0.75-jq.y))),27.0));
+      r=opU(r,vec2(max(jib,-(jq.x+0.45*(0.75-jq.y))),0.3));
     } }
   // the Lastochka: detailed rusty tug-barge at (u_bx,-2.2,u_bz) heading +x
   vec3 b=p-vec3(u_bx,-2.2,u_bz); b.y-=0.04*sin(u_time*2.0); b.xy=rot(0.02*sin(u_time*1.3))*b.xy;
@@ -139,6 +139,15 @@ vec3 fogCol(vec3 rd){
   float s=max(dot(normalize(vec3(rd.x,0.0,rd.z)),normalize(vec3(sunD.x,0.0,sunD.z))),0.0);
   return mix(hexc(170.0,140.0,200.0),hexc(255.0,186.0,150.0),pow(s,3.0));
 }
+// longer march with distance-relative epsilon: thin masts/sails far away no longer pop in and out
+vec3 march2(vec3 ro, vec3 rd, float tmax, float outlineW){
+  float t=0.0, mh=1e9, mt=0.0;
+  for(int i=0;i<200;i++){ vec2 h=map(ro+rd*t); float eps=0.001;
+    if(h.x<eps){ float w=outlineW*mt; float e=(mt<t-0.05) ? 1.0-smoothstep(0.5*w,w,mh) : 0.0; return vec3(t,h.y,e); }
+    if(h.x<mh && h.y>0.5){ mh=h.x; mt=t; }
+    t+=h.x; if(t>tmax) break; }
+  float w=outlineW*max(mt,0.001); return vec3(-1.0,0.0,1.0-smoothstep(0.5*w,w,mh));
+}
 vec3 shadeF(vec3 pos, vec3 n, vec3 alb, vec3 L, vec3 keyC, vec3 fillC, vec3 bounceC, vec3 shT, float aoS, float t){
   if(t<30.0) return shadeR(pos,n,alb,L,keyC,fillC,bounceC,shT,aoS);
   float lit=smoothstep(-0.10,0.30,dot(n,L));
@@ -155,7 +164,7 @@ vec4 pixel(vec2 uv){
   float tDeck=(rd.y<0.0)?(0.0-ro.y)/rd.y:1e5; vec3 pD=ro+rd*tDeck; if(pD.z<-2.85) tDeck=1e5;
   float tSea=(rd.y<0.0)?(-2.2-ro.y)/rd.y:1e5;
   bool nearL=u_layer>1.5;
-  vec3 m=march(ro,rd,nearL?u_focus*1.4:110.0,0.0045);
+  vec3 m=march2(ro,rd,nearL?u_focus*1.4:110.0,0.0045);
   if(nearL && m.x<0.0) return vec4(0.0);
   float tObj=m.x>0.0?m.x:1e5;
   float tt=min(tObj,min(tDeck,tSea));
@@ -163,7 +172,8 @@ vec4 pixel(vec2 uv){
   if(tt<1e4){
     vec3 pos=ro+rd*tt, n, alb; float em=0.0;
     if(tt==tObj){ n=calcNormal(pos); float id=m.y;
-      if(id<2.5) alb=hexc(236.0,226.0,214.0);
+      if(id<0.45){ alb=mix(hexc(250.0,238.0,214.0),hexc(226.0,204.0,176.0),noise2(pos.xy*3.0)); alb*=1.0-0.12*smoothstep(0.4,0.0,abs(fract(pos.y*2.2)-0.5)); em=0.45; ink*=0.2; }
+      else if(id<2.5) alb=hexc(236.0,226.0,214.0);
       else if(id<3.5) alb=hexc(150.0,60.0,32.0);
       else if(id<4.5) alb=hexc(60.0,40.0,40.0);
       else if(id<5.5){ alb=hexc(255.0,210.0,120.0); em=1.0; }
@@ -253,7 +263,7 @@ vec4 pixel(vec2 uv){
       float dy=rd.y*k; float e=abs(dy)>1e-4 ? (1.0-exp(-(tt-3.0)*dy))/dy : (tt-3.0);
       fd=1.0-exp(-0.28*a*e);
       float below=smoothstep(u_fogH+0.5,u_fogH-0.5,pos.y);
-      float patch=0.55+0.45*noise2(pos.xz*0.09+vec2(u_time*0.03,0.0))*noise2(pos.xz*0.21-vec2(0.0,u_time*0.02))*2.0;
+      float patch=0.6+0.4*noise2(pos.xz*0.045+vec2(u_time*0.01,0.0))*noise2(pos.xz*0.09-vec2(0.0,u_time*0.008))*2.0;
       bool isSea=(tt==tSea);
       if(isSea){ below=0.0; fd*=0.6; }
       fd=clamp(max(fd,below*smoothstep(3.0,16.0,tt)*0.75)*patch,0.0,isSea?0.55:0.8);
