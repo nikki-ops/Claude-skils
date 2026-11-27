@@ -1,8 +1,31 @@
 // Pier at dusk: plank deck (y=0, z>-3), railing, table; sea y=-2.2 under height fog;
 // masts poking out of the fog; cape with a red-white lighthouse far away.
 // params: rx ry rz tx ty tz lens  flash (0..1 red lamp flash)  lamp (0..1 steady white light)  fogH (fog top, ~-0.6)
+//         bx bz (Lastochka position)  sx sz stilt (steamer position, aground tilt 0..1)
 float sdCone(vec3 p, float h, float r0, float r1){ float q=length(p.xz); float k=clamp(p.y/h,0.0,1.0); return max(q-mix(r0,r1,k), abs(p.y-0.5*h)-0.5*h); }
 const vec3 LH=vec3(13.0,7.0,-62.0);
+float barge(vec3 b, out float id){
+  float bx=b.x;
+  float hw=0.8*(1.0-0.86*pow(clamp((bx-0.9)/1.55,0.0,1.0),1.6));
+  hw*=mix(0.72,1.0,clamp(b.y/0.35,0.0,1.0));
+  float top=0.66+0.22*smoothstep(0.9,2.45,bx)+0.06*smoothstep(-1.6,-2.4,bx);
+  float outer=max(max(abs(b.z)-hw,max(-b.y,b.y-top)),abs(bx)-2.45)*0.7;
+  float inner=max(max(abs(b.z)-(hw-0.06),0.5-b.y),abs(bx)-2.37);
+  float hull=max(outer,-inner); id=7.0; float d=hull;
+  float deck=max(max(abs(b.z)-hw+0.02,abs(b.y-0.47)-0.03),abs(bx)-2.4)*0.7; if(deck<d){d=deck;id=19.0;}
+  float cab=sdRoundBox(b-vec3(-1.25,0.9,0.0),vec3(0.48,0.38,0.5),0.04); if(cab<d){d=cab;id=12.0;}
+  float roof=sdRoundBox(b-vec3(-1.25,1.32,0.0),vec3(0.58,0.04,0.6),0.02); if(roof<d){d=roof;id=19.0;}
+  float fun=sdCylinder(b-vec3(-0.45,1.35,0.0),0.8,0.17+0.03*clamp(1.0-(b.y-0.55)/1.6,0.0,1.0));
+  if(fun<d){d=fun; id=(b.y>2.0)?13.0:((b.y>1.6&&b.y<1.78)?14.0:25.0);}
+  float mast=sdCylinder(b-vec3(1.05,1.45,0.0),0.95,0.03); if(mast<d){d=mast;id=19.0;}
+  float yard=sdCapsule(b,vec3(1.05,2.05,-0.35),vec3(1.05,2.05,0.35),0.02); if(yard<d){d=yard;id=19.0;}
+  float stay=min(sdCapsule(b,vec3(1.05,2.35,0.0),vec3(2.4,0.9,0.0),0.008),sdCapsule(b,vec3(1.05,2.35,0.0),vec3(-0.45,2.1,0.0),0.008)); if(stay<d){d=stay;id=19.0;}
+  float lan=sdSphere(b-vec3(1.05,2.43,0.0),0.06); if(lan<d){d=lan;id=20.0;}
+  vec3 lb=b-vec3(-1.25,0.92,0.53); float buoy=sdTorus(vec3(lb.x,lb.z,lb.y),vec2(0.13,0.04)); if(buoy<d){d=buoy;id=17.0;}
+  for(int i=0;i<3;i++){ float tx=-0.6+0.75*float(i); float hz=0.8*(1.0-0.86*pow(clamp((tx-0.9)/1.55,0.0,1.0),1.6));
+    vec3 tq=b-vec3(tx,0.34,hz+0.03); float tire=sdTorus(vec3(tq.x,tq.z,tq.y),vec2(0.1,0.045)); if(tire<d){d=tire;id=18.0;} }
+  return d;
+}
 vec2 map(vec3 p){
   vec2 r=vec2(1e5,0.0);
   // railing at z=-2.7 (posts + top rail)
@@ -23,18 +46,22 @@ vec2 map(vec3 p){
     r=opU(r,vec2(sdCylinder(m-vec3(0.0,h,0.0),h,0.05),6.0));
     r=opU(r,vec2(sdCylinder(m-vec3(0.0,2.0*h-0.15,0.0),0.08,0.16),6.0));
     r=opU(r,vec2(sdCapsule(m,vec3(0.0,2.0*h-0.3,0.0),vec3(1.4,0.4,0.0),0.015),6.0)); }
-  // the Lastochka: rusty barge at (u_bx,-2.2,-9) heading +x
-  vec3 b=p-vec3(u_bx,-2.2,-9.0); b.y-=0.04*sin(u_time*2.0);
-  if(length(b)<6.0){
-    float hull=sdRoundBox(b-vec3(0.0,0.25,0.0),vec3(2.3-0.35*clamp(b.x-1.4,0.0,1.0),0.32,0.75-0.4*clamp(b.x-1.6,0.0,1.0)),0.12);
-    float cab=sdRoundBox(b-vec3(-1.3,0.85,0.0),vec3(0.45,0.32,0.5),0.05);
-    float stack=sdCylinder(b-vec3(-0.6,1.15,0.0),0.55,0.17);
-    float band=sdCylinder(b-vec3(-0.6,1.45,0.0),0.08,0.185);
-    r=opU(r,vec2(hull,7.0)); r=opU(r,vec2(cab,12.0)); r=opU(r,vec2(stack,13.0)); r=opU(r,vec2(band,14.0));
+  // the Lastochka: detailed rusty tug-barge at (u_bx,-2.2,u_bz) heading +x
+  vec3 b=p-vec3(u_bx,-2.2,u_bz); b.y-=0.04*sin(u_time*2.0); b.xy=rot(0.02*sin(u_time*1.3))*b.xy;
+  if(length(b)<6.5){ float bid; float d=barge(b,bid); r=opU(r,vec2(d,bid));
     for(int i=0;i<4;i++){ float fi=float(i); float ph=fract(u_time*0.45+fi*0.25);
-      vec3 sm=b-vec3(-0.6-ph*1.6,1.9+ph*1.4,0.0);
-      r=opU(r,vec2(sdSphere(sm,0.12+ph*0.3)+0.08*noise2(sm.xy*5.0+fi),15.0)); }
-  }
+      vec3 sm=b-vec3(-0.45-ph*1.6,2.15+ph*1.4,0.0);
+      r=opU(r,vec2(sdSphere(sm,0.12+ph*0.3)+0.08*noise2(sm.xy*5.0+fi),15.0)); } }
+  // the new steamer at (u_sx,-2.2,u_sz), tilts when aground
+  vec3 sv=p-vec3(u_sx,-2.2,u_sz); sv.xy=rot(-0.12*u_stilt)*sv.xy; sv.yz=rot(0.18*u_stilt)*sv.yz;
+  if(length(sv)<9.0){
+    float sh=sdRoundBox(sv-vec3(0.0,0.55,0.0),vec3(3.6-0.9*clamp(sv.x-2.4,0.0,1.2),0.55,1.0-0.6*clamp(sv.x-2.6,0.0,1.0)),0.15);
+    float sup=sdRoundBox(sv-vec3(-0.6,1.45,0.0),vec3(1.8,0.38,0.75),0.06);
+    float f1=sdCylinder(sv-vec3(-0.2,2.35,0.0),0.55,0.26), f2=sdCylinder(sv-vec3(-1.4,2.35,0.0),0.55,0.26);
+    r=opU(r,vec2(sh,21.0)); r=opU(r,vec2(sup,22.0)); r=opU(r,vec2(min(f1,f2),23.0)); }
+  // the shoal: dark rocks breaking the fog
+  for(int i=0;i<5;i++){ float fi=float(i); vec3 rk=p-vec3(8.0+fi*1.3-0.8*mod(fi,2.0),-2.2,-30.0+0.9*sin(fi*2.1));
+    r=opU(r,vec2(sdEllipsoid(rk,vec3(0.9+0.3*sin(fi),0.7+0.25*cos(fi*1.7),0.8))+0.15*noise2(rk.xy*3.0),24.0)); }
   // cape
   vec3 c=p-vec3(18.0,-6.0,-64.0);
   float cape=sdEllipsoid(c,vec3(16.0,13.0,9.0))+0.6*noise2(p.xy*0.35);
@@ -91,15 +118,34 @@ vec4 pixel(vec2 uv){
       else if(id<4.5) alb=hexc(60.0,40.0,40.0);
       else if(id<5.5){ alb=hexc(255.0,210.0,120.0); em=1.0; }
       else if(id<6.5) alb=hexc(70.0,50.0,60.0);
-      else if(id<7.5){ float rs=noise2(pos.xy*vec2(3.0,6.0))*0.6+noise2(pos.xz*9.0)*0.4; alb=mix(hexc(196.0,98.0,48.0),hexc(110.0,52.0,36.0),rs); alb=mix(alb,hexc(70.0,96.0,110.0),smoothstep(0.62,0.7,noise2(pos.xy*2.0+3.0))*0.6); if(pos.y>-1.68) alb=hexc(96.0,62.0,52.0); if(abs(pos.y+1.66)<0.04) alb=hexc(236.0,226.0,214.0); }
+      else if(id<7.5){ vec3 lb=pos-vec3(u_bx,-2.2,u_bz); float hy=lb.y;
+        alb=hexc(46.0,74.0,92.0);                                            // old navy paint
+        float rs=noise2(vec2(lb.x*9.0,hy*1.2))*0.6+noise2(lb.xy*20.0)*0.4;     // vertical rust streaks
+        alb=mix(alb,hexc(190.0,92.0,40.0),smoothstep(0.45,0.75,rs)*smoothstep(0.62,0.2,hy));
+        alb=mix(alb,hexc(140.0,64.0,36.0),smoothstep(0.7,0.78,noise2(lb.xy*3.0+7.0))*0.8);   // patches
+        if(hy<0.14) alb=mix(hexc(150.0,40.0,36.0),hexc(110.0,46.0,30.0),rs);                  // antifouling
+        if(abs(hy-0.17)<0.025) alb=hexc(236.0,226.0,214.0);                                 // white boot stripe
+        float seam=smoothstep(0.012,0.0,abs(fract(lb.x/0.55)-0.5)-0.488); alb*=1.0-0.35*seam;
+        vec2 rv=vec2(fract(lb.x/0.09)-0.5,(hy-0.42)/0.09); float riv=step(length(rv),0.22)+step(length(vec2(rv.x,(hy-0.24)/0.09)),0.22); alb=mix(alb,hexc(30.0,24.0,30.0),clamp(riv,0.0,1.0)*0.6);
+        for(int k=0;k<4;k++){ float px=-1.7+0.7*float(k); float pr=length(vec2(lb.x-px,hy-0.33)); if(pr<0.075){ alb=(pr<0.055)?hexc(60.0,80.0,110.0):hexc(214.0,170.0,80.0); } }
+        if(hy>0.62) alb=hexc(236.0,226.0,214.0); }
       else if(id<8.5){ alb=(n.y>0.55)?mix(hexc(46.0,120.0,60.0),hexc(92.0,160.0,80.0),noise2(pos.xz*0.5)):mix(hexc(150.0,104.0,90.0),hexc(110.0,70.0,80.0),noise2(pos.xy*0.6)); }
       else if(id<9.5){ float y=pos.y-LH.y; alb=(mod(floor(y/1.6),2.0)<0.5)?hexc(240.0,236.0,230.0):hexc(214.0,52.0,58.0); }
       else if(id<10.5) alb=hexc(50.0,40.0,50.0);
       else if(id<11.5){ alb=mix(hexc(255.0,240.0,200.0),hexc(255.0,70.0,60.0),u_flash); em=max(u_lamp,u_flash); }
-      else if(id<12.5){ alb=hexc(230.0,214.0,190.0); float wnd=step(abs(pos.y+1.32),0.1)*step(0.15,abs(fract((pos.x-u_bx)*2.2)-0.5)); alb=mix(alb,hexc(255.0,200.0,110.0),wnd); em=wnd*0.6; }
+      else if(id<12.5){ alb=hexc(230.0,214.0,190.0); float wnd=step(abs(pos.y+2.2-0.98),0.12)*step(0.12,abs(fract((pos.x-u_bx)*2.6)-0.5)); alb=mix(alb,hexc(255.0,200.0,110.0),wnd); em=wnd*0.6; }
       else if(id<13.5) alb=hexc(60.0,44.0,48.0);
       else if(id<14.5) alb=hexc(214.0,52.0,58.0);
-      else { alb=mix(hexc(250.0,230.0,240.0),hexc(200.0,180.0,215.0),noise2(pos.xy*3.0)); em=0.25; }
+      else if(id<15.5){ alb=mix(hexc(250.0,230.0,240.0),hexc(200.0,180.0,215.0),noise2(pos.xy*3.0)); em=0.25; }
+      else if(id<17.5){ vec3 lb=pos-vec3(u_bx-1.25,-2.2+0.92,u_bz+0.53); float a=atan(lb.y,lb.x); alb=(mod(floor(a/0.785+4.0),2.0)<0.5)?hexc(226.0,52.0,52.0):hexc(245.0,240.0,232.0); }
+      else if(id<18.5) alb=hexc(30.0,28.0,34.0);
+      else if(id<19.5) alb=hexc(110.0,72.0,50.0);
+      else if(id<20.5){ alb=hexc(255.0,210.0,120.0); em=1.2; }
+      else if(id<21.5){ float hy=pos.y+2.2; alb=(hy<0.25)?hexc(170.0,40.0,40.0):hexc(245.0,244.0,240.0); if(abs(hy-0.8)<0.05) alb=hexc(40.0,90.0,170.0); }
+      else if(id<22.5){ alb=hexc(250.0,246.0,236.0); float w=step(abs(fract((pos.x-u_sx)*2.5)-0.5),0.22)*step(abs(pos.y+2.2-1.5),0.1); alb=mix(alb,hexc(255.0,210.0,130.0),w); em=w*0.5; }
+      else if(id<23.5){ alb=(pos.y+2.2>2.65)?hexc(30.0,28.0,34.0):hexc(240.0,196.0,60.0); }
+      else if(id<24.5) alb=mix(hexc(60.0,50.0,64.0),hexc(96.0,84.0,96.0),noise2(pos.xz*2.0));
+      else alb=hexc(54.0,40.0,44.0);
       col=shadeR(pos,n,alb,L,keyC,fillC,bounceC,shT,0.3)+alb*em*2.5;
       float rim=pow(clamp(1.0+dot(n,rd),0.0,1.0),3.0)*smoothstep(-0.2,0.6,dot(n,L));
       col+=keyC*alb*rim*0.6;
