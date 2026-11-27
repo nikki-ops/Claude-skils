@@ -4,6 +4,8 @@
 //         fsharp (0..1: hard near/far split for the 2D card)  bx bz (Lastochka position)  sx sz stilt (steamer position, aground tilt 0..1)
 float sdCone(vec3 p, float h, float r0, float r1){ float q=length(p.xz); float k=clamp(p.y/h,0.0,1.0); return max(q-mix(r0,r1,k), abs(p.y-0.5*h)-0.5*h); }
 const vec3 LH=vec3(13.0,7.0,-62.0);
+// thin parts stay at least ~1.5 px wide at any distance (no popping in/out)
+float thin(vec3 p, float r){ return max(r, 0.0016*length(p-vec3(u_rx,u_ry,u_rz))); }
 float barge(vec3 b, out float id){
   float bx=b.x;
   float hw=0.8*(1.0-0.86*pow(clamp((bx-0.9)/1.55,0.0,1.0),1.6));
@@ -19,7 +21,7 @@ float barge(vec3 b, out float id){
   if(fun<d){d=fun; id=(b.y>2.0)?13.0:((b.y>1.6&&b.y<1.78)?14.0:25.0);}
   float mast=sdCylinder(b-vec3(1.05,1.45,0.0),0.95,0.03); if(mast<d){d=mast;id=19.0;}
   float yard=sdCapsule(b,vec3(1.05,2.05,-0.35),vec3(1.05,2.05,0.35),0.02); if(yard<d){d=yard;id=19.0;}
-  float stay=min(sdCapsule(b,vec3(1.05,2.35,0.0),vec3(2.4,0.9,0.0),0.008),sdCapsule(b,vec3(1.05,2.35,0.0),vec3(-0.45,2.1,0.0),0.008)); if(stay<d){d=stay;id=19.0;}
+  float stay=min(sdCapsule(b,vec3(1.05,2.35,0.0),vec3(2.4,0.9,0.0),0.008),sdCapsule(b,vec3(1.05,2.35,0.0),vec3(-0.45,2.1,0.0),0.008)); stay-=thin(b+vec3(u_bx,-2.2,u_bz),0.008)-0.008; if(stay<d){d=stay;id=19.0;}
   float lan=sdSphere(b-vec3(1.05,2.43,0.0),0.06); if(lan<d){d=lan;id=20.0;}
   vec3 lb=b-vec3(-1.25,0.92,0.53); float buoy=sdTorus(vec3(lb.x,lb.z,lb.y),vec2(0.13,0.04)); if(buoy<d){d=buoy;id=17.0;}
   for(int i=0;i<3;i++){ float tx=-0.6+0.75*float(i); float hz=0.8*(1.0-0.86*pow(clamp((tx-0.9)/1.55,0.0,1.0),1.6));
@@ -46,17 +48,17 @@ vec2 map(vec3 p){
       float mx=m.x; float hw=0.55*(1.0-0.9*pow(clamp((mx-0.4)/1.8,0.0,1.0),1.5))*mix(0.6,1.0,clamp(m.y/0.4,0.0,1.0));
       float hl=max(max(abs(m.z)-hw,max(-m.y,m.y-(0.55+0.15*smoothstep(0.6,2.2,mx)))),abs(mx)-2.2)*0.7;
       r=opU(r,vec2(hl,26.0));
-      r=opU(r,vec2(sdCapsule(m,vec3(2.1,0.65,0.0),vec3(3.2,0.95,0.0),0.035),6.0));
+      r=opU(r,vec2(sdCapsule(m,vec3(2.1,0.65,0.0),vec3(3.2,0.95,0.0),thin(p,0.035)),6.0));
       for(int j=0;j<2;j++){ float px=-0.9+1.4*float(j); float h=2.6+0.3*fi-0.25*float(j);
         vec3 q=m-vec3(px,0.0,0.0);
-        r=opU(r,vec2(sdCylinder(q-vec3(0.0,h*0.5+0.5,0.0),h*0.5,0.04),6.0));
+        r=opU(r,vec2(sdCylinder(q-vec3(0.0,h*0.5+0.5,0.0),h*0.5,thin(p,0.04)),6.0));
         // gaff sail: trapezoid in the xy plane behind the mast, slightly bellied
         vec3 sq=q-vec3(-0.6,0.6+h*0.45,0.08*sin(q.x*2.0));
         float slant=0.25*(sq.y/(h*0.45));
-        float sail=max(max(abs(sq.x+slant)-0.55,abs(sq.y)-h*0.42),abs(sq.z)-0.035);
+        float sail=max(max(abs(sq.x+slant)-0.55,abs(sq.y)-h*0.42),abs(sq.z)-thin(p,0.035));
         r=opU(r,vec2(sail,0.3)); }
       // jib
-      vec3 jq=m-vec3(1.6,1.4,0.0); float jib=max(max(abs(jq.x-0.25*jq.y)-0.35,abs(jq.y)-0.75),abs(jq.z)-0.035);
+      vec3 jq=m-vec3(1.6,1.4,0.0); float jib=max(max(abs(jq.x-0.25*jq.y)-0.35,abs(jq.y)-0.75),abs(jq.z)-thin(p,0.035));
       r=opU(r,vec2(max(jib,-(jq.x+0.45*(0.75-jq.y))),0.3));
     } }
   // the Lastochka: detailed rusty tug-barge at (u_bx,-2.2,u_bz) heading +x
@@ -83,8 +85,8 @@ vec2 map(vec3 p){
     r=opU(r,vec2(min(f1,f2),23.0));
     for(int k=0;k<2;k++){ float bz=0.68*(2.0*float(k)-1.0);
       r=opU(r,vec2(sdCapsule(sv,vec3(-1.6,2.38,bz),vec3(-0.6,2.38,bz),0.12),28.0)); }
-    float mf=sdCylinder(sv-vec3(2.6,2.4,0.0),1.2,0.04), ma=sdCylinder(sv-vec3(-2.9,2.2,0.0),1.0,0.04);
-    float stay=min(sdCapsule(sv,vec3(2.6,3.55,0.0),vec3(3.9,1.4,0.0),0.012),sdCapsule(sv,vec3(2.6,3.55,0.0),vec3(-2.9,3.15,0.0),0.012));
+    float mf=sdCylinder(sv-vec3(2.6,2.4,0.0),1.2,thin(p,0.04)), ma=sdCylinder(sv-vec3(-2.9,2.2,0.0),1.0,thin(p,0.04));
+    float stay=min(sdCapsule(sv,vec3(2.6,3.55,0.0),vec3(3.9,1.4,0.0),thin(p,0.012)),sdCapsule(sv,vec3(2.6,3.55,0.0),vec3(-2.9,3.15,0.0),thin(p,0.012)));
     r=opU(r,vec2(min(min(mf,ma),stay),19.0)); }
   // the shoal: a jagged reef just breaking the water
   vec3 rr=p-vec3(10.0,-2.2,-30.0);

@@ -12,6 +12,8 @@ import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { createRequire } from "node:module";
 const { chromium } = createRequire(import.meta.url)("playwright");
 const S = process.env.SCR, FPS = 30;
+// supersampling: canvases at SS x resolution, shown at 1080x1920 (anti-aliasing of thin masts/ropes). Default 2 on GPU, 1 on CPU.
+const SS = Number(process.env.SS || (process.env.GPU ? 2 : 1));
 const SHOTS_SRC = process.env.SHOTS || "shots.jsx";
 await build({ entryPoints: [SHOTS_SRC], bundle: true, platform: "node", format: "esm", outfile: S + "/shots.mjs", jsxFactory: "__h", jsxFragment: "__F", inject: ["h.mjs"], loader: { ".jsx": "jsx" } });
 const MOD = await import(pathToFileURL(S + "/shots.mjs").href + "?" + Date.now());
@@ -41,7 +43,7 @@ const page = await browser.newPage({ viewport: { width: 1080, height: 1920 } });
 const shell = `<!doctype html><html><head><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@800&display=swap">
 <style>body{margin:0;background:#000;width:1080px;height:1920px;overflow:hidden}#cam{position:absolute;left:0;top:0;width:1080px;height:1920px;transform-origin:540px 960px}
 canvas,svg{position:absolute;left:0;top:0}#cap{position:absolute;left:0;top:0}</style></head><body>
-<div id="cam"><canvas id="bg" width="540" height="960" style="width:1080px;height:1920px"></canvas><div id="mid"></div><canvas id="fg" width="1080" height="1920"></canvas><div id="top"></div></div><div id="iris"></div><div id="cap"></div>
+<div id="cam"><canvas id="bg" width="${540 * SS}" height="${960 * SS}" style="width:1080px;height:1920px"></canvas><div id="mid"></div><canvas id="fg" width="${1080 * SS}" height="${1920 * SS}" style="width:1080px;height:1920px"></canvas><div id="top"></div></div><div id="iris"></div><div id="cap"></div>
 <script>
 const progs={};
 function prog(id,key,fs){ const c=document.getElementById(id); const gl=c.getContext('webgl',{premultipliedAlpha:true,preserveDrawingBuffer:true,alpha:true});
