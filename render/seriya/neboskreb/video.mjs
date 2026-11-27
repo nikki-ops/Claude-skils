@@ -1,3 +1,4 @@
+// (aresample после loudnorm обязателен: иначе amix теряет конец голоса)
 // Рендер шортса «Небоскрёб для семьи» (1080×1920, 30 к/с, голос golos/neboskreb.wav + музыка muzyka/trevoga-100bpm.mp3 на ~18 дБ тише + SFX):
 //   node render/seriya/neboskreb/video.mjs            → gotovo/neboskreb.mp4
 //   node render/seriya/neboskreb/video.mjs --kadry 0.5,3,8,11.5  → PNG в render/_istochniki/neboskreb/
@@ -26,9 +27,9 @@ if(!process.argv.includes('--bez-zvuka')){// звук: голос + музыка
  fs.writeFileSync(path.join(tmp,'sfx.json'),JSON.stringify(await p.evaluate(()=>sfxList())));
  execFileSync('python3',[path.join(HERE,'zvuk.py'),path.join(tmp,'sfx.json'),String(C.dur),path.join(tmp,'sfx.wav')],{stdio:'inherit'});
  const MUS=process.argv.includes('--bez-muzyki')?'/nonexistent':path.join(ROOT,'muzyka/trevoga-100bpm.mp3'),ins=[],fl=[];let k=0;
- if(VOICE){ins.push('-i',VOICE);fl.push(`[${k}:a]aresample=44100,aformat=channel_layouts=stereo,loudnorm=I=-15:TP=-2:LRA=7[v]`);k++}
- if(fs.existsSync(MUS)){ins.push('-stream_loop','-1','-i',MUS);fl.push(`[${k}:a]aresample=44100,aformat=channel_layouts=stereo,atrim=0:${C.dur},afade=t=in:d=0.02,afade=t=out:st=${(C.dur-.03).toFixed(2)}:d=0.03,loudnorm=I=-33:TP=-8[m]`);k++}
- ins.push('-i',path.join(tmp,'sfx.wav'));fl.push(`[${k}:a]loudnorm=I=-22:TP=-3[s]`);k++;
+ if(VOICE){ins.push('-i',VOICE);fl.push(`[${k}:a]aresample=44100,aformat=channel_layouts=stereo,loudnorm=I=-15:TP=-2:LRA=7,aresample=44100[v]`);k++}
+ if(fs.existsSync(MUS)){ins.push('-stream_loop','-1','-i',MUS);fl.push(`[${k}:a]aresample=44100,aformat=channel_layouts=stereo,atrim=0:${C.dur},afade=t=in:d=0.02,afade=t=out:st=${(C.dur-.03).toFixed(2)}:d=0.03,loudnorm=I=-33:TP=-8,aresample=44100[m]`);k++}
+ ins.push('-i',path.join(tmp,'sfx.wav'));fl.push(`[${k}:a]loudnorm=I=-22:TP=-3,aresample=44100[s]`);k++;
  const tags=fl.map(x=>x.match(/\[(\w)\]$/)[0]).join('');
  AUD=path.join(tmp,'mix.wav');execFileSync('ffmpeg',['-v','error','-y',...ins,'-filter_complex',fl.join(';')+`;${tags}amix=inputs=${k}:normalize=0,alimiter=limit=0.89`,'-t',String(C.dur),'-ar','44100',AUD],{stdio:'inherit'});
  console.log('звук:',VOICE?'голос + ':'',fs.existsSync(MUS)?'музыка + ':'','SFX →',AUD)}
