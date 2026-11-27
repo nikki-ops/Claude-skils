@@ -142,10 +142,10 @@ export const SHOTS = [
     cam: (t) => ({ s: key([[0, 1.0], [4.2, 1.1]], t), x: 0, y: 0 }),
     mid: (t) => [
       <Toon env="in" x={300} y={560} s={0.65} o="pajama" dur={5} face={{ eyes: "smug", brows: "flat", mouth: "flat", glasses: true, stache: true, blinks: [1.0, 3.0] }} hold={NIGHTCAP} />,
-      <Toon env="in" x={330} y={850} s={0.75} o="student" dur={5} face={{ eyes: "smug", brows: "smug", mouth: "smirk", blinks: [2.0] }} arms={{ r: ["down", "knock", 1.2] }} hold={HAIR} />],
+      <Toon env="in" x={330} y={760} s={0.75} o="student" dur={5} face={{ eyes: "smug", brows: "smug", mouth: "smirk", blinks: [2.0] }} arms={{ r: ["down", "knock", 1.2] }} hold={HAIR} />],
     top: (t) => [<Label x={480} y={560} w={430} size={42} text="ПРОФЕССОР" bg="#B79AE8" s={pop(t, 0.9, 5) * 0.9} rot={4} />,
       <Label x={150} y={1540} w={280} size={70} text="№13" bg="#F2C14E" s={pop(t, 2.2, 5)} rot={-5} />,
-      <Boom x={300} y={830} text="СТЕНКА" s={pop(t, 2.6, 5) * 0.55} col="#FFFFFF" rot={0} />] },
+      <Boom x={-90} y={990} text="СТЕНКА" s={pop(t, 2.6, 5) * 0.5} col="#FFFFFF" rot={-8} />] },
   { name: "B6", at: A.B6, scene: "dorm", focus: 0.4, blur: 12, enter: "fade",
     p: () => ({ ...DORM, rx: 1.4, ry: 1.3, rz: -1.0, tx: 1.75, ty: 0.8, tz: -2.3, lens: 1.1 }),
     cam: (t) => ({ s: key([[0, 1.0], [4.1, 1.06]], t), x: 0, y: 0 }),
