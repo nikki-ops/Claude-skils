@@ -10,9 +10,10 @@ cd Claude-skils
 git checkout claude/bold-cerf-an70j4
 cd projects/mayak/edit
 npm init -y
-npm i esbuild@0.24.0 playwright@1.48.2
-npx playwright install chromium
+npm i esbuild@0.24.0 playwright@latest
 ```
+
+На **Windows** браузер отдельно качать не нужно: рендер сам берёт установленный Microsoft Edge (`CHANNEL=msedge`). На macOS/Linux один раз выполни `npx playwright install chromium`. Если `npm init` дописал в `package.json` строку `"type": "commonjs"`, её можно оставить: файлы рендера — `.mjs`.
 
 ## 2. Рендер кадров
 Из папки `projects/mayak/edit`, команда одна для Windows, macOS и Linux:

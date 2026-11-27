@@ -8,7 +8,7 @@ description: Делает вертикальный мультролик (1080×1
 Это рабочий путь, которым сделан ролик «Маяк» (`projects/mayak`). Стиль, персонажи, свет и правила самопроверки — из соседнего скилла `toon3d-shorts-higgsedit` (читать его `references/STYLE_RULES.md`, `characters.md`, `self_check.md`, `prompts.md`). Higgsedit для этого пути **не нужен**.
 
 ## Что нужно на машине
-Node.js 20+, Python 3 (`pillow`, `numpy`), ffmpeg. В папке проекта: `npm i esbuild@0.24.0 playwright@1.48.2` и `npx playwright install chromium`. На ПК с видеокартой рендер — с переменной `GPU=1`; если кадры чёрные, без неё.
+Node.js 20+, Python 3 (`pillow`, `numpy`), ffmpeg. В папке проекта: `npm i esbuild@0.24.0 playwright@latest`. На Windows рендер сам берёт установленный Microsoft Edge (без скачивания Chromium); на macOS/Linux — `npx playwright install chromium`. На ПК с видеокартой рендер — с переменной `GPU=1`; если кадры чёрные, без неё.
 
 ## Пайплайн (по шагам, как в projects/mayak)
 1. **Сценарий** — формула и промт в `toon3d-shorts-higgsedit/references/prompts.md` §2. Учесть разбор виральности (`projects/mayak/virality.md`): крючок «Как X подстроил Y» в первые 1,5 с, трюк героя — причина победы (не удача), понятное правило/сигнал, финал с петлёй к первому кадру, слова «пари» вместо «ставки» (монетизация). Файл: `projects/<slug>/script.md`.

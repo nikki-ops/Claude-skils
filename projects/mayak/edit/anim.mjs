@@ -7,13 +7,13 @@ import { resolve } from "node:path";
 process.env.SHOTS = process.env.SHOTS || "shots_full.jsx";
 process.env.WORDS = process.env.WORDS || resolve("../audio/words.json");
 process.env.SCR = resolve(process.env.SCR || "../render");
-import { h } from "./h.js";
+import { h } from "./h.mjs";
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { createRequire } from "node:module";
 const { chromium } = createRequire(import.meta.url)("playwright");
 const S = process.env.SCR, FPS = 30;
 const SHOTS_SRC = process.env.SHOTS || "shots.jsx";
-await build({ entryPoints: [SHOTS_SRC], bundle: true, platform: "node", format: "esm", outfile: S + "/shots.mjs", jsxFactory: "__h", jsxFragment: "__F", inject: ["h.js"], loader: { ".jsx": "jsx" } });
+await build({ entryPoints: [SHOTS_SRC], bundle: true, platform: "node", format: "esm", outfile: S + "/shots.mjs", jsxFactory: "__h", jsxFragment: "__F", inject: ["h.mjs"], loader: { ".jsx": "jsx" } });
 const MOD = await import(pathToFileURL(S + "/shots.mjs").href + "?" + Date.now());
 const { SHOTS, T } = MOD;
 const Cap = (s) => h("text", { x: 40, y: 1303, width: 1000, align: "center", fontFamily: "Montserrat", fontWeight: 800, fontSize: 70, color: "#FFFFFF", strokeColor: "#000000", strokeWidth: 5, shadow: { x: 3, y: 4, blur: 0, color: "#000000" } }, s);
@@ -32,7 +32,11 @@ mkdirSync(S + "/" + (process.env.OUT || "frames"), { recursive: true });
 
 
 
-const browser = await chromium.launch(process.env.GPU ? { args: ["--ignore-gpu-blocklist", "--enable-gpu"] } : { args: ["--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist"] });
+// On Windows use the installed Microsoft Edge (Chromium) unless CHANNEL says otherwise: no Playwright browser download needed.
+const CHANNEL = process.env.CHANNEL ?? (process.platform === "win32" ? "msedge" : "");
+const launchOpts = process.env.GPU ? { args: ["--ignore-gpu-blocklist", "--enable-gpu"] } : { args: ["--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist"] };
+if (CHANNEL) launchOpts.channel = CHANNEL;
+const browser = await chromium.launch(launchOpts);
 const page = await browser.newPage({ viewport: { width: 1080, height: 1920 } });
 const shell = `<!doctype html><html><head><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@800&display=swap">
 <style>body{margin:0;background:#000;width:1080px;height:1920px;overflow:hidden}#cam{position:absolute;left:0;top:0;width:1080px;height:1920px;transform-origin:540px 960px}
