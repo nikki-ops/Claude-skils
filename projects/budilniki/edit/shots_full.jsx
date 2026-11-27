@@ -186,8 +186,8 @@ export const SHOTS = [
     mid: (t) => {
       if (t < 1.1) return [<Toon env="in" x={200} y={520} s={1.0} o="pajama" dur={2} face={{ eyes: "open", brows: "angry", mouth: "teeth", glasses: true, stache: true }} arms={{ r: ["knock"] }} hold={NIGHTCAP} anim={[{ property: "offsetX", keyframes: Array.from({ length: 9 }, (_, i) => ({ at: i * 0.13, value: i % 2 ? -14 : 0 })) }]} />,
         <Boom x={440} y={300} text="БАМ! БАМ!" s={0.85 + 0.08 * Math.abs(Math.sin(t * 24))} col="#FFFFFF" />];
-      if (t < 2.2) return [<Flashlight x={key([[1.1, 520], [2.2, 380]], t)} y={1120} rot={key([[1.1, -10], [2.2, 15]], t)} />,
-        <Toon env="in" x={key([[1.1, 520], [2.2, 380]], t) - 420} y={900} s={0.8} o="pajama" dur={3} face={{ eyes: "open", brows: "up", mouth: "o", glasses: true, stache: true }} arms={{ r: ["fwd"] }} hold={NIGHTCAP} anim={[{ property: "rotation", keyframes: [{ at: 0, value: 25 }, { at: 0.02, value: 25 }] }]} />,
+      if (t < 2.2) return [<Flashlight x={key([[1.1, 520], [2.2, 380]], t)} y={980} rot={key([[1.1, -10], [2.2, 15]], t)} />,
+        <Toon env="in" x={key([[1.1, 520], [2.2, 380]], t) - 420} y={760} s={0.8} o="pajama" dur={3} face={{ eyes: "open", brows: "up", mouth: "o", glasses: true, stache: true }} arms={{ r: ["fwd"] }} hold={NIGHTCAP} anim={[{ property: "rotation", keyframes: [{ at: 0, value: 25 }, { at: 0.02, value: 25 }] }]} />,
         <Boom x={300} y={300} text="ГДЕ?!" s={pop(t, 1.15, 2) * 0.8} col="#FFFFFF" />];
       return [<Toon env="in" x={200} y={560} s={1.0} o="pajama" dur={2} face={{ eyes: "squint", brows: "angry", mouth: "teeth", glasses: true, stache: true }} arms={{ r: ["up"], l: ["up"] }}
           hold={[<rect x={110} y={20} width={380} height={170} radius={60} fill="#FBF6E6" strokeColor={INK} strokeWidth={9} />]} anim={[{ property: "rotation", keyframes: Array.from({ length: 8 }, (_, i) => ({ at: i * 0.12, value: i % 2 ? 6 : -6 })) }]} />,
@@ -214,8 +214,8 @@ export const SHOTS = [
     p: () => ({ ...HALL, rx: 0.8, ry: 2.0, rz: 2.0, tx: 0.0, ty: 1.6, tz: -3.9, lens: 1.2 }),
     cam: (t) => ({ s: key([[0, 1.0], [2.5, 1.12]], t), x: 0, y: 0 }),
     top: (t) => { const m = t < 0.78 ? 5 : t < 1.57 ? 10 : 15; return [<Clock x={340} y={420} s={1.6 + 0.08 * pop(t, [0.02, 0.78, 1.57].filter((x) => t >= x).pop() ?? 0, 0.2)} h={9} m={m} />,
-      <Toon env="in" x={40} y={1180} s={0.62} o="mate3" dur={3} face={t < 1.57 ? { eyes: "open", brows: "up", mouth: "o" } : { eyes: "happy", brows: "up", mouth: "grin" }} />,
-      <Toon env="in" x={440} y={1200} s={0.62} o="mate1" dur={3} face={t < 1.57 ? { eyes: "open", brows: "up", mouth: "flat" } : { eyes: "happy", brows: "up", mouth: "grin" }} />,
+      <Toon env="in" x={40} y={1420} s={0.62} o="mate3" dur={3} face={t < 1.57 ? { eyes: "open", brows: "up", mouth: "o" } : { eyes: "happy", brows: "up", mouth: "grin" }} />,
+      <Toon env="in" x={440} y={1440} s={0.62} o="mate1" dur={3} face={t < 1.57 ? { eyes: "open", brows: "up", mouth: "flat" } : { eyes: "happy", brows: "up", mouth: "grin" }} />,
       <Boom x={280} y={1080} text="ТИК-ТАК" s={pop(t, 0.05, 3) * 0.6} col="#FFFFFF" rot={-4} />]; } },
   { name: "B13", at: A.B13, scene: "hall", focus: 3.2, blur: 7, enter: "cut",
     p: () => ({ ...HALL, rx: -0.4, ry: 1.6, rz: 0.8, tx: -1.4, ty: 1.1, tz: -3.0, lens: 1.1 }),
