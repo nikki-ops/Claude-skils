@@ -104,6 +104,7 @@ vec2 map(vec3 p){
   float gal=sdCylinder(l-vec3(0.0,8.1,0.0),0.12,1.25);
   float room=sdCylinder(l-vec3(0.0,8.8,0.0),0.6,0.75);
   float roof=sdCone(l-vec3(0.0,9.35,0.0),0.9,0.9,0.05);
+  float base=sdCylinder(l-vec3(0.0,-1.6,0.0),2.0,1.55); r=opU(r,vec2(min(base,sdCylinder(l-vec3(0.0,0.2,0.0),0.25,1.45)),29.0));
   r=opU(r,vec2(tower,9.0)); r=opU(r,vec2(gal,10.0)); r=opU(r,vec2(room,11.0)); r=opU(r,vec2(roof,10.0));
   // gallery railing: top ring, mid ring and posts around the lamp room
   if(length(l-vec3(0.0,8.6,0.0))<2.0){
@@ -135,7 +136,7 @@ vec3 skyD(vec3 rd){
 vec3 fogCol(vec3 rd){
   vec3 sunD=normalize(vec3(-0.75,0.06,-0.65));
   float s=max(dot(normalize(vec3(rd.x,0.0,rd.z)),normalize(vec3(sunD.x,0.0,sunD.z))),0.0);
-  return mix(hexc(214.0,150.0,205.0),hexc(255.0,190.0,150.0),pow(s,3.0));
+  return mix(hexc(170.0,140.0,200.0),hexc(255.0,186.0,150.0),pow(s,3.0));
 }
 vec4 pixel(vec2 uv){
   vec2 sp=screenP(uv,0.0);
@@ -149,7 +150,7 @@ vec4 pixel(vec2 uv){
   vec3 m=march(ro,rd,110.0,0.0045);
   float tObj=m.x>0.0?m.x:1e5;
   float tt=min(tObj,min(tDeck,tSea));
-  vec3 col=skyD(rd); float ink=m.z;
+  vec3 col=skyD(rd); float ink=(tSea<tObj&&tSea<tDeck)?0.0:m.z;
   if(tt<1e4){
     vec3 pos=ro+rd*tt, n, alb; float em=0.0;
     if(tt==tObj){ n=calcNormal(pos); float id=m.y;
@@ -199,7 +200,8 @@ vec4 pixel(vec2 uv){
       else if(id<26.5){ float hy=pos.y+2.2; alb=mix(hexc(96.0,58.0,40.0),hexc(70.0,40.0,32.0),noise2(pos.xy*vec2(1.0,12.0)));
         if(abs(hy-0.42)<0.03) alb=hexc(220.0,200.0,150.0); if(hy<0.12) alb=hexc(40.0,30.0,34.0); }
       else if(id<27.5){ alb=mix(hexc(250.0,238.0,214.0),hexc(226.0,204.0,176.0),noise2(pos.xy*3.0)); alb*=1.0-0.12*smoothstep(0.4,0.0,abs(fract(pos.y*2.2)-0.5)); em=0.45; ink*=0.3; }
-      else alb=hexc(245.0,240.0,232.0);
+      else if(id<28.5) alb=hexc(245.0,240.0,232.0);
+      else { vec3 bq=pos-LH; float br=step(0.5,fract(bq.y*3.0))*0.5; float bk=smoothstep(0.06,0.0,abs(fract(bq.y*3.0)-0.5)-0.44)+smoothstep(0.04,0.0,abs(fract(atan(bq.z,bq.x)*3.0+br)-0.5)-0.46); alb=mix(hexc(150.0,136.0,140.0),hexc(116.0,104.0,112.0),noise2(bq.xy*4.0)); alb*=1.0-0.4*clamp(bk,0.0,1.0); }
       col=shadeR(pos,n,alb,L,keyC,fillC,bounceC,shT,0.3)+alb*em*2.5;
       float rim=pow(clamp(1.0+dot(n,rd),0.0,1.0),3.0)*smoothstep(-0.2,0.6,dot(n,L));
       col+=keyC*alb*rim*0.6;
@@ -224,8 +226,8 @@ vec4 pixel(vec2 uv){
       n=normalize(vec3(-(hx*1.2+hx2*0.5)*fade*2.2,1.0,-(hz*1.2+hz2*0.5)*fade*2.2));
       vec3 rf=reflect(rd,n); rf.y=abs(rf.y);
       float fr=0.04+0.96*pow(1.0-max(dot(-rd,n),0.0),5.0);
-      vec3 deep=mix(hexc(36.0,34.0,96.0),hexc(70.0,52.0,130.0),smoothstep(4.0,50.0,tSea));
-      col=mix(deep*(0.75+0.5*h0),lin(skyD(rf)*0.9),clamp(fr*1.4,0.0,0.85));
+      vec3 deep=mix(hexc(22.0,30.0,84.0),hexc(52.0,44.0,118.0),smoothstep(4.0,60.0,tSea));
+      col=mix(deep*(0.8+0.4*h0),lin(skyD(rf))*0.8,clamp(fr*1.1,0.0,0.7));
       vec3 sunD=normalize(vec3(-0.75,0.06,-0.65));
       col+=hexc(255.0,190.0,120.0)*pow(max(dot(rf,sunD),0.0),90.0)*3.0;            // sun glitter path
       float crest=smoothstep(0.76,0.82,h1*0.6+h2*0.4)*fade;                           // whitecaps
@@ -243,10 +245,12 @@ vec4 pixel(vec2 uv){
       fd=1.0-exp(-0.28*a*e);
       float below=smoothstep(u_fogH+0.5,u_fogH-0.5,pos.y);
       float patch=0.55+0.45*noise2(pos.xz*0.09+vec2(u_time*0.03,0.0))*noise2(pos.xz*0.21-vec2(0.0,u_time*0.02))*2.0;
-      fd=clamp(max(fd,below*smoothstep(3.0,16.0,tt)*0.8)*patch,0.0,0.82);
+      bool isSea=(tt==tSea);
+      if(isSea){ below=0.0; fd*=0.6; }
+      fd=clamp(max(fd,below*smoothstep(3.0,16.0,tt)*0.75)*patch,0.0,isSea?0.55:0.8);
     }
     col=mix(col,fogCol(rd),fd);
-    col=mix(col,hexc(255.0,170.0,190.0),clamp((tt-30.0)*0.006,0.0,0.35));
+    col=mix(col,hexc(230.0,170.0,190.0),clamp((tt-40.0)*0.005,0.0,0.25));
     col=pow(max(col,0.0),vec3(0.4545));
   }
   // lamp glow + star rays + beams
