@@ -93,7 +93,8 @@ vec2 map(vec3 p){
       reef=smin(reef,sdEllipsoid(rk,vec3(0.55+0.25*sin(fi*1.3),0.45+0.35*abs(cos(fi*1.7)),0.5)),0.35); }
     reef=(reef+0.12*noise2(rr.xy*4.0)+0.08*noise2(rr.xz*7.0))*0.8;
     r=opU(r,vec2(reef,24.0)); }
-  // cape
+  // cape + lighthouse only behind z=-45 (cheap bound elsewhere)
+  if(p.z>-45.0){ float bd=p.z+45.05; if(bd<r.x) r=vec2(bd,0.0); return r; }
   vec3 c=p-vec3(18.0,-6.0,-64.0);
   float cape=smin(sdEllipsoid(c,vec3(16.0,13.0,9.0)),sdEllipsoid(c-vec3(-9.0,4.0,3.0),vec3(8.0,7.0,6.0)),3.0);
   cape=(cape+0.35*noise2(p.xz*0.25)+0.15*noise2(p.xy*0.9))*0.8;
@@ -138,6 +139,12 @@ vec3 fogCol(vec3 rd){
   float s=max(dot(normalize(vec3(rd.x,0.0,rd.z)),normalize(vec3(sunD.x,0.0,sunD.z))),0.0);
   return mix(hexc(170.0,140.0,200.0),hexc(255.0,186.0,150.0),pow(s,3.0));
 }
+vec3 shadeF(vec3 pos, vec3 n, vec3 alb, vec3 L, vec3 keyC, vec3 fillC, vec3 bounceC, vec3 shT, float aoS, float t){
+  if(t<30.0) return shadeR(pos,n,alb,L,keyC,fillC,bounceC,shT,aoS);
+  float lit=smoothstep(-0.10,0.30,dot(n,L));
+  vec3 c=alb*(keyC*lit+fillC*(0.5+0.5*n.y)+bounceC*max(0.0,-n.y)*0.6);
+  return c*mix(shT,vec3(1.0),lit);
+}
 vec4 pixel(vec2 uv){
   vec2 sp=screenP(uv,0.0);
   vec3 ro=vec3(u_rx,u_ry,u_rz), ta=vec3(u_tx,u_ty,u_tz);
@@ -147,7 +154,9 @@ vec4 pixel(vec2 uv){
   vec3 shT=vec3(0.55,0.42,0.68);
   float tDeck=(rd.y<0.0)?(0.0-ro.y)/rd.y:1e5; vec3 pD=ro+rd*tDeck; if(pD.z<-2.85) tDeck=1e5;
   float tSea=(rd.y<0.0)?(-2.2-ro.y)/rd.y:1e5;
-  vec3 m=march(ro,rd,110.0,0.0045);
+  bool nearL=u_layer>1.5;
+  vec3 m=march(ro,rd,nearL?u_focus*1.4:110.0,0.0045);
+  if(nearL && m.x<0.0) return vec4(0.0);
   float tObj=m.x>0.0?m.x:1e5;
   float tt=min(tObj,min(tDeck,tSea));
   vec3 col=skyD(rd); float ink=(tSea<tObj&&tSea<tDeck)?0.0:m.z;
@@ -202,7 +211,7 @@ vec4 pixel(vec2 uv){
       else if(id<27.5){ alb=mix(hexc(250.0,238.0,214.0),hexc(226.0,204.0,176.0),noise2(pos.xy*3.0)); alb*=1.0-0.12*smoothstep(0.4,0.0,abs(fract(pos.y*2.2)-0.5)); em=0.45; ink*=0.3; }
       else if(id<28.5) alb=hexc(245.0,240.0,232.0);
       else { vec3 bq=pos-LH; float br=step(0.5,fract(bq.y*3.0))*0.5; float bk=smoothstep(0.06,0.0,abs(fract(bq.y*3.0)-0.5)-0.44)+smoothstep(0.04,0.0,abs(fract(atan(bq.z,bq.x)*3.0+br)-0.5)-0.46); alb=mix(hexc(150.0,136.0,140.0),hexc(116.0,104.0,112.0),noise2(bq.xy*4.0)); alb*=1.0-0.4*clamp(bk,0.0,1.0); }
-      col=shadeR(pos,n,alb,L,keyC,fillC,bounceC,shT,0.3)+alb*em*2.5;
+      col=shadeF(pos,n,alb,L,keyC,fillC,bounceC,shT,0.3,tt)+alb*em*2.5;
       float rim=pow(clamp(1.0+dot(n,rd),0.0,1.0),3.0)*smoothstep(-0.2,0.6,dot(n,L));
       col+=keyC*alb*rim*0.6;
     } else if(tt==tDeck){ n=vec3(0.0,1.0,0.0);
