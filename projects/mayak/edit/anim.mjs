@@ -1,6 +1,12 @@
 // Frame-by-frame renderer for shots.jsx: WebGL (SwiftShader) for the 3D sets, SVG for the 2D cards.
 // usage: SCR=<scratch dir> NODE_PATH=<global node_modules> node anim.mjs [from_frame to_frame]
 import { build } from "esbuild";
+import { pathToFileURL } from "node:url";
+import { resolve } from "node:path";
+// defaults let a plain `node anim.mjs` render the full film from projects/mayak/edit
+process.env.SHOTS = process.env.SHOTS || "shots_full.jsx";
+process.env.WORDS = process.env.WORDS || resolve("../audio/words.json");
+process.env.SCR = resolve(process.env.SCR || "../render");
 import { h } from "./h.js";
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { createRequire } from "node:module";
@@ -8,7 +14,7 @@ const { chromium } = createRequire(import.meta.url)("playwright");
 const S = process.env.SCR, FPS = 30;
 const SHOTS_SRC = process.env.SHOTS || "shots.jsx";
 await build({ entryPoints: [SHOTS_SRC], bundle: true, platform: "node", format: "esm", outfile: S + "/shots.mjs", jsxFactory: "__h", jsxFragment: "__F", inject: ["h.js"], loader: { ".jsx": "jsx" } });
-const MOD = await import(S + "/shots.mjs?" + Date.now());
+const MOD = await import(pathToFileURL(S + "/shots.mjs").href + "?" + Date.now());
 const { SHOTS, T } = MOD;
 const Cap = (s) => h("text", { x: 40, y: 1303, width: 1000, align: "center", fontFamily: "Montserrat", fontWeight: 800, fontSize: 70, color: "#FFFFFF", strokeColor: "#000000", strokeWidth: 5, shadow: { x: 3, y: 4, blur: 0, color: "#000000" } }, s);
 let CAPS = MOD.CAPS || [];
@@ -26,7 +32,7 @@ mkdirSync(S + "/" + (process.env.OUT || "frames"), { recursive: true });
 
 
 
-const browser = await chromium.launch({ args: ["--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist"] });
+const browser = await chromium.launch(process.env.GPU ? { args: ["--ignore-gpu-blocklist", "--enable-gpu"] } : { args: ["--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist"] });
 const page = await browser.newPage({ viewport: { width: 1080, height: 1920 } });
 const shell = `<!doctype html><html><head><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@800&display=swap">
 <style>body{margin:0;background:#000;width:1080px;height:1920px;overflow:hidden}#cam{position:absolute;left:0;top:0;width:1080px;height:1920px;transform-origin:540px 960px}
@@ -48,7 +54,7 @@ window.draw=(id,key,fs,P,time)=>{ const [gl,pr,c]=prog(id,key,fs); gl.useProgram
 window.clear=(id)=>{ const c=document.getElementById(id); const gl=c.getContext('webgl'); if(gl){gl.disable(gl.SCISSOR_TEST);gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT);} };
 </script></body></html>`;
 writeFileSync(S + "/anim.html", shell);
-await page.goto("file://" + S + "/anim.html");
+await page.goto(pathToFileURL(S + "/anim.html").href);
 await page.waitForTimeout(1500);
 
 const fragFor = (scene, P) => {

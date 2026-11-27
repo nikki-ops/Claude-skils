@@ -15,20 +15,18 @@ npx playwright install chromium
 ```
 
 ## 2. Рендер кадров
-Windows (PowerShell), из папки `projects/mayak/edit`:
-```powershell
-$env:SCR = "$PWD\..\render"; $env:SHOTS = "shots_full.jsx"; $env:WORDS = "$PWD\..\audio\words.json"; $env:OUT = "frames"
-mkdir $env:SCR -Force
+Из папки `projects/mayak/edit`, команда одна для Windows, macOS и Linux:
+```bash
 node anim.mjs 0 1325
 ```
-macOS / Linux:
-```bash
-export SCR="$PWD/../render" SHOTS=shots_full.jsx WORDS="$PWD/../audio/words.json" OUT=frames
-mkdir -p "$SCR" && node anim.mjs 0 1325
-```
-- Кадры появятся в `projects/mayak/render/frames/f0000.png … f1325.png` (30 fps, 44,2 с).
+- Кадры появятся в `projects/mayak/render/frames/f0000.png … f1325.png` (30 fps, 44,2 с). Субтитры уже впечатаны.
+- **Быстрее на видеокарте:** перед запуском задай `GPU=1`.
+  - Windows PowerShell: `$env:GPU=1; node anim.mjs 0 1325`
+  - macOS/Linux: `GPU=1 node anim.mjs 0 1325`
+
+  Если с `GPU=1` кадры получаются чёрными, запусти без него.
 - Можно частями: `node anim.mjs 0 600`, потом `node anim.mjs 601 1325`.
-- Если в `anim.mjs` браузер не видит видеокарту, убери из `chromium.launch` аргументы `--use-angle=swiftshader` и `--enable-unsafe-swiftshader`. Тогда WebGL пойдёт через GPU.
+- Один кадр для проверки: `node anim.mjs list 330`.
 
 ## 3. Склейка со звуком (голос Mell v4 + звуки, без музыки)
 ```bash
