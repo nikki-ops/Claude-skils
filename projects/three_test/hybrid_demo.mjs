@@ -1,0 +1,14 @@
+import { build } from "esbuild";
+import { readFileSync, writeFileSync } from "node:fs";
+import { createRequire } from "node:module";
+process.chdir("/home/user/Claude-skils/projects/mayak/edit");
+await build({ entryPoints: ["/tmp/claude-0/demo.jsx"], bundle: true, platform: "node", format: "esm", outfile: "/tmp/claude-0/demo_b.mjs", jsxFactory: "__h", jsxFragment: "__F", inject: ["h.mjs"], loader: { ".jsx": "jsx" } });
+const { node } = await import("/tmp/claude-0/demo_b.mjs");
+const { toSVG, svgDefs, resetDefs } = await import("/home/user/Claude-skils/projects/mayak/edit/svg.mjs");
+resetDefs(); const inner = toSVG(node, 0.5);
+const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1920" viewBox="0 0 1080 1920"><defs>${svgDefs()}</defs>${inner}</svg>`;
+const bg = readFileSync("/home/user/Claude-skils/projects/three_test/bg.png").toString("base64");
+const { chromium } = createRequire(import.meta.url)("playwright");
+const b = await chromium.launch(); const p = await b.newPage({ viewport: { width: 1080, height: 1920 } });
+await p.setContent(`<html><body style="margin:0;width:1080px;height:1920px;background:url(data:image/png;base64,${bg})">${svg}</body></html>`);
+await p.waitForTimeout(300); await p.screenshot({ path: "/tmp/claude-0/hybrid.png" }); await b.close(); console.log("ok");

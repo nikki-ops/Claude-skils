@@ -134,8 +134,8 @@ function toon({ x, z, rotY = 0, cap = 0x3a5fa8, body = denim }) {
   for (const sx of [-0.17, 0.2]) { const shoe = new THREE.Mesh(new THREE.SphereGeometry(0.08, 16, 8), limb); shoe.position.set(sx, 0.04, 0.06); shoe.scale.set(1, 0.6, 1.6); g.add(shoe); }
   g.traverse((m) => { m.castShadow = m.receiveShadow = true; }); return g;
 }
-toon({ x: 3.4, z: 2.9, rotY: 0.75 });
-toon({ x: 5.6, z: 1.6, rotY: 1.1, cap: 0x8a3a2a });
+// toon({ x: 3.4, z: 2.9, rotY: 0.75 });
+// toon({ x: 5.6, z: 1.6, rotY: 1.1, cap: 0x8a3a2a });
 
 // ---------- lights ----------
 scene.add(new THREE.HemisphereLight(0xcfdcf0, 0x4a3a2c, 0.35));
