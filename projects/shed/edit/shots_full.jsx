@@ -132,60 +132,91 @@ function Tray({ x, y, s = 1, rot = 0 }) {
 const flash = (t, ts) => { const d = ts.map((x) => t - x).filter((u) => u >= 0 && u < 0.18); return d.length ? 1 - d[0] / 0.18 : 0; };
 const Flash = ({ a }) => (a > 0.01 ? <rect x={0} y={0} width={1080} height={1920} fill="#FFFFFF" opacity={a * 0.85} /> : null);
 
+// --- 3D placement: characters stand on the floor of the scene, size from depth ---
+const sub = (a, b) => [a[0] - b[0], a[1] - b[1], a[2] - b[2]], dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+const crs = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]], nrm = (a) => { const l = Math.hypot(...a); return a.map((v) => v / l); };
+export const proj = (c, X, Y, Z) => { const ro = [c.rx, c.ry, c.rz], ww = nrm(sub([c.tx, c.ty, c.tz], ro)), uu = nrm(crs(ww, [0, 1, 0])), vv = crs(uu, ww), d = sub([X, Y, Z], ro), z = dot(d, ww);
+  return { px: 540 + dot(d, uu) * c.lens / z * 1920, py: 960 - dot(d, vv) * c.lens / z * 1920, z }; };
+export const stand = (c, X, Z, H = 1.55) => { const f = proj(c, X, 0, Z), s = H * c.lens * 1920 / (f.z * 985); return { x: f.px - 300, y: f.py - 500 - 485 * s, s }; };
+// sign text glued to the 3D sign board over the door (centre -0.35,1.98,-1.91; 1.24 m wide)
+function Sign({ c, s = 1 }) {
+  if (s <= 0.01) return null; const f = proj(c, -0.35, 1.98, -1.91), w = 1.24 * c.lens / f.z * 1920, h = 0.32 * c.lens / f.z * 1920;
+  return <frame x={f.px - w / 2} y={f.py - h / 2} width={w} height={h} layout="none" origin="center" animate={S(s)}>
+    <text x={0} y={h * 0.2} width={w} align="center" fontFamily="Montserrat" fontWeight={800} fontSize={h * 0.58} color="#FFF3C8" strokeColor="#1E1418" strokeWidth={Math.max(2, h * 0.05)}>THE SHED</text>
+  </frame>;
+}
+
 const A = { S1: 0, S2: 2.68, S3: 4.11, S4: 6.90, S5: 9.74, S6: 10.79, S7: 13.48, S8: 15.19, S9: 16.61, S10: 19.33, S11: 22.90, S12: 24.72, S13: 25.82, S14: 29.86, S15: 31.80, S16: 35.15 };
 export const T = 38.3;
 export const CAP_Y = 1330;
 const DAY = { night: 0, lights: 0, table: 0, dawn: 0, sign: 1 };
 const NIGHT = { night: 1, lights: 1, table: 1, dawn: 0, sign: 1 };
 const ROOM = { night: 0, lamp: 0.5, cut: 0, pbed: 0, prof: 0 };
-const WIDE = { rx: 0.6, ry: 1.4, rz: 3.2, tx: 0.0, ty: 1.2, tz: -2.6, lens: 1.0 };
 const HERO = (o) => ({ env: "out", o: "chef", hold: [...BEANIE, ...(o || [])] });
+const LAPTOP = [<rect x={330} y={470} width={250} height={160} radius={12} fill="#3A3A4A" strokeColor={INK} strokeWidth={8} />, <rect x={346} y={484} width={218} height={120} radius={6} fill="#BFE6FF" />,
+  <rect x={366} y={506} width={150} height={12} radius={6} fill="#7FA8C8" />, <rect x={366} y={534} width={110} height={12} radius={6} fill="#7FA8C8" />, <rect x={310} y={624} width={290} height={24} radius={8} fill="#55556A" strokeColor={INK} strokeWidth={7} />];
+
+export const C = {
+  S1: (t) => ({ rx: key([[0, 1.4], [2.6, 0.9]], t), ry: 1.3, rz: key([[0, 2.6], [2.6, 2.0]], t), tx: -0.2, ty: 1.5, tz: -2.0, lens: 1.0 }),
+  S2: () => ({ rx: 0.8, ry: 1.3, rz: 0.9, tx: -0.1, ty: 1.25, tz: -2.0, lens: 1.1 }),
+  S3: (t) => ({ rx: key([[0, 0.2], [2.8, 0.5]], t), ry: 1.45, rz: 1.9, tx: 0.5, ty: 1.0, tz: -2.0, lens: 1.0 }),
+  S4: (t) => ({ rx: 0.9, ry: 1.5, rz: 0.7, tx: 0.5, ty: 1.35, tz: -2.0, lens: 1.1 }),
+  S5: (t) => ({ rx: -0.9, ry: 1.3, rz: 1.5, tx: 0.2, ty: 1.1, tz: -2.2, lens: 1.05 }),
+  S7: (t) => ({ rx: -0.4, ry: 1.55, rz: 1.1, tx: 0.2, ty: 1.15, tz: -1.4, lens: 1.1 }),
+  S9: (t) => ({ rx: key([[0, 1.2], [2.7, 0.6]], t), ry: 1.35, rz: 2.6, tx: 0.0, ty: 1.15, tz: -2.0, lens: 1.0 }),
+  S10: (t) => ({ rx: 0.0, ry: key([[0, 0.5], [3.5, 2.6]], t), rz: key([[0, 3.6], [3.5, 3.0]], t), tx: -0.2, ty: key([[0, 1.3], [3.5, 1.7]], t), tz: -3.0, lens: 1.0 }),
+  S11: (t) => ({ rx: 2.2, ry: 1.4, rz: 3.2, tx: -0.2, ty: 1.1, tz: -2.2, lens: 1.0 }),
+  S12: (t) => ({ rx: 0.7, ry: 1.45, rz: 0.8, tx: 0.5, ty: 1.3, tz: -2.0, lens: 1.1 }),
+  S13: (t) => ({ rx: key([[0, -1.6], [4.0, -0.8]], t), ry: 0.8, rz: 4.6, tx: 0.0, ty: 1.5, tz: -3.0, lens: 1.05 }),
+  S14: (t) => ({ rx: key([[0, 2.6], [1.9, 2.0]], t), ry: 1.6, rz: 3.8, tx: 0.0, ty: 1.0, tz: -1.4, lens: 1.0 }),
+  S15: (t) => ({ rx: 0.4, ry: 1.4, rz: 1.5, tx: 0.6, ty: 1.0, tz: -2.0, lens: 1.05 }),
+  S16: (t) => ({ rx: key([[0, 2.0], [3.1, 1.6]], t), ry: 1.5, rz: 2.6, tx: 0.0, ty: 0.95, tz: -0.6, lens: 1.0 }),
+};
 
 export const SHOTS = [
-  // 0.00 «Парень сделал свой садовый сарай лучшим рестораном Лондона.» — he slams a sign onto the shed, №1 stamp
+  // 0.00 hook: he slams the sign onto the shed, №1 medal drops
   { name: "S1", at: A.S1, scene: "garden", focus: null,
-    p: (t) => ({ ...DAY, sign: t > 0.55 ? 1 : 0, rx: key([[0, 1.4], [2.6, 0.7]], t), ry: 1.3, rz: key([[0, 2.2], [2.6, 1.6]], t), tx: -0.3, ty: 1.55, tz: -2.0, lens: 1.0 }),
-    cam: (t) => ({ s: key([[0, 1.0], [2.6, 1.1]], t), x: 0, y: 0 }),
-    mid: (t) => [<Toon {...HERO()} x={330} y={560} s={1.05} dur={3} face={{ eyes: t < 0.6 ? "open" : "smug", brows: t < 0.6 ? "angry" : "smug", mouth: t < 0.6 ? "teeth" : "smirk", blinks: [1.6] }}
-      arms={{ r: ["lift", "slap", 0.45], l: ["lift"] }} anim={[{ property: "offsetY", keyframes: [{ at: 0, value: 0 }, { at: 0.25, value: -40 }, { at: 0.5, value: 0 }, { at: 3, value: 0 }] }]} />],
-    top: (t) => [<Label x={170} y={key([[0.45, 450], [0.6, 640]], t)} w={680} size={74} text="РЕСТОРАН" bg="#D21E34" fg="#FFFFFF" s={t > 0.45 ? 1 : 0} rot={-3} />,
-      <Boom x={170} y={470} text="БАХ!" s={pop(t, 0.5, 0.5)} rot={8} />,
-      <Medal x={620} y={key([[1.7, 0], [1.85, 120]], t)} s={pop(t, 1.7, 5) * 0.8} />] },
-  // 2.68 «Не приготовив ни одного блюда.» — empty plate, shrug
-  { name: "S2", at: A.S2, scene: "garden", focus: 2.0, blur: 6, enter: "whip",
-    p: (t) => ({ ...DAY, rx: 0.9, ry: 1.25, rz: 0.6, tx: -0.2, ty: 1.2, tz: -2.0, lens: 1.1 }),
-    cam: (t) => ({ s: key([[0, 1.04], [1.4, 1.12]], t), x: 0, y: 0 }),
-    mid: (t) => [<Toon {...HERO(PLATE0(470, 560, 260))} x={200} y={420} s={1.25} dur={2} face={{ eyes: "smug", brows: "up", mouth: "smirk", blinks: [0.9] }} arms={{ r: ["hold"], l: ["down", "up", 0.5] }} />],
+    p: (t) => ({ ...DAY, sign: t > 0.55 ? 1 : 0, ...C.S1(t) }),
+    cam: (t) => ({ s: key([[0, 1.0], [2.6, 1.06]], t), x: 0, y: 0 }),
+    mid: (t) => [<Sign c={C.S1(t)} s={t > 0.55 ? 1 : 0} />,
+      <Toon {...HERO()} {...stand(C.S1(t), 0.45, -1.45)} dur={3} face={{ eyes: t < 0.6 ? "open" : "smug", brows: t < 0.6 ? "angry" : "smug", mouth: t < 0.6 ? "teeth" : "smirk", blinks: [1.6] }}
+        arms={{ l: ["lift", "point", 0.45], r: ["down"] }} anim={[{ property: "offsetY", keyframes: [{ at: 0, value: 0 }, { at: 0.25, value: -40 }, { at: 0.5, value: 0 }, { at: 3, value: 0 }] }]} />],
+    top: (t) => [<Boom x={60} y={330} text="БАХ!" s={pop(t, 0.5, 0.5)} rot={8} />,
+      <Medal x={600} y={key([[1.7, -60], [1.85, 60]], t)} s={pop(t, 1.7, 5) * 0.75} />] },
+  // 2.68 «Не приготовив ни одного блюда.»
+  { name: "S2", at: A.S2, scene: "garden", focus: null, enter: "whip",
+    p: () => ({ ...DAY, ...C.S2() }),
+    cam: (t) => ({ s: key([[0, 1.0], [1.4, 1.06]], t), x: 0, y: 0 }),
+    mid: (t) => [<Sign c={C.S2()} />, <Toon {...HERO(PLATE0(470, 560, 260))} {...stand(C.S2(), 0.35, -1.2)} dur={2} face={{ eyes: "smug", brows: "up", mouth: "smirk", blinks: [0.9] }} arms={{ r: ["hold"], l: ["down", "up", 0.5] }} />],
     top: (t) => [<Boom x={260} y={250} text="0 БЛЮД" s={pop(t, 0.35, 2)} col="#FFFFFF" rot={-6} />] },
-  // 4.11 «Раньше ему платили по десять фунтов — за фальшивые отзывы чужим кафе.» — typing reviews, coins
-  { name: "S3", at: A.S3, scene: "room", focus: 1.6, blur: 8, enter: "fade",
-    p: (t) => ({ ...ROOM, lamp: 0.9, rx: key([[0, 0.3], [2.8, 0.6]], t), ry: 1.35, rz: -0.6, tx: 1.75, ty: 0.95, tz: -2.3, lens: 1.0 }),
+  // 4.11 fake reviews for £10
+  { name: "S3", at: A.S3, scene: "room", focus: null, enter: "fade",
+    p: (t) => ({ ...ROOM, lamp: 0.9, ...C.S3(t) }),
     cam: (t) => ({ s: key([[0, 1.0], [2.8, 1.06]], t), x: 0, y: 0 }),
-    mid: (t) => [<Toon {...HERO()} env="in" x={180} y={560} s={1.0} dur={3} sit face={{ eyes: "smug", brows: "smug", mouth: "smirk", blinks: [1.1, 2.4] }} arms={{ r: ["fwd"], l: ["fwd"] }} anim={bob(17, 0.09, -6)} />],
-    top: (t) => [<Laptop x={460} y={940} s={1.0} />,
-      ...[0.3, 1.0, 1.7, 2.3].map((t0, i) => <Coin x={720 - (i % 2) * 520 + 30 * i} y={key([[t0, 640], [t0 + 0.8, 420]], t) - i * 40} s={pop(t, t0, 3) * 0.75} />),
+    mid: (t) => [<Toon {...HERO(LAPTOP)} env="in" {...stand(C.S3(t), 0.3, -1.3)} dur={3} face={{ eyes: "smug", brows: "smug", mouth: "smirk", blinks: [1.1, 2.4] }} arms={{ r: ["hold"], l: ["fwd"] }} />],
+    top: (t) => [...[0.3, 1.0, 1.7, 2.3].map((t0, i) => <Coin x={760 - (i % 2) * 640 + 30 * i} y={key([[t0, 700], [t0 + 0.8, 480]], t) - i * 40} s={pop(t, t0, 3) * 0.75} />),
       <Stars x={260} y={key([[0.6, 330], [2.4, 260]], t)} s={pop(t, 0.6, 3) * 0.95} />,
-      <Label x={180} y={160} w={720} size={52} text="«ЛУЧШЕЕ КАФЕ!!!»" bg="#FFFFFF" s={pop(t, 1.4, 3) * 0.9} rot={3} />] },
-  // 6.90 «И он подумал: а что, если отзывы будут на ресторан, которого нет?» — lightbulb, thought bubble
-  { name: "S4", at: A.S4, scene: "room", focus: 1.3, blur: 10, enter: "cut",
-    p: (t) => ({ ...ROOM, lamp: 0.9, rx: 1.0, ry: 1.2, rz: -0.9, tx: 1.6, ty: 1.0, tz: -2.3, lens: 1.15 }),
-    cam: (t) => ({ s: key([[0, 1.05], [2.8, 1.15]], t), x: 0, y: key([[0, 0], [2.8, 40]], t) }),
-    mid: (t) => [<Toon {...HERO()} env="in" x={240} y={620} s={1.15} dur={3} face={t < 0.9 ? { eyes: "open", brows: "flat", mouth: "flat" } : { eyes: "smug", brows: "smug", mouth: "grin", blinks: [2.2] }} arms={{ r: ["down", "point", 0.9] }} />],
-    top: (t) => [<Bulb x={520} y={260} s={pop(t, 0.85, 3) * 0.9} />,
-      t > 1.4 ? <frame x={120} y={160} width={420} height={360} layout="none" origin="center" animate={S(pop(t, 1.4, 3) * 0.95, -4)}>
+      <Label x={180} y={150} w={720} size={52} text="«ЛУЧШЕЕ КАФЕ!!!»" bg="#FFFFFF" s={pop(t, 1.4, 3) * 0.9} rot={3} />] },
+  // 6.90 the idea
+  { name: "S4", at: A.S4, scene: "room", focus: null, enter: "cut",
+    p: (t) => ({ ...ROOM, lamp: 0.9, ...C.S4(t) }),
+    cam: (t) => ({ s: key([[0, 1.0], [2.8, 1.08]], t), x: 0, y: 0 }),
+    mid: (t) => [<Toon {...HERO()} env="in" {...stand(C.S4(t), 0.5, -1.2)} dur={3} face={t < 0.9 ? { eyes: "open", brows: "flat", mouth: "flat" } : { eyes: "smug", brows: "smug", mouth: "grin", blinks: [2.2] }} arms={{ r: ["down", "point", 0.9] }} />],
+    top: (t) => [<Bulb x={700} y={180} s={pop(t, 0.85, 3) * 0.8} />,
+      t > 1.4 ? <frame x={60} y={120} width={420} height={360} layout="none" origin="center" animate={S(pop(t, 1.4, 3) * 0.85, -4)}>
         {P(circ(210, 170, 200, 160), { fill: "#FFFFFF", stroke: { width: 9, color: INK } })}
         {P("M120 230 L120 140 L210 80 L300 140 L300 230 Z", { fill: "#7AA070", stroke: { width: 8, color: INK } })}
         <rect x={180} y={160} width={50} height={70} radius={4} fill="#C45C40" strokeColor={INK} strokeWidth={6} />
         <text x={250} y={30} width={140} align="center" fontFamily="Montserrat" fontWeight={800} fontSize={110} color="#D21E34">?</text>
       </frame> : null] },
-  // 9.74 «Он фотографирует «блюда».» — hero with a camera, flash
+  // 9.74 he photographs the «dishes»
   { name: "S5", at: A.S5, scene: "garden", focus: null, enter: "whip",
-    p: (t) => ({ ...DAY, rx: -0.9, ry: 1.3, rz: 1.4, tx: 0.2, ty: 1.1, tz: -2.2, lens: 1.05 }),
-    cam: (t) => ({ s: key([[0, 1.04], [1.05, 1.1]], t), x: 0, y: 0 }),
-    mid: (t) => [<Toon {...HERO([<rect x={330} y={300} width={190} height={130} radius={18} fill="#3A3A4A" strokeColor={INK} strokeWidth={8} />, P(circ(425, 365, 44), { fill: "#8FD0F0", stroke: { width: 8, color: INK } }), <rect x={470} y={280} width={40} height={24} radius={6} fill="#D21E34" strokeColor={INK} strokeWidth={5} />])}
-      x={160} y={440} s={1.2} dur={2} face={{ eyes: "squint", brows: "smug", mouth: "smirk" }} arms={{ r: ["fwd"], l: ["fwd"] }} />],
-    top: (t) => [<Boom x={420} y={260} text="ЩЁЛК!" s={pop(t, 0.3, 0.6)} col="#FFFFFF" rot={8} />, <Flash a={flash(t, [0.3])} />] },
-  // 10.79 «Пена для бритья.» 11.55 «Таблетки для посудомойки.» 12.67 «Губка для посуды.» — fake dish photos
+    p: (t) => ({ ...DAY, ...C.S5(t) }),
+    cam: (t) => ({ s: key([[0, 1.0], [1.05, 1.06]], t), x: 0, y: 0 }),
+    mid: (t) => [<Sign c={C.S5(t)} />, <Toon {...HERO([<rect x={330} y={300} width={190} height={130} radius={18} fill="#3A3A4A" strokeColor={INK} strokeWidth={8} />, P(circ(425, 365, 44), { fill: "#8FD0F0", stroke: { width: 8, color: INK } }), <rect x={470} y={280} width={40} height={24} radius={6} fill="#D21E34" strokeColor={INK} strokeWidth={5} />])}
+      {...stand(C.S5(t), -0.15, -1.0)} dur={2} face={{ eyes: "squint", brows: "smug", mouth: "smirk" }} arms={{ r: ["fwd"], l: ["fwd"] }} />],
+    top: (t) => [<Boom x={460} y={240} text="ЩЁЛК!" s={pop(t, 0.3, 0.6)} col="#FFFFFF" rot={8} />, <Flash a={flash(t, [0.3])} />] },
+  // 10.79 / 11.55 / 12.67 dish photos
   { name: "S6", at: A.S6, scene: "garden", focus: 0.9, blur: 14, enter: "cut",
     p: (t) => ({ ...DAY, table: 1, rx: 0.3, ry: 1.6, rz: 0.9, tx: 0.0, ty: 0.8, tz: -0.4, lens: 1.1 }),
     cam: (t) => ({ s: key([[0, 1.0], [2.7, 1.06]], t), x: 0, y: 0 }),
@@ -199,14 +230,14 @@ export const SHOTS = [
           <text x={0} y={760} width={880} align="center" fontFamily="Montserrat" fontWeight={800} fontSize={k === "tab" ? 44 : 56} color="#1E1418">{name}</text>
         </frame>,
         <Stars x={260} y={210} s={pop(t, t0 + 0.15, 2) * 0.9} />, <Flash a={flash(t, [0.0, 0.76, 1.88])} />]; } },
-  // 13.48 «А одно блюдо — его собственная нога.»
-  { name: "S7", at: A.S7, scene: "garden", focus: 0.9, blur: 14, enter: "cut",
-    p: (t) => ({ ...DAY, table: 1, rx: -0.4, ry: 1.5, rz: 0.8, tx: 0.0, ty: 0.8, tz: -0.4, lens: 1.1 }),
-    cam: (t) => ({ s: key([[0, 1.02], [1.7, 1.12]], t), x: 0, y: 0 }),
-    mid: (t) => [<Toon {...HERO()} x={key([[0, 560], [1.7, 540]], t)} y={240} s={0.75} dur={2} face={{ eyes: t < 0.8 ? "squint" : "smug", brows: "smug", mouth: t < 0.8 ? "teeth" : "smirk" }} arms={{ r: ["down"], l: ["up"] }} anim={[{ property: "rotation", keyframes: [{ at: 0, value: -8 }, { at: 1.7, value: -8 }] }]} />],
-    top: (t) => [<frame x={40} y={760} width={1000} height={600} layout="none" origin="center" animate={S(1.8, -2)}><Dish x={300} y={170} k="foot" rot={0} /></frame>,
-      <Boom x={260} y={160} text="ФИРМЕННОЕ" s={pop(t, 0.7, 2) * 0.85} rot={-6} />, <Flash a={flash(t, [0.05])} />] },
-  // 15.19 «Адреса нет.» 15.79 «Только по записи.» — website on a phone
+  // 13.48 his own foot as a dish — he stands BEHIND the table (table is in the near layer and covers his legs)
+  { name: "S7", at: A.S7, scene: "garden", focus: 2.1, blur: 3, enter: "cut",
+    p: (t) => ({ ...DAY, table: 1, ...C.S7(t) }),
+    cam: (t) => ({ s: key([[0, 1.0], [1.7, 1.08]], t), x: 0, y: 0 }),
+    mid: (t) => [<Sign c={C.S7(t)} />, <Toon {...HERO()} {...stand(C.S7(t), 0.45, -1.8)} dur={2} face={{ eyes: t < 0.8 ? "squint" : "smug", brows: "smug", mouth: t < 0.8 ? "teeth" : "smirk" }} arms={{ r: ["down"], l: ["up"] }} />],
+    top: (t) => [<frame x={40} y={900} width={1000} height={600} layout="none" origin="center" animate={S(1.6, -2)}><Dish x={300} y={170} k="foot" rot={0} /></frame>,
+      <Boom x={260} y={120} text="ФИРМЕННОЕ" s={pop(t, 0.7, 2) * 0.85} rot={-6} />, <Flash a={flash(t, [0.05])} />] },
+  // 15.19 website: address ???, appointment only
   { name: "S8", at: A.S8, scene: "garden", focus: 0.6, blur: 16, enter: "fade",
     p: (t) => ({ ...DAY, rx: 0.4, ry: 1.2, rz: 1.4, tx: 0.0, ty: 1.3, tz: -2.0, lens: 1.0 }),
     cam: (t) => ({ s: 1.04, x: 0, y: 0 }),
@@ -220,47 +251,49 @@ export const SHOTS = [
         <text x={60} y={748} width={420} align="center" fontFamily="Montserrat" fontWeight={800} fontSize={40} color="#FFFFFF">ЗАПИСАТЬСЯ</text>
       </Phone>,
       <Label x={110} y={1080} w={860} size={64} text="ТОЛЬКО ПО ЗАПИСИ" bg="#FFE45C" s={pop(t, 0.62, 3)} rot={-6} />] },
-  // 16.61 «Друзья смеялись: «Шеф-повар губок».» 18.38 «Но писали отзывы.»
+  // 16.61 friends laugh, then write reviews
   { name: "S9", at: A.S9, scene: "garden", focus: null, enter: "whip",
-    p: (t) => ({ ...DAY, rx: key([[0, 1.2], [2.7, 0.6]], t), ry: 1.35, rz: 2.4, tx: 0.0, ty: 1.15, tz: -2.0, lens: 1.0 }),
-    cam: (t) => ({ s: key([[0, 1.0], [2.7, 1.08]], t), x: 0, y: 0 }),
-    mid: (t) => { const typing = t > 1.77; return [
-      <Toon env="out" x={-20} y={700} s={0.82} o="f1" dur={3} face={typing ? { eyes: "squint", brows: "flat", mouth: "smirk" } : { eyes: "happy", brows: "up", mouth: "grin" }} laugh={!typing} arms={typing ? { r: ["hold"] } : {}} hold={typing ? PHONE() : []} />,
-      <Toon env="out" x={270} y={650} s={0.88} o="f2" dur={3} face={typing ? { eyes: "squint", brows: "flat", mouth: "smirk" } : { eyes: "open", brows: "up", mouth: "talk", talk: [[0.1, 1.6]] }} arms={typing ? { r: ["hold"] } : { r: ["down", "point", 0.3] }} hold={typing ? PHONE() : []} />,
-      <Toon env="out" x={560} y={720} s={0.8} o="f3" dur={3} face={typing ? { eyes: "squint", brows: "flat", mouth: "smirk" } : { eyes: "squint", brows: "up", mouth: "grin", blush: true }} laugh={!typing} arms={typing ? { r: ["hold"] } : {}} hold={typing ? PHONE() : []} />]; },
-    top: (t) => [<Label x={160} y={260} w={760} size={60} text="«ШЕФ-ПОВАР ГУБОК»" bg="#FFFFFF" s={t < 1.77 ? pop(t, 0.5, 2) : 0} rot={-4} />,
-      <Boom x={260} y={110} text="ХА-ХА" s={t < 1.77 ? pop(t, 0.05, 2) * 0.8 : 0} col="#FFFFFF" rot={8} />,
-      ...[0, 1, 2].map((i) => <Stars x={40 + i * 300} y={key([[1.9 + i * 0.2, 640], [2.7, 420]], t)} s={pop(t, 1.9 + i * 0.2, 2) * 0.5} />)] },
-  // 19.33 «Сарай ползёт вверх.» 20.34 «Восемнадцать тысячное место.» 21.76 «Тысячное.» 22.40 «Сотое.»
+    p: (t) => ({ ...DAY, ...C.S9(t) }),
+    cam: (t) => ({ s: key([[0, 1.0], [2.7, 1.06]], t), x: 0, y: 0 }),
+    mid: (t) => { const typing = t > 1.77, c = C.S9(t); return [<Sign c={c} />,
+      <Toon env="out" {...stand(c, -0.8, -1.25)} o="f1" dur={3} face={typing ? { eyes: "squint", brows: "flat", mouth: "smirk" } : { eyes: "happy", brows: "up", mouth: "grin" }} laugh={!typing} arms={typing ? { r: ["hold"] } : {}} hold={typing ? PHONE() : []} />,
+      <Toon env="out" {...stand(c, 0.0, -0.95)} o="f2" dur={3} face={typing ? { eyes: "squint", brows: "flat", mouth: "smirk" } : { eyes: "open", brows: "up", mouth: "talk", talk: [[0.1, 1.6]] }} arms={typing ? { r: ["hold"] } : { r: ["down", "point", 0.3] }} hold={typing ? PHONE() : []} />,
+      <Toon env="out" {...stand(c, 0.8, -1.25)} o="f3" dur={3} face={typing ? { eyes: "squint", brows: "flat", mouth: "smirk" } : { eyes: "squint", brows: "up", mouth: "grin", blush: true }} laugh={!typing} arms={typing ? { r: ["hold"] } : {}} hold={typing ? PHONE() : []} />]; },
+    top: (t) => [<Label x={160} y={240} w={760} size={60} text="«ШЕФ-ПОВАР ГУБОК»" bg="#FFFFFF" s={t < 1.77 ? pop(t, 0.5, 2) : 0} rot={-4} />,
+      <Boom x={260} y={90} text="ХА-ХА" s={t < 1.77 ? pop(t, 0.05, 2) * 0.8 : 0} col="#FFFFFF" rot={8} />,
+      ...[0, 1, 2].map((i) => <Stars x={40 + i * 300} y={key([[1.9 + i * 0.2, 560], [2.7, 300]], t)} s={pop(t, 1.9 + i * 0.2, 2) * 0.5} />)] },
+  // 19.33 rank climbs 18 149 → 1 000 → 100
   { name: "S10", at: A.S10, scene: "garden", focus: null, enter: "cut",
-    p: (t) => ({ ...DAY, rx: 0.0, ry: key([[0, 0.5], [3.5, 2.6]], t), rz: key([[0, 3.6], [3.5, 3.0]], t), tx: -0.2, ty: key([[0, 1.3], [3.5, 1.7]], t), tz: -3.0, lens: 1.0 }),
+    p: (t) => ({ ...DAY, ...C.S10(t) }),
     cam: (t) => ({ s: key([[0, 1.0], [3.5, 1.1]], t), x: 0, y: 0 }),
+    mid: (t) => [<Sign c={C.S10(t)} />],
     top: (t) => { const n = t < 1.01 ? null : t < 2.43 ? "18 149" : t < 3.07 ? "1 000" : "100", t0 = t < 2.43 ? 1.01 : t < 3.07 ? 2.43 : 3.07; return [
       n ? <Rank x={160} y={300} s={1 + 0.08 * pop(t, t0, 0.2)} n={n} /> : null,
       P(`M${880} ${key([[0, 1250], [3.5, 650]], t)} l-80 110 l50 0 l0 160 l60 0 l0 -160 l50 0 Z`, { fill: "#2E9E4E", stroke: { width: 8, color: INK } }),
       <Boom x={120} y={key([[0, 900], [1.0, 700]], t)} text="ВВЕРХ!" s={t < 1.01 ? pop(t, 0.1, 1) * 0.9 : 0} col="#8FD06A" rot={-6} />]; } },
-  // 22.90 «Столиков нет — значит, все хотят столик.» — queue in front of the shed
+  // 22.90 no tables — everyone wants a table: queue on the lawn
   { name: "S11", at: A.S11, scene: "garden", focus: null, enter: "whip",
-    p: (t) => ({ ...DAY, rx: 2.2, ry: 1.4, rz: 3.0, tx: -0.2, ty: 1.1, tz: -2.2, lens: 1.0 }),
-    cam: (t) => ({ s: key([[0, 1.0], [1.8, 1.08]], t), x: key([[0, 0], [1.8, -40]], t), y: 0 }),
-    mid: (t) => ["g1", "g2", "g3", "f1", "f2"].map((o, i) => <Toon env="out" x={-120 + i * 230} y={760 + (i % 2) * 40} s={0.72 + i * 0.02} o={o} dur={2} face={{ eyes: i % 2 ? "open" : "squint", brows: "up", mouth: i % 2 ? "o" : "talk", talk: [[0, 1.8]] }} arms={{ r: ["down", "up", 0.2 + i * 0.15] }} anim={bob(12, 0.15 + i * 0.01, -10)} />),
-    top: (t) => [<Label x={330} y={240} w={420} size={64} text="МЕСТ НЕТ" bg="#D21E34" fg="#FFFFFF" s={pop(t, 0.15, 3)} rot={4} />,
-      <Boom x={120} y={480} text="ХОЧУ!" s={pop(t, 0.8, 2) * 0.8} col="#FFFFFF" rot={-8} />] },
-  // 24.72 «Телефон разрывается.»
-  { name: "S12", at: A.S12, scene: "room", focus: 1.2, blur: 10, enter: "cut",
-    p: (t) => ({ ...ROOM, lamp: 0.6, rx: 0.8, ry: 1.25, rz: -0.6, tx: 1.6, ty: 1.0, tz: -2.3, lens: 1.1 }),
-    cam: (t) => ({ s: 1.06, x: Math.sin(t * 50) * 6, y: 0 }),
-    mid: (t) => [<Toon {...HERO(PHONE(370, 400))} env="in" x={200} y={560} s={1.15} dur={2} face={{ eyes: "shock", brows: "up", mouth: "o" }} arms={{ r: ["hold"] }} anim={[{ property: "offsetX", keyframes: Array.from({ length: 14 }, (_, i) => ({ at: i * 0.08, value: i % 2 ? -8 : 8 })) }]} />],
-    top: (t) => [<Boom x={420} y={300} text="ДЗЫНЬ!" s={0.85 + 0.06 * Math.sin(t * 40)} rot={-6} />,
-      <Boom x={40} y={520} text="ДЗЫНЬ!" s={t > 0.4 ? 0.6 + 0.05 * Math.sin(t * 36) : 0} col="#FFFFFF" rot={8} />,
-      <Label x={560} y={560} w={380} size={46} text="+99 ЗВОНКОВ" bg="#FFFFFF" s={pop(t, 0.6, 2) * 0.85} rot={5} />] },
-  // 25.82 «И однажды утром его сарай — номер один в Лондоне.» 28.22 «Выше тысяч настоящих ресторанов.»
+    p: (t) => ({ ...DAY, ...C.S11(t) }),
+    cam: (t) => ({ s: key([[0, 1.0], [1.8, 1.06]], t), x: 0, y: 0 }),
+    mid: (t) => { const c = C.S11(t); return [<Sign c={c} />, ...["g1", "g2", "g3", "f1", "f2"].map((o, i) => [o, i]).sort((a, b) => (b[1] % 2) - (a[1] % 2)).map(([o, i]) =>
+      <Toon env="out" {...stand(c, -1.7 + i * 0.85, i % 2 ? -0.9 : -0.3)} o={o} dur={2} face={{ eyes: i % 2 ? "open" : "squint", brows: "up", mouth: i % 2 ? "o" : "talk", talk: [[0, 1.8]] }} arms={{ r: ["down", "up", 0.2 + i * 0.15] }} anim={bob(12, 0.15 + i * 0.01, -10)} />)]; },
+    top: (t) => [<Label x={330} y={140} w={420} size={64} text="МЕСТ НЕТ" bg="#D21E34" fg="#FFFFFF" s={pop(t, 0.15, 3)} rot={4} />,
+      <Boom x={100} y={330} text="ХОЧУ!" s={pop(t, 0.8, 2) * 0.8} col="#FFFFFF" rot={-8} />] },
+  // 24.72 the phone explodes
+  { name: "S12", at: A.S12, scene: "room", focus: null, enter: "cut",
+    p: (t) => ({ ...ROOM, lamp: 0.6, ...C.S12(t) }),
+    cam: (t) => ({ s: 1.04, x: Math.sin(t * 50) * 6, y: 0 }),
+    mid: (t) => [<Toon {...HERO(PHONE(370, 400))} env="in" {...stand(C.S12(t), 0.5, -1.2)} dur={2} face={{ eyes: "shock", brows: "up", mouth: "o" }} arms={{ r: ["hold"] }} anim={[{ property: "offsetX", keyframes: Array.from({ length: 14 }, (_, i) => ({ at: i * 0.08, value: i % 2 ? -8 : 8 })) }]} />],
+    top: (t) => [<Boom x={480} y={220} text="ДЗЫНЬ!" s={0.85 + 0.06 * Math.sin(t * 40)} rot={-6} />,
+      <Boom x={0} y={420} text="ДЗЫНЬ!" s={t > 0.4 ? 0.6 + 0.05 * Math.sin(t * 36) : 0} col="#FFFFFF" rot={8} />,
+      <Label x={600} y={470} w={380} size={46} text="+99 ЗВОНКОВ" bg="#FFFFFF" s={pop(t, 0.6, 2) * 0.85} rot={5} />] },
+  // 25.82 one morning: №1 in London
   { name: "S13", at: A.S13, scene: "garden", focus: null, enter: "fade",
-    p: (t) => ({ ...DAY, dawn: key([[0, 1], [4, 0.6]], t), rx: key([[0, -1.6], [4.0, -0.8]], t), ry: 0.8, rz: 4.6, tx: 0.0, ty: 1.5, tz: -3.0, lens: 1.05 }),
-    cam: (t) => ({ s: key([[0, 1.0], [4.0, 1.12]], t), x: 0, y: 0 }),
-    mid: (t) => [<Toon {...HERO()} x={300} y={640} s={0.95} dur={4} face={t < 1.2 ? { eyes: "open", brows: "up", mouth: "o" } : { eyes: "happy", brows: "up", mouth: "grin" }} arms={{ r: ["down", "up", 1.2], l: ["down", "up", 1.25] }}
+    p: (t) => ({ ...DAY, dawn: key([[0, 1], [4, 0.6]], t), ...C.S13(t) }),
+    cam: (t) => ({ s: key([[0, 1.0], [4.0, 1.1]], t), x: 0, y: 0 }),
+    mid: (t) => [<Sign c={C.S13(t)} />, <Toon {...HERO()} {...stand(C.S13(t), 0.35, -1.0)} dur={4} face={t < 1.2 ? { eyes: "open", brows: "up", mouth: "o" } : { eyes: "happy", brows: "up", mouth: "grin" }} arms={{ r: ["down", "up", 1.2], l: ["down", "up", 1.25] }}
       anim={[{ property: "offsetY", keyframes: [{ at: 0, value: 0 }, { at: 1.2, value: 0 }, { at: 1.45, value: -120 }, { at: 1.7, value: 0 }, { at: 1.95, value: -80 }, { at: 2.2, value: 0 }, { at: 4.1, value: 0 }] }]} />],
-    top: (t) => [<Medal x={330} y={key([[1.1, -200], [1.3, 120]], t)} s={t > 1.1 ? 0.95 : 0} />,
+    top: (t) => [<Medal x={330} y={key([[1.1, -260], [1.3, 40]], t)} s={t > 1.1 ? 0.8 : 0} />,
       t > 2.4 ? <frame x={140} y={1400} width={800} height={600} layout="none" origin="center" animate={S(pop(t, 2.4, 5) * 0.68, -3)}>
         <rect x={14} y={18} width={780} height={560} radius={24} fill="#1E1418" />
         <rect x={0} y={0} width={780} height={560} radius={24} fill="#FFFFFF" strokeColor={INK} strokeWidth={8} />
@@ -268,36 +301,36 @@ export const SHOTS = [
         <text x={40} y={42} width={700} fontFamily="Montserrat" fontWeight={800} fontSize={56} color="#1E1418">1. САРАЙ ★★★★★</text>
         {["2. Ресторан", "3. Ресторан", "4. Ресторан"].map((r, i) => <text x={40} y={170 + i * 110} width={700} fontFamily="Montserrat" fontWeight={800} fontSize={50} color="#8A8A9A">{r}</text>)}
       </frame> : null] },
-  // 29.86 «Тогда он всё-таки открылся.» 31.18 «На один вечер.» — night garden, lights on, guests arrive
+  // 29.86 open for one evening: lights on, guests walk in (all stand on the lawn in front of the table)
   { name: "S14", at: A.S14, scene: "garden", focus: null, enter: "fade",
-    p: (t) => ({ ...NIGHT, lights: t > 0.35 ? 1 : 0, rx: key([[0, 2.6], [1.9, 2.0]], t), ry: 1.6, rz: 3.8, tx: 0.0, ty: 1.0, tz: -1.4, lens: 1.0 }),
-    cam: (t) => ({ s: key([[0, 1.0], [1.9, 1.08]], t), x: 0, y: 0 }),
-    mid: (t) => [<Toon {...HERO()} x={key([[0, 380], [1.9, 300]], t)} y={600} s={0.85} dur={2} face={{ eyes: "smug", brows: "smug", mouth: "smirk" }} arms={{ r: ["down", "wave", 0.3] }} />,
-      <Toon env="out" x={key([[0.6, -400], [1.9, -60]], t)} y={720} s={0.8} o="g1" dur={2} face={{ eyes: "open", brows: "up", mouth: "o" }} anim={bob(12, 0.16, -12)} />,
-      <Toon env="out" x={key([[0.8, 1200], [1.9, 700]], t)} y={740} s={0.78} o="g2" dur={2} face={{ eyes: "open", brows: "up", mouth: "o" }} anim={bob(12, 0.16, -12)} />],
-    top: (t) => [<Label x={250} y={250} w={580} size={64} text="ОТКРЫТО" bg="#2E9E4E" fg="#FFFFFF" s={pop(t, 0.35, 0.95)} rot={-4} />,
-      <Label x={250} y={250} w={580} size={64} text="1 ВЕЧЕР" bg="#FFE45C" s={pop(t, 1.32, 2)} rot={4} />] },
-  // 31.80 «Купил в супермаркете готовые обеды по фунту.» 33.70 «Разогрел в микроволновке.» 34.82 «Подал.»
-  { name: "S15", at: A.S15, scene: "room", focus: 1.0, blur: 12, enter: "whip",
-    p: (t) => ({ ...ROOM, night: 1, lamp: 0.9, rx: 0.7, ry: 1.3, rz: -0.8, tx: 1.7, ty: 0.95, tz: -2.3, lens: 1.05 }),
-    cam: (t) => ({ s: key([[0, 1.0], [3.3, 1.1]], t), x: 0, y: 0 }),
-    mid: (t) => t < 3.02 ? [<Toon {...HERO()} env="in" x={60} y={600} s={1.0} dur={4} face={{ eyes: "smug", brows: "smug", mouth: "smirk", blinks: [0.8, 2.4] }} arms={{ r: ["down", "point", 1.9] }} />] : [],
-    top: (t) => { if (t >= 3.02) return [<Toon {...HERO(PLATE0(480, 520, 260))} x={240} y={420} s={1.25} dur={2} face={{ eyes: "smug", brows: "smug", mouth: "grin" }} arms={{ r: ["hold"] }} />,
-        <Tray x={440} y={key([[3.02, 900], [3.2, 880]], t)} s={0.75} />, <Boom x={240} y={200} text="ПОДАНО!" s={pop(t, 3.05, 1)} rot={-6} />];
+    p: (t) => ({ ...NIGHT, lights: t > 0.35 ? 1 : 0, ...C.S14(t) }),
+    cam: (t) => ({ s: key([[0, 1.0], [1.9, 1.06]], t), x: 0, y: 0 }),
+    mid: (t) => { const c = C.S14(t); return [<Sign c={c} />,
+      <Toon env="out" {...stand(c, key([[0.6, -3.2], [1.9, -1.3]], t), 0.9)} o="g1" dur={2} face={{ eyes: "open", brows: "up", mouth: "o" }} anim={bob(12, 0.16, -12)} />,
+      <Toon env="out" {...stand(c, key([[0.8, 3.2], [1.9, 1.3]], t), 0.9)} o="g2" dur={2} face={{ eyes: "open", brows: "up", mouth: "o" }} anim={bob(12, 0.16, -12)} />,
+      <Toon {...HERO()} {...stand(c, 0.9, 0.6)} dur={2} face={{ eyes: "smug", brows: "smug", mouth: "smirk" }} arms={{ r: ["down", "wave", 0.3] }} />]; },
+    top: (t) => [<Label x={250} y={160} w={580} size={64} text="ОТКРЫТО" bg="#2E9E4E" fg="#FFFFFF" s={pop(t, 0.35, 0.95)} rot={-4} />,
+      <Label x={250} y={160} w={580} size={64} text="1 ВЕЧЕР" bg="#FFE45C" s={pop(t, 1.32, 2)} rot={4} />] },
+  // 31.80 ready meals for £1, microwave, served
+  { name: "S15", at: A.S15, scene: "room", focus: null, enter: "whip",
+    p: (t) => ({ ...ROOM, night: 1, lamp: 0.9, ...C.S15(t) }),
+    cam: (t) => ({ s: key([[0, 1.0], [3.3, 1.08]], t), x: 0, y: 0 }),
+    mid: (t) => [<Toon {...HERO(t >= 3.02 ? PLATE0(480, 560, 260) : [])} env="in" {...stand(C.S15(t), 0.25, -1.2)} dur={4} face={t < 3.02 ? { eyes: "smug", brows: "smug", mouth: "smirk", blinks: [0.8, 2.4] } : { eyes: "smug", brows: "smug", mouth: "grin" }} arms={t < 3.02 ? { r: ["down", "point", 1.9] } : { r: ["hold"] }} />],
+    top: (t) => { if (t >= 3.02) return [<Tray x={520} y={key([[3.02, 820], [3.2, 800]], t)} s={0.6} />, <Boom x={300} y={160} text="ПОДАНО!" s={pop(t, 3.05, 1)} rot={-6} />];
       const trays = Math.min(5, Math.floor(t / 0.25) + 1); return [
-      ...(t < 1.9 ? Array.from({ length: trays }, (_, i) => <Tray x={520 - (i % 2) * 40} y={1120 - i * 110} s={0.9} rot={(i % 2 ? 4 : -3)} />) : [<Microwave x={500} y={820} s={1.0} on={t > 2.0 ? 1 : 0} />]),
-      <Label x={540} y={300} w={460} size={50} text="ГОТОВЫЕ ОБЕДЫ" bg="#FFFFFF" s={t < 1.9 ? pop(t, 0.2, 2) * 0.9 : 0} rot={4} />,
-      <Boom x={520} y={520} text="ДЗЫНЬ!" s={pop(t, 2.6, 0.45) * 0.85} rot={6} />]; } },
-  // 35.15 «Гости спрашивали, можно ли прийти ещё.» 36.85 «Это реальная история.»
-  { name: "S16", at: A.S16, scene: "garden", focus: null, enter: "cut",
-    p: (t) => ({ ...NIGHT, rx: key([[0, 2.0], [3.1, 1.6]], t), ry: 1.5, rz: 2.6, tx: 0.0, ty: 0.95, tz: -0.6, lens: 1.0 }),
-    cam: (t) => ({ s: key([[0, 1.02], [3.1, 1.12]], t), x: 0, y: 0 }),
-    mid: (t) => [
-      <Toon env="out" x={-60} y={560} s={0.82} o="g1" dur={4} face={{ eyes: "happy", brows: "up", mouth: "grin" }} arms={{ r: ["down", "up", 0.4] }} />,
-      <Toon env="out" x={260} y={530} s={0.84} o="g2" dur={4} face={{ eyes: "happy", brows: "up", mouth: "talk", talk: [[0.3, 1.5]] }} />,
-      <Toon env="out" x={560} y={560} s={0.82} o="g3" dur={4} face={{ eyes: "open", brows: "up", mouth: "grin", blush: true }} arms={{ l: ["down", "up", 0.6] }} />],
-    top: (t) => [<Boom x={300} y={180} text="ЕЩЁ!" s={pop(t, 0.4, 1.4)} col="#FFFFFF" rot={-6} />,
-      t > 1.6 ? <Toon {...HERO()} x={key([[1.6, 1100], [2.0, 560]], t)} y={720} s={1.15} dur={3} face={{ eyes: "smug", brows: "smug", mouth: "smirk", blinks: [2.4] }} arms={{ r: ["down", "point", 1.9] }} /> : null,
-      <Label x={130} y={1590} w={820} size={60} text="РЕАЛЬНАЯ ИСТОРИЯ" bg="#FFE45C" s={pop(t, 1.75, 5)} rot={-3} />] },
+      ...(t < 1.9 ? Array.from({ length: trays }, (_, i) => <Tray x={680 - (i % 2) * 40} y={1100 - i * 110} s={0.9} rot={(i % 2 ? 4 : -3)} />) : [<Microwave x={600} y={760} s={0.95} on={t > 2.0 ? 1 : 0} />]),
+      <Label x={500} y={200} w={520} size={44} text="ГОТОВЫЕ ОБЕДЫ" bg="#FFFFFF" s={t < 1.9 ? pop(t, 0.2, 2) * 0.9 : 0} rot={4} />,
+      <Boom x={520} y={480} text="ДЗЫНЬ!" s={pop(t, 2.6, 0.45) * 0.85} rot={6} />]; } },
+  // 35.15 guests behind the table ask to come again; hero steps in front, «реальная история»
+  { name: "S16", at: A.S16, scene: "garden", focus: 3.4, blur: 2, enter: "cut",
+    p: (t) => ({ ...NIGHT, ...C.S16(t) }),
+    cam: (t) => ({ s: key([[0, 1.0], [3.1, 1.06]], t), x: 0, y: 0 }),
+    mid: (t) => { const c = C.S16(t); return [<Sign c={c} />,
+      <Toon env="out" {...stand(c, -0.75, -1.15)} o="g1" dur={4} face={{ eyes: "happy", brows: "up", mouth: "grin" }} arms={{ r: ["down", "up", 0.4] }} />,
+      <Toon env="out" {...stand(c, 0.0, -1.15)} o="g2" dur={4} face={{ eyes: "happy", brows: "up", mouth: "talk", talk: [[0.3, 1.5]] }} />,
+      <Toon env="out" {...stand(c, 0.75, -1.15)} o="g3" dur={4} face={{ eyes: "open", brows: "up", mouth: "grin", blush: true }} arms={{ l: ["down", "up", 0.6] }} />]; },
+    top: (t) => [<Boom x={300} y={120} text="ЕЩЁ!" s={pop(t, 0.4, 1.4)} col="#FFFFFF" rot={-6} />,
+      t > 1.6 ? <Toon {...HERO()} {...stand(C.S16(t), key([[1.6, 2.2], [2.0, 0.75]], t), 0.75)} dur={3} face={{ eyes: "smug", brows: "smug", mouth: "smirk", blinks: [2.4] }} arms={{ r: ["down", "point", 1.9] }} /> : null,
+      <Label x={130} y={1600} w={820} size={60} text="РЕАЛЬНАЯ ИСТОРИЯ" bg="#FFE45C" s={pop(t, 1.75, 5)} rot={-3} />] },
 ];
 for (const s of SHOTS) s.enter = s.enter || "cut";

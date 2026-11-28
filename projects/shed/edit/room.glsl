@@ -26,7 +26,6 @@ vec2 map(vec3 p){
   r=opU(r,vec2(sdCylinder(l-vec3(0.0,0.015,0.0),0.015,0.09),9.0));
   r=opU(r,vec2(sdCapsule(l,vec3(0.0,0.0,0.0),vec3(-0.05,0.32,0.0),0.012),9.0));
   r=opU(r,vec2(sdEllipsoid(l-vec3(-0.12,0.36,0.0),vec3(0.13,0.07,0.1)),10.0));
-  r=opU(r,vec2(sdRoundBox(d-vec3(-0.2,0.8,0.05),vec3(0.18,0.04,0.13),0.01),11.0)); // books
   // poster on the back wall
   if(u_cut<0.5 && u_prof<0.5) r=opU(r,vec2(sdRoundBox(p-vec3(0.55,1.55,-2.98),vec3(0.32,0.44,0.01),0.005),12.0));
   // window frame (right part of back wall)
