@@ -147,7 +147,7 @@ function Sign({ c, s = 1 }) {
 }
 
 const A = { S1: 0, S2: 2.68, S3: 4.11, S4: 6.90, S5: 9.74, S6: 10.79, S7: 13.48, S8: 15.19, S9: 16.61, S10: 19.33, S11: 22.90, S12: 24.72, S13: 25.82, S14: 29.86, S15: 31.80, S16: 35.15 };
-export const T = 38.3;
+export const T = 40.4;
 export const CAP_Y = 1330;
 const DAY = { night: 0, lights: 0, table: 0, dawn: 0, sign: 1 };
 const NIGHT = { night: 1, lights: 1, table: 1, dawn: 0, sign: 1 };
@@ -331,6 +331,13 @@ export const SHOTS = [
       <Toon env="out" {...stand(c, 0.75, -1.15)} o="g3" dur={4} face={{ eyes: "open", brows: "up", mouth: "grin", blush: true }} arms={{ l: ["down", "up", 0.6] }} />]; },
     top: (t) => [<Boom x={300} y={120} text="ЕЩЁ!" s={pop(t, 0.4, 1.4)} col="#FFFFFF" rot={-6} />,
       t > 1.6 ? <Toon {...HERO()} {...stand(C.S16(t), key([[1.6, 2.2], [2.0, 0.75]], t), 0.75)} dur={3} face={{ eyes: "smug", brows: "smug", mouth: "smirk", blinks: [2.4] }} arms={{ r: ["down", "point", 1.9] }} /> : null,
-      <Label x={130} y={1600} w={820} size={60} text="РЕАЛЬНАЯ ИСТОРИЯ" bg="#FFE45C" s={pop(t, 1.75, 5)} rot={-3} />] },
+      <Label x={130} y={1600} w={820} size={60} text="РЕАЛЬНАЯ ИСТОРИЯ" bg="#FFE45C" s={pop(t, 1.75, 1.15)} rot={-3} />,
+      t > 2.9 ? <frame x={190} y={170} width={700} height={300} layout="none" origin="center" animate={S(pop(t, 2.9, 3) * (1 + 0.04 * Math.sin(t * 9)), -4)}>
+        <rect x={12} y={16} width={680} height={270} radius={40} fill="#1E1418" />
+        <rect x={0} y={0} width={680} height={270} radius={40} fill="#4C9AE8" strokeColor={INK} strokeWidth={9} />
+        {P("M70 150 L230 70 L190 220 L160 165 Z", { fill: "#FFFFFF", stroke: { width: 8, color: INK } })}{P("M160 165 L230 70", { stroke: { width: 6, color: INK } })}
+        <text x={230} y={50} width={430} align="center" fontFamily="Montserrat" fontWeight={800} fontSize={70} color="#FFFFFF" strokeColor={INK} strokeWidth={5}>СКИНЬ</text>
+        <text x={230} y={140} width={430} align="center" fontFamily="Montserrat" fontWeight={800} fontSize={70} color="#FFE45C" strokeColor={INK} strokeWidth={5}>ДРУГУ</text>
+      </frame> : null] },
 ];
 for (const s of SHOTS) s.enter = s.enter || "cut";
